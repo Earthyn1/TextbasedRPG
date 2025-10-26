@@ -1,0 +1,717 @@
+[
+  {
+    "id": "adventurersStable",
+    "displayName": "Stables",
+    "description": "The straw is damp, the air reeks of horses, but there’s a strange comfort to it.",
+    "examine": "A rough place to sleep, but at least it’s dry.",
+    "actions": [
+      {
+        "name": "Stable Entrance",
+        "zone": "stableFront",
+        "type": "Zone"
+      },
+      {
+        "name": "Horse Stalls",
+        "zone": "stableHorseStalls",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "narrator",
+    "bgImage": "Stables",
+    "npcInteractables": [
+      {
+        "id": "stableMaster",
+        "type": "Friendly"
+      }
+    ],
+    "worldInteractables": [
+      {
+        "id": "yourBag"
+      }
+    ]
+  },
+  {
+    "id": "stableFront",
+    "displayName": "Stable Entrance",
+    "description": "Sunlight cuts through the open doors, tracing muddy prints in and out — comings and goings never cease here.",
+    "examine": "You see muddy hoofprints across the ground.",
+    "actions": [
+      {
+        "name": "Road to Town",
+        "zone": "stableDirtRoad",
+        "type": "Zone",
+        "enableWhen": [
+          "QuestHandedIn(GroomMaple)"
+        ],
+        "lockedMessage": "Should talk with the Stable Master first."
+      },
+      {
+        "name": "Back to Stable Block",
+        "zone": "adventurersStable",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "narrator",
+    "bgImage": "Stables",
+    "npcInteractables": [
+      {
+        "id": "DogLester",
+        "type": "Friendly"
+      },
+      {
+        "id": "stableBoy",
+        "type": "Friendly"
+      }
+    ],
+    "worldInteractables": [
+      {
+        "id": "stableCupboard"
+      }
+    ]
+  },
+  {
+    "id": "stableHorseStalls",
+    "displayName": "Horse Stalls",
+    "description": "Horses shift in their stalls, leather tack swaying gently with each heavy breath.",
+    "examine": "The smell of leather and hay fills the air.",
+    "actions": [
+      {
+        "name": "Back to Stable Block",
+        "zone": "adventurersStable",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "narrator",
+    "bgImage": "Stables",
+    "npcInteractables": [
+      {
+        "id": "HorseMaple",
+        "type": "Friendly"
+      },
+      {
+        "id": "HorseSmoke",
+        "type": "Friendly"
+      }
+    ],
+    "worldInteractables": [
+      {
+        "id": "haystack"
+      },
+      {
+        "id": "ladder"
+      }
+    ]
+  },
+  {
+    "id": "stableHayLoft",
+    "displayName": "Hay Loft",
+    "description": "A precarious ladder leads up to the hayloft above.",
+    "examine": "Loose hay hangs over the edge.",
+    "actions": [
+      {
+        "name": "Back to Stable Block",
+        "zone": "adventurersStable",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "narrator",
+    "bgImage": "Stables",
+    "npcInteractables": [],
+    "worldInteractables": []
+  },
+  {
+    "id": "stableBoy",
+    "displayName": "Stable Boy",
+    "description": "A boy stands with broom in hand, hay tangled in his hair, suspicion softening into curiosity.",
+    "examine": "He looks like he works hard for little pay.",
+    "actions": [
+      {
+        "name": "Talk",
+        "zone": "StableBoy_Intro",
+        "type": "Dialog"
+      },
+      {
+        "name": "Return",
+        "zone": "stableFront",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "stableBoy",
+    "bgImage": "Stables",
+    "autoDialog": "StableBoy_Intro"
+  },
+  {
+    "id": "stableMaster",
+    "displayName": "Stable Master",
+    "description": "The Stable Master stands watch — whip idle, eyes sharp, every inch of him used to authority.",
+    "examine": "His stern glare keeps the animals in line.",
+    "actions": [
+      {
+        "name": "Talk",
+        "zone": "StableMaster_Intro",
+        "type": "Dialog"
+      },
+      {
+        "name": "Return",
+        "zone": "adventurersStable",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "stableMaster",
+    "bgImage": "Stables",
+    "autoDialog": "StableMaster_Intro"
+  },
+  {
+    "id": "yourBag",
+    "displayName": "Your Bag",
+    "description": "Your worn pack slumps against the wall, seams tested but still holding secrets.",
+    "examine": "It’s patched and fraying, but holds your gear.",
+    "actions": [
+      {
+        "name": "Search",
+        "zone": "yourBagTimed",
+        "type": "Timed"
+      },
+      {
+        "name": "Return",
+        "zone": "adventurersStable",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "satchel",
+    "bgImage": "Stables"
+  },
+  {
+    "id": "haystack",
+    "displayName": "Haystack",
+    "description": "A crude mound of hay leans to one side, as if hiding something — or nothing at all.",
+    "examine": "It could hide something… or just be itchy.",
+    "actions": [
+      {
+        "name": "Search",
+        "zone": "SearchHaystackTimed",
+        "type": "Timed",
+        "hideOnSuccess": true
+      },
+      {
+        "name": "Return",
+        "zone": "stableHorseStalls",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "hayStack",
+    "bgImage": "Stables"
+  },
+  {
+    "id": "ladder",
+    "displayName": "Ladder",
+    "description": "A rickety wooden ladder leading to the loft.",
+    "examine": "It creaks ominously.",
+    "actions": [
+      {
+        "name": "Climb Up",
+        "zone": "stableHayLoft",
+        "type": "Zone"
+      },
+      {
+        "name": "Return",
+        "zone": "stableHorseStalls",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "ladder",
+    "bgImage": "Stables"
+  },
+  {
+    "id": "HorseMaple",
+    "displayName": "Maple",
+    "description": "Maple stands proud, her dark coat catching what little light finds its way inside.",
+    "examine": "You reach out to stroke the beautiful horse, Maple scoffs realising you are not holding the brush.",
+    "actions": [
+      {
+        "name": "Brush Maple",
+        "zone": "BrushMapleTimed",
+        "type": "Timed",
+        "visibleWhen": [
+          "QuestInProgress(GroomMaple)"
+        ],
+        "enableWhen": [
+          "Item(brush)>=1"
+        ],
+        "hideOnSuccess": true,
+        "lockedMessage": "You need a brush!"
+      },
+      {
+        "name": "Stroke",
+        "zone": "",
+        "type": "Examine"
+      },
+      {
+        "name": "Return",
+        "zone": "stableHorseStalls",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "horseMaple",
+    "bgImage": "Stables"
+  },
+  {
+    "id": "HorseSmoke",
+    "displayName": "Smoke",
+    "description": "Smoke stands apart, eyes alert, hooves shifting at your approach.",
+    "examine": "The horse seems very wary of you, not wanting to cause a scene you back away.",
+    "actions": [
+      {
+        "name": "Approach",
+        "zone": "",
+        "type": "Examine"
+      },
+      {
+        "name": "Return",
+        "zone": "stableHorseStalls",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "horseSmoke",
+    "bgImage": "Stables"
+  },
+  {
+    "id": "DogLester",
+    "displayName": "Lester",
+    "description": "Lester stands by the doorway, hackles raised, a low growl rolling in his chest.",
+    "examine": "A scruffy old dog that looks to be napping.",
+    "actions": [
+      {
+        "name": "Give bone",
+        "zone": "dogLester_bone",
+        "type": "Dialog",
+        "enableWhen": [
+          "Item(dog_bone)>=1"
+        ],
+        "lockedMessage": "You don't have a bone..."
+      },
+      {
+        "name": "Return",
+        "zone": "stableFront",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "dogLester",
+    "bgImage": "Stables"
+  },
+  {
+    "id": "stableCupboard",
+    "displayName": "Cupboard",
+    "description": "A battered cupboard slumps against the wall, wood swollen and secrets long since taken.",
+    "examine": "A place to store things.",
+    "actions": [
+      {
+        "name": "Search Upper",
+        "zone": "stableCupboardUpperSearch",
+        "type": "Timed",
+        "visibleWhen": [
+          "QuestInProgress(GroomMaple)"
+        ],
+        "hideOnSuccess": true
+      },
+      {
+        "name": "Search Lower",
+        "zone": "stableCupboardLowerSearch",
+        "type": "Timed",
+        "visibleWhen": [
+          "QuestInProgress(GroomMaple)"
+        ],
+        "hideOnSuccess": true
+      },
+      {
+        "name": "Return",
+        "zone": "stableFront",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "cupboard",
+    "bgImage": "Stables"
+  },
+  {
+    "id": "stableDirtRoad",
+    "displayName": "Dirt Road",
+    "description": "Open fields surround the dirt road",
+    "examine": "",
+    "actions": [
+      {
+        "name": "Jacks Farm",
+        "zone": "jacksFarm",
+        "type": "Zone",
+        "enableWhen": [
+          "QuestInProgress(EggTrouble)"
+        ],
+        "lockedMessage": "Need permission."
+      },
+      {
+        "name": "Town Square",
+        "zone": "townsquare",
+        "type": "Zone"
+      },
+      {
+        "name": "Stables",
+        "zone": "stableFront",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "narrator",
+    "bgImage": "DirtRoad",
+    "npcInteractables": [
+      {
+        "id": "farmerJack",
+        "type": "Friendly"
+      }
+    ],
+    "worldInteractables": []
+  },
+  {
+    "id": "farmerJack",
+    "displayName": "Farmer Jack",
+    "description": "An old beaten up farmer tends to his wounds on the side of the road.",
+    "examine": "",
+    "actions": [
+      {
+        "name": "Talk",
+        "zone": "farmerJack_Intro",
+        "type": "Dialog"
+      }
+    ],
+    "portrait": "farmerJack",
+    "bgImage": "DirtRoad",
+    "autoDialog": "FarmerJack_Intro"
+  },
+  {
+    "id": "jacksFarm",
+    "displayName": "Jacks Farm",
+    "description": "The farm is eerily quiet...",
+    "examine": "",
+    "actions": [
+      {
+        "name": "Old Barn",
+        "zone": "barn",
+        "type": "Zone"
+      },
+      {
+        "name": "Chicken Coop",
+        "zone": "chickenCoop",
+        "type": "Zone",
+        "enableWhen": [
+          "Item(coopKey)>=1"
+        ],
+        "lockedMessage": "Doors locked... from the inside? Should ask the farmer."
+      },
+      {
+        "name": "Back to Road",
+        "zone": "stableDirtRoad",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "narrator",
+    "bgImage": "JacksFarm",
+    "npcInteractables": [
+      {
+        "id": "angryChicken",
+        "type": "Aggressive"
+      }
+    ],
+    "worldInteractables": []
+  },
+  {
+    "id": "barn",
+    "displayName": "Old Barn",
+    "description": "Light seeps in through the rotted wooden roof, hay stacks surround you",
+    "examine": "",
+    "actions": [
+      {
+        "name": "Jacks Farm",
+        "zone": "jacksFarm",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "narrator",
+    "bgImage": "JacksBarn",
+    "npcInteractables": [
+      {
+        "id": "friendlyCow",
+        "type": "Friendly"
+      }
+    ],
+    "worldInteractables": [
+      {
+        "id": "barnLadder"
+      },
+      {
+        "id": "keyHolder"
+      }
+    ]
+  },
+  {
+    "id": "barnLadder",
+    "displayName": "Ladder",
+    "description": "A rickety wooden ladder leading to the loft.",
+    "examine": "It creaks ominously.",
+    "actions": [
+      {
+        "name": "Climb",
+        "zone": "barnLoft",
+        "type": "Zone"
+      },
+      {
+        "name": "Return",
+        "zone": "barn",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "ladder",
+    "bgImage": "JacksBarn"
+  },
+  {
+    "id": "keyHolder",
+    "displayName": "Key Holder",
+    "description": "A key holder, looks to hold many keys.",
+    "examine": "",
+    "actions": [
+      {
+        "name": "Search for Key",
+        "zone": "SearchBarnKeyHolder",
+        "type": "Timed"
+      },
+      {
+        "name": "Return",
+        "zone": "barn",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "keyHolder",
+    "bgImage": "JacksBarn"
+  },
+  {
+    "id": "friendlyCow",
+    "displayName": "Friendly Cow",
+    "description": "The cow moos happily at you, enjoying her freedom of the barn.",
+    "examine": "Moo",
+    "actions": [
+      {
+        "name": "Approach",
+        "zone": "",
+        "type": "Examine"
+      },
+      {
+        "name": "Return",
+        "zone": "barn",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "friendlyCow",
+    "bgImage": "JacksBarn"
+  },
+  {
+    "id": "barnLoft",
+    "displayName": "Barn Loft",
+    "description": "The barn Loft",
+    "examine": "",
+    "actions": [
+      {
+        "name": "Climb Down",
+        "zone": "barn",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "barn_oldChest",
+    "bgImage": "JackBarnLoft",
+    "npcInteractables": [],
+    "worldInteractables": []
+  },
+  {
+    "id": "barn_oldChest",
+    "displayName": "Old Chest",
+    "description": "",
+    "examine": "",
+    "actions": [],
+    "portrait": "barn_oldBoxes",
+    "bgImage": "JackBarnLoft"
+  },
+  {
+    "id": "barn_oldBoxes",
+    "displayName": "Wooden Crates",
+    "description": "",
+    "examine": "",
+    "actions": [],
+    "portrait": "",
+    "bgImage": "JackBarnLoft"
+  },
+  {
+    "id": "chickenCoop",
+    "displayName": "Chicken Coop",
+    "description": "A very spacious coop.",
+    "examine": "",
+    "actions": [
+      {
+        "name": "Jacks Farm",
+        "zone": "jacksFarm",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "narrator",
+    "bgImage": "JacksCoop",
+    "npcInteractables": [
+      {
+        "id": "angryChicken",
+        "type": "Aggressive"
+      },
+      {
+        "id": "angryChicken",
+        "type": "Aggressive"
+      },
+      {
+        "id": "angryChicken",
+        "type": "Aggressive"
+      }
+    ],
+    "worldInteractables": []
+  },
+  {
+    "id": "angryChicken",
+    "displayName": "Chicken",
+    "description": "A very angry looking chicken",
+    "examine": "",
+    "actions": [
+      {
+        "name": "Fight",
+        "zone": "angryChicken",
+        "type": "Combat"
+      }
+    ],
+    "portrait": "angryChicken",
+    "bgImage": "JacksCoop"
+  },
+  {
+    "id": "townsquare",
+    "displayName": "Town Square",
+    "description": "The Town Square opens wide before you — stone, noise, motion. Merchants cry, wheels clatter, and life spills in every direction.",
+    "examine": "You enter the stone cobbled Town Square, many people are moving through, carriages hurry along.",
+    "actions": [
+      {
+        "name": "Stable Entrance",
+        "zone": "stableFront",
+        "type": "Zone"
+      },
+      {
+        "name": "Horse Stalls",
+        "zone": "stableHorseStalls",
+        "type": "Zone"
+      }
+    ],
+    "portrait": "narrator",
+    "bgImage": "TownSquare",
+    "npcInteractables": [
+      {
+        "id": "townGuard",
+        "type": "Friendly"
+      }
+    ],
+    "worldInteractables": [
+      {
+        "id": "fountain"
+      }
+    ]
+  },
+  {
+    "id": "marketStalls",
+    "displayName": "Market Stalls",
+    "description": "A colorful line of canvas-covered stalls buzzes with activity. Merchants hawk fruit, fabrics, and trinkets.",
+    "examine": "Spices and fresh bread mingle in the air.",
+    "actions": [],
+    "portrait": "narrator",
+    "bgImage": "TownSquare",
+    "npcInteractables": [],
+    "worldInteractables": []
+  },
+  {
+    "id": "fountain",
+    "displayName": "Town Fountain",
+    "description": "A broad stone fountain stands at the center, water trickling from a weathered statue.",
+    "examine": "Coins glint beneath the rippling surface.",
+    "actions": [],
+    "portrait": "fountain",
+    "bgImage": "TownSquare"
+  },
+  {
+    "id": "noticeBoard",
+    "displayName": "Notice Board",
+    "description": "A wooden board plastered with tattered parchment.",
+    "examine": "Most are job postings and lost-pet notices, but one bears the seal of the Adventurer’s Guild.",
+    "actions": [],
+    "portrait": "noticeBoard",
+    "bgImage": "TownSquare"
+  },
+  {
+    "id": "townGuard",
+    "displayName": "Town Guard",
+    "description": "A uniformed guard stands watch at the fountain’s edge.",
+    "examine": "His armor is polished, though his eyes look weary.",
+    "actions": [],
+    "portrait": "guardCaptain",
+    "bgImage": "TownSquare"
+  },
+  {
+    "id": "streetPerformer",
+    "displayName": "Street Performer",
+    "description": "A lively juggler entertains children with colorful balls.",
+    "examine": "His smile falters as he glances at his empty coin hat.",
+    "actions": [],
+    "portrait": "performer",
+    "bgImage": "TownSquare"
+  },
+  {
+    "id": "beggar",
+    "displayName": "Beggar",
+    "description": "An old man sits on the cobbles with a wooden bowl.",
+    "examine": "His hands tremble as he raises it hopefully.",
+    "actions": [],
+    "portrait": "beggar",
+    "bgImage": "TownSquare"
+  },
+  {
+    "id": "merchantCaravan",
+    "displayName": "Merchant Caravan",
+    "description": "A pair of oxen are hitched to a heavy wagon laden with crates.",
+    "examine": "The wheels are mud-caked and the driver keeps glancing around nervously.",
+    "actions": [],
+    "portrait": "caravan",
+    "bgImage": "TownSquare"
+  },
+  {
+    "id": "tavernFront",
+    "displayName": "Tavern Front",
+    "description": "A wide double-door entry spills light and laughter into the square.",
+    "examine": "The smell of roasted meat wafts through the open windows.",
+    "actions": [],
+    "portrait": "narrator",
+    "bgImage": "TownSquare",
+    "npcInteractables": [],
+    "worldInteractables": []
+  },
+  {
+    "id": "herbalistStall",
+    "displayName": "Herbalist",
+    "description": "A middle-aged woman in layered shawls arranges dried herbs.",
+    "examine": "The bundles smell sharp and earthy, her fingers stained green.",
+    "actions": [],
+    "portrait": "herbalist",
+    "bgImage": "TownSquare"
+  },
+  {
+    "id": "streetDog",
+    "displayName": "Stray Dog",
+    "description": "A skinny dog darts between legs, tail tucked low.",
+    "examine": "It pauses to sniff at you before trotting away.",
+    "actions": [],
+    "portrait": "dogStray",
+    "bgImage": "TownSquare"
+  }
+]

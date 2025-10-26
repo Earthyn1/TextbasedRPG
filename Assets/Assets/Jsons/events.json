@@ -1,0 +1,140 @@
+[
+  {
+    "id": "stable_wakeup",
+    "scope": "zone",
+    "zoneId": "adventurersStable",
+    "triggers": [
+      "OnEnterZone"
+    ],
+    "priority": 50,
+    "once": true,
+    "blocking": true,
+    "conditions": {
+      "allOf": [
+        "FirstTimeInZone(adventurersStable)"
+      ]
+    },
+    "actions": [
+      "Narrate(You wake in a bed of straw, dust dancing in a shaft of morning light. Horses breathe slow and steady nearby.)"
+    ]
+  },
+  {
+    "id": "ladder_blocked",
+    "scope": "zone",
+    "zoneId": "stableHayLoft",
+    "triggers": [
+      "OnEnterZone"
+    ],
+    "priority": 0,
+    "once": false,
+    "blocking": true,
+    "conditions": {
+      "noneOf": [
+        "Flag(ALLOWED_HAYLOFT)"
+      ]
+    },
+    "actions": [
+      "Narrate(The Stable Boy shouts: \"OI! You're not allowed up there!\")",
+      "SetFlag(ALLOWED_HAYLOFT,false)",
+      "Zone(stableHorseStalls)"
+    ]
+  },
+    {
+        "id": "OLDbrush_maple_completed",
+        "scope": "zone",
+        "zoneId": "adventurersStable",
+        "triggers": [
+            "action.BrushMapleTimed.complete"
+        ],
+        "priority": 0,
+        "once": true,
+        "blocking": false,
+        "actions": [
+            "SetFlag(ACT_DONE_BrushMapleTimed,true)",
+            "Narrate(Maple flicks her ears, content.)"
+        ]
+    },
+  {
+    "id": "OLDstable_cupboard_upper_completed",
+    "scope": "zone",
+    "zoneId": "stableFront",
+    "triggers": [
+      //"action.stableCupboardUpperSearch.complete"
+    ],
+    "priority": 0,
+    "once": true,
+    "blocking": false,
+    "actions": [
+      "SetFlag(ACT_DONE_stableCupboardUpperSearch,true)",
+      "GiveItem(brush,1)"
+    ]
+  },
+    {
+        "id": "OLDstable_cupboard_lower_completed",
+        "scope": "zone",
+        "zoneId": "stableFront",
+        "triggers": [
+            "action.stableCupboardLowerSearch.complete"
+        ],
+        "priority": 0,
+        "once": true,
+        "blocking": false,
+        "actions": [
+            "SetFlag(ACT_DONE_stableCupboardLowerSearch,true)",
+            "GiveItem(gold_coin,4)"
+        ]
+    },
+    {
+        "id": "OLDsearch_haystack_complete",
+        "scope": "zone",
+        "zoneId": "stableHorseStalls",
+        "triggers": [
+            "action.SearchHaystackTimed.complete"
+        ],
+        "priority": 0,
+        "once": true,
+        "blocking": false,
+        "actions": [
+            "GiveItem(dog_bone,1)"
+        ]
+    },
+  {
+    "id": "townsquare_injured_adventurer",
+    "scope": "zone",
+    "zoneId": "townsquare",
+    "triggers": [
+      "OnEnterZone"
+    ],
+    "priority": 0,
+    "once": true,
+    "blocking": false,
+    "conditions": {
+      "allOf": [
+        "FirstTimeInZone(townsquare)"
+      ]
+    },
+    "actions": [
+      "Zone(Start_CarriageScene)"
+    ]
+  },
+  {
+    "id": "coop_door_attempt_locked",
+    "scope": "zone",
+    "zoneId": "jacksFarm",
+    "triggers": [
+      "LockedAttempt_Chicken Coop"
+    ],
+    "priority": 0,
+    "once": false,
+    "blocking": true,
+    "conditions": {
+      "noneOf": [
+        "Flag(TRIED_COOP_LOCKED)"
+      ]
+    },
+    "actions": [
+      "Narrate(You rattle the door. It’s locked tight… someone’s barred it from inside.)",
+      "SetFlag(TRIED_COOP_LOCKED,true)"
+    ]
+  }
+]

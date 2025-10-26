@@ -1,0 +1,101 @@
+[
+  {
+    "BookID": "WC_Basic01",
+    "BookName": "Basic Woodcutting",
+    "RequiredLvl": 1,
+    "ReadingXP": 6,
+    "SkillReward": "Woodcutting",
+    "XPReward": 500,
+    "LiteracyXP": 100,
+    "Words": [
+      {
+        "WordID": "W1",
+        "WordText": "Axe",
+        "WordDifficulty": 1,
+        "UnlockXP": 7
+      },
+      {
+        "WordID": "W2",
+        "WordText": "Tree",
+        "WordDifficulty": 1,
+        "UnlockXP": 7
+      },
+      {
+        "WordID": "W3",
+        "WordText": "Log",
+        "WordDifficulty": 1,
+        "UnlockXP": 7
+      }
+    ]
+  },
+  {
+    "BookID": "F_Basic01",
+    "BookName": "Beginner Fishing",
+    "RequiredLvl": 2,
+    "ReadingXP": 6,
+    "SkillReward": "Fishing",
+    "XPReward": 120,
+    "LiteracyXP": 40,
+    "Words": [
+      {
+        "WordID": "F1",
+        "WordText": "Cast",
+        "WordDifficulty": 1,
+        "UnlockXP": 7
+      },
+      {
+        "WordID": "F2",
+        "WordText": "Reel",
+        "WordDifficulty": 2,
+        "UnlockXP": 13
+      },
+      {
+        "WordID": "F3",
+        "WordText": "Rod",
+        "WordDifficulty": 3,
+        "UnlockXP": 20
+      },
+      {
+        "WordID": "F4",
+        "WordText": "Net",
+        "WordDifficulty": 3,
+        "UnlockXP": 20
+      }
+    ]
+  },
+  {
+    "BookID": "M_Basic01",
+    "BookName": "Mining Basics",
+    "RequiredLvl": 5,
+    "ReadingXP": 7,
+    "SkillReward": "Mining",
+    "XPReward": 450,
+    "LiteracyXP": 135,
+    "Words": [
+      {
+        "WordID": "M1",
+        "WordText": "Ore",
+        "WordDifficulty": 3,
+        "UnlockXP": 20
+      },
+      {
+        "WordID": "M2",
+        "WordText": "Vein",
+        "WordDifficulty": 3,
+        "UnlockXP": 20
+      },
+      {
+        "WordID": "M3",
+        "WordText": "Pickaxe",
+        "WordDifficulty": 4,
+        "UnlockXP": 26
+      },
+      {
+        "WordID": "M4",
+        "WordText": "Shaft",
+        "WordDifficulty": 4,
+        "UnlockXP": 26
+      }
+    ]
+  }
+]

@@ -1,0 +1,890 @@
+[
+  {
+    "dialogId": "StableMaster_Intro",
+    "npcName": "Stable Master",
+    "npcText": "He eyes you from under his brow. “Ah! Awake, are we?”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Thanks for the bed.",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_Intro2",
+        "questId": null,
+        "requirement": "QuestNotStarted:GroomMaple"
+      },
+      {
+        "ord": 2,
+        "optionText": "Ugh, my neck hurts…",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_Intro2",
+        "questId": null,
+        "requirement": "QuestNotStarted:GroomMaple"
+      },
+      {
+        "ord": 3,
+        "optionText": "You mentioned grooming work?",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_Remind",
+        "questId": null,
+        "requirement": "GroomMaple:QuestInProgress"
+      },
+      {
+        "ord": 4,
+        "optionText": "Maple’s brushed.",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_Thanks",
+        "questId": null,
+        "requirement": "GroomMaple:QuestCompleted"
+      },
+      {
+        "ord": 5,
+        "optionText": "(Back to stables)",
+        "type": "Zone",
+        "nextDialogId": "adventurersStable",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_Intro2",
+    "npcName": "Stable Master",
+    "npcText": "He grunts. “Adventurers’ Guild sent word. Came at dawn.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "What’s it say?",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_NotFreeBed",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "The Guild? Tell me.",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_NotFreeBed",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_NotFreeBed",
+    "npcName": "Stable Master",
+    "npcText": "He jerks a thumb toward the stalls. “First give ol’ Maple a brushin’. Place to sleep ain’t free.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Fair enough.",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_OfferQuest",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "But my neck—",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_HurtNeck",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_HurtNeck",
+    "npcName": "Stable Master",
+    "npcText": "He snorts. “Ha! Complainin’ won’t earn ya a bed. Horse is waitin’. Brush is by the front cabinet.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Fine.",
+        "type": "Quest",
+        "nextDialogId": "StableMaster_Accepted",
+        "questId": "GroomMaple",
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_OfferQuest",
+    "npcName": "Stable Master",
+    "npcText": "“Maple’s taken a shine to ya. Brush is by the cabinet near the front.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Okay.",
+        "type": "Quest",
+        "nextDialogId": "StableMaster_Accepted",
+        "questId": "GroomMaple",
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_Explain",
+    "npcName": "Stable Master",
+    "npcText": "“Maple needs proper groomin’. Calms her and keeps the coat healthy.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": []
+  },
+  {
+    "dialogId": "StableMaster_Remind",
+    "npcName": "Stable Master",
+    "npcText": "“Maple’s in the stalls. Slow with the grain — an’ don’t forget the brush.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Got it.",
+        "type": "Zone",
+        "nextDialogId": "adventurersStable",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_Thanks",
+    "npcName": "Stable Master",
+    "npcText": "A rare nod. “Maple looks pleased. You’ve a knack for this work.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [
+      {
+        "id": "brush",
+        "amount": 1
+      }
+    ],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "She likes me.",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_Message",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "Yeah... the message?",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_Message",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_Accepted",
+    "npcName": "Stable Master",
+    "npcText": "“Good. Slow strokes with the grain. Don’t spook her.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "(Return)",
+        "type": "Zone",
+        "nextDialogId": "adventurersStable",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_Message",
+    "npcName": "Stable Master",
+    "npcText": "He crosses his arms. “Messenger came at dawn. Guild’s holdin’ a job for ya — F-rank, till noon. Not many o’ those left. Guild Master’s soft on ya, eh?”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Woah, I should get going.",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_SeeYouAround",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "What time is it?!",
+        "type": "Dialog",
+        "nextDialogId": "StableMaster_GotTime?",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_SeeYouAround",
+    "npcName": "Stable Master",
+    "npcText": "“If adventurin’ don’t work out… you’ve hands for horses.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "(Return)",
+        "type": "Zone",
+        "nextDialogId": "adventurersStable",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableMaster_GotTime?",
+    "npcName": "Stable Master",
+    "npcText": "“About noon, I’d say.”",
+    "npcId": "stableMaster",
+    "npcPortrait": "stableMaster",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "(Return)",
+        "type": "Zone",
+        "nextDialogId": "adventurersStable",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "dogLester_bone",
+    "npcName": "Lester",
+    "npcText": "Lester eyes you warily, tail twitching, a low growl rumbling in his throat.",
+    "npcId": "DogLester",
+    "npcPortrait": "dogLester",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Easy now, boy... look what I’ve got.",
+        "type": "Dialog",
+        "nextDialogId": "dogLester_takebone_1",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "“Fetch!”",
+        "type": "Dialog",
+        "nextDialogId": "dogLester_takebone_2",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "dogLester_takebone_1",
+    "npcName": "Lester",
+    "npcText": "His ears perk up as the scent hits him. He sits, almost proudly, as you offer the bone — then takes it gently, careful not to bite.",
+    "npcId": "DogLester",
+    "npcPortrait": "dogLester",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [
+      {
+        "id": "dog_bone",
+        "amount": 1
+      }
+    ],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "(Return)",
+        "type": "Zone",
+        "nextDialogId": "stableFront",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "dogLester_takebone_2",
+    "npcName": "Lester",
+    "npcText": "Lester’s eyes lock onto the bone mid-air. With surprising grace, he snatches it, trots to his corner, and settles in to devour his prize with a satisfied grunt.",
+    "npcId": "DogLester",
+    "npcPortrait": "dogLester",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [
+      {
+        "id": "dog_bone",
+        "amount": 1
+      }
+    ],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "(Return)",
+        "type": "Zone",
+        "nextDialogId": "stableFront",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableBoy_Intro",
+    "npcName": "Stable Boy",
+    "npcText": "The lad glances up from a broom, hay stuck to his sleeves. “You ain’t from around here, are you?”",
+    "npcId": "stableBoy",
+    "npcPortrait": "stableBoy",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Came in two days past.",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Warm",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "Any news from town?",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Rumors",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 3,
+        "optionText": "(Glance at the dog)",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Lester",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableBoy_Warm",
+    "npcName": "Stable Boy",
+    "npcText": "He brightens a little. “Name’s Tom. I keep the stalls clean ‘n the horses calmer than the Stable Master does.”",
+    "npcId": "stableBoy",
+    "npcPortrait": "stableBoy",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Any news from town?",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Rumors",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "I’ll get out of your way.",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Goodbye",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableBoy_Rumors",
+    "npcName": "Stable Boy",
+    "npcText": "“Guild’s been busier. Folks go down into the dungeon and come back… wrong somehow. And the priests? Charge double if you’re not copper-tier.",
+    "npcId": "stableBoy",
+    "npcPortrait": "stableBoy",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Changed how?",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Changed",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "Damned priests. Same in every town, eh?",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Pops",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableBoy_Lester",
+    "npcName": "Stable Boy",
+    "npcText": "A grin. “Lester’s friendly enough. Toss him a bone and he’ll guard your boots like treasure.”",
+    "npcId": "stableBoy",
+    "npcPortrait": "stableBoy",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Thats a good boy.",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Lester_2",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "I’ll get out of your way.",
+        "type": "Zone",
+        "nextDialogId": "stableFront",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableBoy_Goodbye",
+    "npcName": "Stable Boy",
+    "npcText": "“Right, I’ve chores. Don’t step in the bucket by the door—it’s not water.”",
+    "npcId": "stableBoy",
+    "npcPortrait": "stableBoy",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "I’ll get out of your way.",
+        "type": "Zone",
+        "nextDialogId": "stableFront",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableBoy_Pops",
+    "npcName": "Stable Boy",
+    "npcText": "Aye, Pops says the same — swears priests never heal what they can’t tax.",
+    "npcId": "stableBoy",
+    "npcPortrait": "stableBoy",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "(Glance at the dog)",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Lester",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "I’ll get out of your way.",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Goodbye",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableBoy_Changed",
+    "npcName": "Stable Boy",
+    "npcText": "“They come back dull-eyed. Nothin’ brings ‘em joy. Some just pack up and leave town…”",
+    "npcId": "stableBoy",
+    "npcPortrait": "stableBoy",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Odd business. Thanks for the talk.",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Goodbye",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "StableBoy_Lester_2",
+    "npcName": "Stable Boy",
+    "npcText": "\"If he bites you… that’s on you, not me.”",
+    "npcId": "stableBoy",
+    "npcPortrait": "stableBoy",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Any news from town?",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Rumors",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "I’ll get out of your way.",
+        "type": "Dialog",
+        "nextDialogId": "StableBoy_Goodbye",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "FarmerJack_Intro",
+    "npcName": "Farmer Jack",
+    "npcText": "He tips his hat, squinting at you. “Damned chickens won’t give me their eggs again!”",
+    "npcId": "farmerJack",
+    "npcPortrait": "farmerJack",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "What’s wrong with the chickens?",
+        "type": "Dialog",
+        "nextDialogId": "FarmerJack_AggroExplain",
+        "questId": null,
+        "requirement": "QuestNotStarted:EggTrouble"
+      },
+      {
+        "ord": 3,
+        "optionText": "Not my problem.",
+        "type": "Dialog",
+        "nextDialogId": "FarmerJack_Decline",
+        "questId": null,
+        "requirement": "QuestNotStarted:EggTrouble"
+      },
+      {
+        "ord": 4,
+        "optionText": "Where’s the coop again?",
+        "type": "Dialog",
+        "nextDialogId": "FarmerJack_Remind",
+        "questId": null,
+        "requirement": "EggTrouble:QuestInProgress, NotFlag(TRIED_COOP_LOCKED)"
+      },
+      {
+        "ord": 5,
+        "optionText": "Managed to get some eggs.",
+        "type": "Dialog",
+        "nextDialogId": "FarmerJack_Thanks",
+        "questId": null,
+        "requirement": "EggTrouble:QuestCompleted"
+      },
+      {
+        "ord": 6,
+        "optionText": "Chicken Coop is locked?",
+        "type": "Dialog",
+        "nextDialogId": "FarmerJack_FindKey",
+        "questId": null,
+        "requirement": "Flag(TRIED_COOP_LOCKED)"
+      },
+      {
+        "ord": 7,
+        "optionText": "Need to leave.",
+        "type": "Zone",
+        "nextDialogId": "stableDirtRoad",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "FarmerJack_AggroExplain",
+    "npcName": "Farmer Jack",
+    "npcText": "“They’ve gone mean… eyes all wild. No idea why—something in the water, maybe?”",
+    "npcId": "farmerJack",
+    "npcPortrait": "farmerJack",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "I’ll get the eggs.",
+        "type": "Quest",
+        "nextDialogId": "FarmerJack_Accepted",
+        "questId": "EggTrouble",
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "This sounds cursed... no thanks.",
+        "type": "Dialog",
+        "nextDialogId": "FarmerJack_Decline",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "FarmerJack_Accepted",
+    "npcName": "Farmer Jack",
+    "npcText": "“Tried gettin’ in there myself. Came out missin’ half my hat and most my pride. Even drew blood.”",
+    "npcId": "farmerJack",
+    "npcPortrait": "farmerJack",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Right...",
+        "type": "Zone",
+        "nextDialogId": "stableDirtRoad",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "I'll go check it out",
+        "type": "Zone",
+        "nextDialogId": "stableDirtRoad",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "FarmerJack_Decline",
+    "npcName": "Farmer Jack",
+    "npcText": "“Hmph. Suit yourself. But if I starve, this town’ll feel it.”",
+    "npcId": "farmerJack",
+    "npcPortrait": "farmerJack",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "(Leave)",
+        "type": "Zone",
+        "nextDialogId": "stableDirtRoad",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "FarmerJack_Return",
+    "npcName": "Farmer Jack",
+    "npcText": "“You’re back! Got anything in that pack—or did they peck you hollow?”",
+    "npcId": "farmerJack",
+    "npcPortrait": "farmerJack",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Here are your eggs.",
+        "type": "Dialog",
+        "nextDialogId": "FarmerJack_Thanks",
+        "questId": null,
+        "requirement": null
+      },
+      {
+        "ord": 2,
+        "optionText": "They nearly killed me!",
+        "type": "Dialog",
+        "nextDialogId": "FarmerJack_Thanks",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "FarmerJack_Thanks",
+    "npcName": "Farmer Jack",
+    "npcText": "“Well I’ll be—eggs! You’ve done me a good turn. Take this. Not much, but it’s somethin’.”",
+    "npcId": "farmerJack",
+    "npcPortrait": "farmerJack",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": []
+  },
+  {
+    "dialogId": "FarmerJack_Remind",
+    "npcName": "Farmer Jack",
+    "npcText": "“Coop’s just past the barn. Mind the top roost—she watches you like a hawk.”",
+    "npcId": "farmerJack",
+    "npcPortrait": "farmerJack",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Got it.",
+        "type": "Zone",
+        "nextDialogId": "stableDirtRoad",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "FarmerJack_RefuseSnark",
+    "npcName": "Farmer Jack",
+    "npcText": "“Right then. I’ll just tell the market the chickens out-voted me.”",
+    "npcId": "farmerJack",
+    "npcPortrait": "farmerJack",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": []
+  },
+  {
+    "dialogId": "FarmerJack_FindKey",
+    "npcName": "Farmer Jack",
+    "npcText": "\"Locked? How in the world... Well keys in the barn on a hook\"",
+    "npcId": "farmerJack",
+    "npcPortrait": "farmerJack",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Okay.",
+        "type": "Zone",
+        "nextDialogId": "stableDirtRoad",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "Start_CarriageScene",
+    "npcName": "Narrator",
+    "npcText": "As you move to cross the street, a carriage hurtles around the corner. “OUTTA THE WAY!”",
+    "npcId": "townsquare",
+    "npcPortrait": "NarrativeBook",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Continue",
+        "type": "Dialog",
+        "nextDialogId": "CarriageScene_2",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "CarriageScene_2",
+    "npcName": "Narrator",
+    "npcText": "The carriage rushes past you, a dark liquid dripping through the gaps in the wood. Blood. A sharp cry pierces the air as the carriage hit a bump in the road.",
+    "npcId": "townsquare",
+    "npcPortrait": "NarrativeBook",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Continue",
+        "type": "Dialog",
+        "nextDialogId": "CarriageScene_3",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "CarriageScene_3",
+    "npcName": "Narrator",
+    "npcText": "Through the blur you glimpse the scene: in the back of the carriage, two robed priests struggle to hold down a mangled adventurer—his arm torn away, his face twisted in agony.",
+    "npcId": "townsquare",
+    "npcPortrait": "NarrativeBook",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Continue",
+        "type": "Dialog",
+        "nextDialogId": "CarriageScene_4",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "CarriageScene_4",
+    "npcName": "Narrator",
+    "npcText": "A faint glint catches your eye. Something small and metallic tumbles from the wagon, clattering to your feet. An adventurer’s tag.",
+    "npcId": "townsquare",
+    "npcPortrait": "NarrativeBook",
+    "onEnterGiveItems": [],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Pickup the tag",
+        "type": "Dialog",
+        "nextDialogId": "Tiana_Intro",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  },
+  {
+    "dialogId": "Tiana_Intro",
+    "npcName": "Tiano",
+    "npcText": "Must be noble to be rushing to the Priests Sanctum liek that.",
+    "npcId": "tiana",
+    "npcPortrait": "tiana",
+    "onEnterGiveItems": [
+      {
+        "id": "jasonTag",
+        "amount": 1
+      }
+    ],
+    "onEnterTakeItems": [],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Return",
+        "type": "Zone",
+        "nextDialogId": "townsquare",
+        "questId": null,
+        "requirement": null
+      }
+    ]
+  }
+]

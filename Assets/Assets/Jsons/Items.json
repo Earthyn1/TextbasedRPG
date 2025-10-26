@@ -1,0 +1,281 @@
+[
+  {
+    "itemID": "potion_health",
+    "itemName": "Health Potion",
+    "description": "Restores 50% of your health instantly.",
+    "itemType": "Consumable",
+    "maxQuantity": 10,
+    "consumable": {
+      "healHPFlat": 0,
+      "healHPPercent": 0.5,
+      "healMPFlat": 0,
+      "healMPPercent": 0,
+      "usableInCombat": true,
+      "cooldownSeconds": 5
+    }
+  },
+  {
+    "itemID": "potion_mana",
+    "itemName": "Mana Potion",
+    "description": "Restores 30 MP.",
+    "itemType": "Consumable",
+    "maxQuantity": 10,
+    "consumable": {
+      "healHPFlat": 0,
+      "healHPPercent": 0,
+      "healMPFlat": 30,
+      "healMPPercent": 0,
+      "usableInCombat": true,
+      "cooldownSeconds": 5
+    }
+  },
+  {
+    "itemID": "bread_loaf",
+    "itemName": "Loaf of Bread",
+    "description": "A fresh loaf of bread that restores a little health.",
+    "itemType": "Consumable",
+    "maxQuantity": 20,
+    "consumable": {
+      "healHPFlat": 8,
+      "healHPPercent": 0,
+      "healMPFlat": 0,
+      "healMPPercent": 0,
+      "usableInCombat": false,
+      "cooldownSeconds": 0
+    }
+  },
+  {
+    "itemID": "meat_cooked",
+    "itemName": "Cooked Meat",
+    "description": "Grilled meat that restores a good chunk of health.",
+    "itemType": "Consumable",
+    "maxQuantity": 10,
+    "consumable": {
+      "healHPFlat": 10,
+      "healHPPercent": 0.15,
+      "healMPFlat": 0,
+      "healMPPercent": 0,
+      "usableInCombat": true,
+      "cooldownSeconds": 5
+    }
+  },
+  {
+    "itemID": "herb_green",
+    "itemName": "Green Herb",
+    "description": "A basic healing herb.",
+    "itemType": "Consumable",
+    "maxQuantity": 25,
+    "consumable": {
+      "healHPFlat": 5,
+      "healHPPercent": 0,
+      "healMPFlat": 0,
+      "healMPPercent": 0,
+      "usableInCombat": true,
+      "cooldownSeconds": 2
+    }
+  },
+  {
+    "itemID": "herb_red",
+    "itemName": "Red Herb",
+    "description": "A rare herb used in stronger potions.",
+    "itemType": "Consumable",
+    "maxQuantity": 10,
+    "consumable": {
+      "healHPFlat": 20,
+      "healHPPercent": 0.25,
+      "healMPFlat": 0,
+      "healMPPercent": 0,
+      "usableInCombat": true,
+      "cooldownSeconds": 5
+    }
+  },
+  {
+    "itemID": "iron_sword",
+    "itemName": "Iron Sword",
+    "description": "A simple iron sword.",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "wooden_shield",
+    "itemName": "Wooden Shield",
+    "description": "A basic shield carved from oak.",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "iron_shield",
+    "itemName": "Iron Shield",
+    "description": "A solid iron shield.",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "leather_armor",
+    "itemName": "Leather Armor",
+    "description": "Basic protection made from animal hides.",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "chainmail_armor",
+    "itemName": "Chainmail Armor",
+    "description": "Armor of interlocked iron rings.",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "staff_apprentice",
+    "itemName": "Apprentice Staff",
+    "description": "A simple wooden staff with faint magic.",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "gem_ruby",
+    "itemName": "Ruby Gem",
+    "description": "A sparkling red gem.",
+    "itemType": "Resource",
+    "maxQuantity": 5
+  },
+  {
+    "itemID": "gem_sapphire",
+    "itemName": "Sapphire Gem",
+    "description": "A rare blue gem.",
+    "itemType": "Resource",
+    "maxQuantity": 5
+  },
+  {
+    "itemID": "gold_coin",
+    "itemName": "Gold Coin",
+    "description": "Common currency of the realm.",
+    "itemType": "Currency",
+    "maxQuantity": 9999
+  },
+  {
+    "itemID": "torch_basic",
+    "itemName": "Wooden Torch",
+    "description": "A torch that lights dark places.",
+    "itemType": "Equippable",
+    "maxQuantity": 10
+  },
+  {
+    "itemID": "fishing_rod",
+    "itemName": "Basic Fishing Rod",
+    "description": "A rod used for catching fish.",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "WC_Basic01",
+    "itemName": "Woodcutting 101",
+    "description": "A simple book on Woodcutting",
+    "itemType": "Literacy",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "F_Basic01",
+    "itemName": "Fishing 101",
+    "description": "A simple book on Fishing",
+    "itemType": "Literacy",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "M_Basic01",
+    "itemName": "Mining 101",
+    "description": "A simple book on Mining",
+    "itemType": "Literacy",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "iron_pickaxe",
+    "itemName": "Iron Pickaxe",
+    "description": "A simple Iron Pickaxe",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "iron_axe",
+    "itemName": "Iron Axe",
+    "description": "Used for chopping down trees",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "leather_pants",
+    "itemName": "Leather Pants",
+    "description": "Pants Baby",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "leather_boots",
+    "itemName": "Leather Boots",
+    "description": "Boots to wear",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "leather_helm",
+    "itemName": "Leather Helm",
+    "description": "Leather helmet",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "iron_longsword",
+    "itemName": "Iron LongSword",
+    "description": "A Iron LongSword",
+    "itemType": "Equippable",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "brush",
+    "itemName": "Brush",
+    "description": "To Comb the Horses!",
+    "itemType": "Resource",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "dog_bone",
+    "itemName": "Dog Bone",
+    "description": "A bone for a dog",
+    "itemType": "Resource",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "jasonTag",
+    "itemName": "Jasons Tag",
+    "description": "no desc",
+    "itemType": "Resource",
+    "maxQuantity": 1
+  },
+  {
+    "itemID": "chicken_Egg",
+    "itemName": "Chicken Egg",
+    "description": "no desc",
+    "itemType": "Resource",
+    "maxQuantity": 10
+  },
+  {
+    "itemID": "chicken_Feather",
+    "itemName": "Chicken Feather",
+    "description": "no desc",
+    "itemType": "Resource",
+    "maxQuantity": 100
+  },
+  {
+    "itemID": "chicken_meat",
+    "itemName": "Raw Chicken Meat",
+    "description": "no desc",
+    "itemType": "Resource",
+    "maxQuantity": 20
+  },
+  {
+    "itemID": "coopKey",
+    "itemName": "Coop Key",
+    "description": "no desc",
+    "itemType": "Resource",
+    "maxQuantity": 1
+  }
+]

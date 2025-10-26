@@ -1,0 +1,125 @@
+[
+  {
+    "questId": "Q001",
+    "questName": "Missing Amulet",
+    "description": "Find the missing amulet in the mines.",
+    "questType": "Fetch",
+    "requiredActions": [
+      {
+        "actionID": "Action_Mines_Search",
+        "name": "Search",
+        "requiredQty": 1,
+        "currentQty": 0
+      }
+    ],
+    "reward": {
+      "rewardGold": 50,
+      "rewardItem": null
+    },
+    "isCompleted": false
+  },
+  {
+    "questId": "Q002",
+    "questName": "Deliver Amulet",
+    "description": "Bring the amulet to Gregory in Town Hall.",
+    "questType": "Delivery",
+    "requiredActions": [
+      {
+        "actionID": "Action_TownHall_GiveAmulet",
+        "name": "Give Amulet",
+        "requiredQty": 1,
+        "currentQty": 0
+      }
+    ],
+    "reward": {
+      "rewardGold": 0,
+      "rewardItem": {
+        "itemID": "item_amulet",
+        "quantity": 4
+      }
+    },
+    "isCompleted": false
+  },
+  {
+    "questId": "Q003",
+    "questName": "Rare Trout",
+    "description": "Catch 5 Goldenback Trout from the lake.",
+    "questType": "Collection",
+    "requiredActions": [
+      {
+        "actionID": "Action_Fishing_Lake_5Goldenback",
+        "name": "5goldenback",
+        "requiredQty": 1,
+        "currentQty": 0
+      }
+    ],
+    "reward": {
+      "rewardGold": 33,
+      "rewardItem": {
+        "itemID": "item_fishingRod",
+        "quantity": 1
+      }
+    },
+    "isCompleted": false
+  },
+  {
+    "questId": "GoblinSlayer",
+    "questName": "Goblin Slayer",
+    "description": "Defeat 5 Goblins roaming around the outer walls of the city",
+    "questType": "Kill",
+    "requiredActions": [
+      {
+        "actionID": "Action_Kill_Goblins",
+        "name": "Goblins",
+        "requiredQty": 5,
+        "currentQty": 0
+      }
+    ],
+    "reward": {
+      "rewardGold": 22,
+      "rewardItem": {
+        "itemID": "fishing_rod",
+        "quantity": 1
+      }
+    },
+    "isCompleted": false
+  },
+  {
+    "questId": "GroomMaple",
+    "questName": "Groom Maple",
+    "description": "Groom Maple in the stables for the Stable Master.",
+    "questType": "Task",
+    "requiredActions": [
+      {
+        "actionID": "Action_Stable_GroomMaple",
+        "name": "Groom Maple",
+        "requiredQty": 1,
+        "currentQty": 0
+      }
+    ],
+    "reward": {
+      "rewardGold": 0,
+      "rewardItem": null
+    },
+    "isCompleted": false
+  },
+  {
+    "questId": "EggTrouble",
+    "questName": "Egg Trouble",
+    "description": "Get the eggs from the out-of-control hens.",
+    "questType": "Task",
+    "requiredActions": [
+      {
+        "actionID": "Action_ItemGain_egg",
+        "name": "Egg",
+        "requiredQty": 5,
+        "currentQty": 0
+      }
+    ],
+    "reward": {
+      "rewardGold": 15,
+      "rewardItem": null
+    },
+    "isCompleted": false
+  }
+]

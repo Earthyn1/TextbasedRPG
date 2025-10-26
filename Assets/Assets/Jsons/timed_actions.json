@@ -1,0 +1,299 @@
+{
+  "actions": [
+    {
+      "id": "BrushMapleTimed",
+      "durationMs": 5000,
+      "cancelOnZoneChange": true,
+      "reportQuestOnComplete": false,
+      "questActionOverride": "Action_Stable_GroomMaple",
+      "startLog": "You begin brushing the horse…",
+      "completeLog": "*Maple chuffs. The horse’s coat gleams.",
+      "milestones": [
+        {
+          "atPercent": 0.5,
+          "log": "Dust plumes off the mane with each stroke.",
+          "xp": [
+            {
+              "skill": "Precision",
+              "amount": 8
+            }
+          ]
+        }
+      ],
+      "onSuccess": {
+        "log": "*Maple chuffs. The horse’s coat gleams.",
+        "reportQuest": true
+      },
+      "onFail": {
+        "log": "StableMaster shouts \"Come on now you can do better than that!\""
+      },
+      "skillCheck": {
+        "skill": "Precision",
+        "chance": {
+          "base": 0,
+          "perLevel": 0.8,
+          "min": 0.05,
+          "max": 0.95
+        }
+      }
+    },
+    {
+      "id": "stableCupboardUpperSearch",
+      "durationMs": 5000,
+      "cancelOnZoneChange": true,
+      "reportQuestOnComplete": false,
+      "startLog": "You begin searching the upper levels of the cabinet.",
+      "completeLog": "You sift past cobwebs and old rags.",
+      "milestones": [
+        {
+          "atPercent": 0.5,
+          "log": "Must be something in here.",
+          "xp": [
+            {
+              "skill": "Precision",
+              "amount": 6
+            }
+          ]
+        }
+      ],
+      "onSuccess": {
+        "log": "You sift past cobwebs and old rags.",
+        "giveItems": [
+          {
+            "id": "brush",
+            "amount": 1
+          }
+        ],
+        "setFlags": [
+          "CABINET_UPPER_FOUND"
+        ]
+      },
+      "onFail": {
+        "log": "You come up empty. Maybe try again, more carefully."
+      },
+      "skillCheck": {
+        "skill": "Precision",
+        "chance": {
+          "base": 0,
+          "perLevel": 0.8,
+          "min": 0.05,
+          "max": 0.95
+        }
+      }
+    },
+    {
+      "id": "stableCupboardLowerSearch",
+      "durationMs": 5000,
+      "cancelOnZoneChange": true,
+      "reportQuestOnComplete": false,
+      "startLog": "You check the lower shelves of the cabinet.",
+      "completeLog": "A few gold coins glint in the dust — lucky find.",
+      "milestones": [
+        {
+          "atPercent": 0.5,
+          "log": "Got to make sure I am thorough.",
+          "xp": [
+            {
+              "skill": "Precision",
+              "amount": 7
+            }
+          ]
+        }
+      ],
+      "onSuccess": {
+        "log": "A few gold coins glint in the dust — lucky find.",
+        "giveItems": [
+          {
+            "id": "gold",
+            "amount": 3
+          }
+        ]
+      },
+      "onFail": {
+        "log": "You come up empty. Maybe try again, more carefully."
+      },
+      "skillCheck": {
+        "skill": "Precision",
+        "chance": {
+          "base": 0,
+          "perLevel": 0.8,
+          "min": 0.05,
+          "max": 0.95
+        }
+      }
+    },
+    {
+      "id": "yourBagTimed",
+      "durationMs": 4000,
+      "cancelOnZoneChange": true,
+      "reportQuestOnComplete": false,
+      "startLog": "You search through your own bag, hoping something new might’ve appeared.",
+      "completeLog": "But no — still nothing.",
+      "onSuccess": {
+        "log": "But no — still nothing."
+      },
+      "onFail": {
+        "log": "You come up empty. Maybe try again, more carefully."
+      },
+      "skillCheck": {
+        "skill": "Precision",
+        "chance": {
+          "base": 0,
+          "perLevel": 0.8,
+          "min": 0.05,
+          "max": 0.95
+        }
+      }
+    },
+    {
+      "id": "SearchHaystackTimed",
+      "durationMs": 5000,
+      "cancelOnZoneChange": true,
+      "reportQuestOnComplete": false,
+      "startLog": "You rummage through the haystack...",
+      "completeLog": "A bone! Someone must have hidden this here.",
+      "onSuccess": {
+        "log": "A bone! Someone must have hidden this here.",
+        "giveItems": [
+          {
+            "id": "bone",
+            "amount": 1
+          }
+        ]
+      },
+      "onFail": {
+        "log": "You come up empty. Maybe try again, more carefully."
+      },
+      "skillCheck": {
+        "skill": "Precision",
+        "chance": {
+          "base": 0,
+          "perLevel": 0.8,
+          "min": 0.05,
+          "max": 0.95
+        }
+      }
+    },
+    {
+      "id": "SearchBarnKeyHolder",
+      "durationMs": 3000,
+      "cancelOnZoneChange": true,
+      "reportQuestOnComplete": false,
+      "startLog": "You start to look through the old keys",
+      "completeLog": "Aha! You found it.",
+      "milestones": [
+        {
+          "atPercent": 0.5,
+          "log": "So many keys...",
+          "xp": [
+            {
+              "skill": "Precision",
+              "amount": 5
+            }
+          ]
+        }
+      ],
+      "onSuccess": {
+        "log": "Aha! You found it.",
+        "giveItems": [
+          {
+            "id": "coopKey",
+            "amount": 1
+          }
+        ],
+        "setFlags": [
+          "BARN_KEY_FOUND"
+        ],
+        "reportQuest": true
+      },
+      "onFail": {
+        "log": "Ah no luck, it must be here!"
+      },
+      "skillCheck": {
+        "skill": "Precision",
+        "chance": {
+          "base": -0.1,
+          "perLevel": 0.8,
+          "min": 0.2,
+          "max": 0.95
+        }
+      }
+    },
+    {
+      "id": "EggSnatchTimed",
+      "durationMs": 4000,
+      "cancelOnZoneChange": true,
+      "reportQuestOnComplete": false,
+      "questActionOverride": "Action_Chicken_EggSnatch",
+      "startLog": "You creep toward the nest, timing your reach...",
+      "completeLog": "You steady your breathing as the hen watches.",
+      "onSuccess": {
+        "log": "You steady your breathing as the hen watches.",
+        "giveItems": [
+          {
+            "id": "egg",
+            "amount": 1
+          }
+        ],
+        "setFlags": [
+          "EGGSNATCH_SUCCESS"
+        ],
+        "reportQuest": true
+      },
+      "onFail": {
+        "log": "The hen lunges and pecks your hand! You fumble your grip.",
+        "setFlags": [
+          "EGGSNATCH_FAIL"
+        ],
+        "damage": 2
+      },
+      "skillCheck": {
+        "skill": "Precision",
+        "chance": {
+          "base": -0.25,
+          "perLevel": 0.15,
+          "min": 0.05,
+          "max": 0.95
+        }
+      }
+    },
+    {
+      "id": "KnockOutChickenTimed",
+      "durationMs": 3000,
+      "cancelOnZoneChange": true,
+      "reportQuestOnComplete": false,
+      "questActionOverride": "Action_Chicken_KnockOut",
+      "startLog": "You wait for the lunge…",
+      "completeLog": "You commit to the strike.",
+      "onSuccess": {
+        "log": "You commit to the strike.",
+        "giveItems": [
+          {
+            "id": "feather",
+            "amount": 1
+          }
+        ],
+        "setFlags": [
+          "CHICKEN_STUNNED"
+        ],
+        "reportQuest": true
+      },
+      "onFail": {
+        "log": "You whiff—nasty counter-peck!",
+        "setFlags": [
+          "CHICKEN_ALERTED"
+        ],
+        "damage": 4
+      },
+      "skillCheck": {
+        "skill": "Strength",
+        "chance": {
+          "base": -0.1,
+          "perLevel": 0.1,
+          "min": 0.1,
+          "max": 0.95
+        }
+      }
+    }
+  ]
+}
