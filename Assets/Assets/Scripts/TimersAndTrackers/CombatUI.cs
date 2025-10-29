@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CombatUI : MonoBehaviour
@@ -19,6 +20,10 @@ public class CombatUI : MonoBehaviour
     public ProgressBar EnemySpeedBar;
 
     private NPCData _enemyData;
+
+    [Header("Loot UI")]
+    public Transform lootPanelParent;                  // your grid parent (the panel with Loot_Item_UI children)
+
 
 
     private void OnEnable()
@@ -148,6 +153,57 @@ public class CombatUI : MonoBehaviour
     {
         Debug.Log("💀 Player lost!");
         // TODO: death screen popup
+    }
+
+    private void SpawnCombatLoot()
+    {
+        foreach (var item in CombatManager.Instance.rolledLoot.items)
+        {
+            string itemId = item.itemId;
+            int qty = item.qty;
+              Inventory_Manager.Instance.AddItem(itemId, qty);     
+        }     
+    }
+
+    public void UpdateLootSlotsUI(List<(string itemId, int qty)> rolledItems)
+    {
+        // safety: if panel isn't wired, bail
+        if (lootPanelParent == null)
+        {
+            Debug.LogWarning("lootPanelParent not assigned on CombatManager.");
+            return;
+        }
+
+        int dropCount = rolledItems.Count;
+        int childCount = lootPanelParent.transform.childCount;
+
+        for (int i = 0; i < childCount; i++)
+        {
+            Transform slotT = lootPanelParent.transform.GetChild(i);
+            LootBox_UI slot = slotT.GetComponent<LootBox_UI>();
+
+            slot.ClearImage();
+
+            if (slot == null)
+            {
+                continue;
+            }
+
+            if (i < dropCount)
+            {
+                // turn it on and populate
+                var drop = rolledItems[i];
+
+                // if you added qty support later you can pass it here
+                slot.Setup(drop.itemId);
+
+            }
+            else
+            {
+                // too many slots, not enough loot -> hide this one
+                slotT.gameObject.SetActive(true);
+            }
+        }
     }
 }
 

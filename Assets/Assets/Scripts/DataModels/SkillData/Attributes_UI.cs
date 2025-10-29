@@ -4,12 +4,17 @@ using TMPro;
 public class Attributes_UI : MonoBehaviour
 {
     [Header("Text fields")]
-    [SerializeField] private TMP_Text healthText;        // e.g. "58/60"
-    [SerializeField] private TMP_Text attackText;        // e.g. "7"
-    [SerializeField] private TMP_Text defenceText;       // e.g. "2 (+1)"
-    [SerializeField] private TMP_Text aetherText;        // e.g. "5/5"
-    [SerializeField] private TMP_Text hitchanceText;     // e.g. "78%"
-    [SerializeField] private TMP_Text critChanceText;    // e.g. "9%"
+    [SerializeField] private TMP_Text healthCurrentText;   // e.g. "322"
+    [SerializeField] private TMP_Text healthMaxText;       // e.g. "1530"
+
+    [SerializeField] private TMP_Text attackText;          // e.g. "16"
+    [SerializeField] private TMP_Text defenceText;         // e.g. "232"
+
+    [SerializeField] private TMP_Text aetherCurrentText;   // e.g. "14"
+    [SerializeField] private TMP_Text aetherMaxText;       // e.g. "165"
+
+    [SerializeField] private TMP_Text hitchanceText;       // e.g. "45%"
+    [SerializeField] private TMP_Text critChanceText;      // e.g. "47%"
 
     private bool subscribedToStats;
     private bool subscribedToStance;
@@ -78,12 +83,13 @@ public class Attributes_UI : MonoBehaviour
             ? PlayerStance.Instance.currentStance
             : StanceType.None;
 
-        // ---- HEALTH ----
-        if (healthText)
-            healthText.text = $"{ps.CurrentHP}";
+        // ---- HEALTH (current / max) ----
+        if (healthCurrentText)
+            healthCurrentText.text = ps.CurrentHP.ToString();
+        if (healthMaxText)
+            healthMaxText.text = ps.MaxHP.ToString();
 
-        // ---- ATTACK / DAMAGE PREVIEW ----
-        // "your swing" with stance applied
+        // ---- ATTACK PREVIEW (stance applied) ----
         if (attackText)
         {
             float baseSwing = ps.WeaponDamage + ps.StrengthBonusDamage;
@@ -93,7 +99,7 @@ public class Attributes_UI : MonoBehaviour
             attackText.text = Mathf.RoundToInt(shownSwing).ToString();
         }
 
-        // ---- DEFENCE / BLOCK (STANCE AFFECTED) ----
+        // ---- DEFENCE / ARMOR PREVIEW (stance applied) ----
         if (defenceText)
         {
             int baseArmor = Mathf.RoundToInt(ps.Armor);
@@ -110,15 +116,15 @@ public class Attributes_UI : MonoBehaviour
                 defenceText.text = $"{effectiveArmor}";
         }
 
-        // ---- AETHER / MANA ----
-        if (aetherText)
-            aetherText.text = $"{ps.CurrentMana}/{ps.MaxMana}";
+        // ---- AETHER / MANA (current / max) ----
+        if (aetherCurrentText)
+            aetherCurrentText.text = ps.CurrentMana.ToString();
+        if (aetherMaxText)
+            aetherMaxText.text = ps.MaxMana.ToString();
 
         // ---- HIT CHANCE / CRIT CHANCE ----
-        // This uses the most recent resolved swing numbers from CombatManager.
         if (CombatManager.Instance != null)
         {
-            // player's chance to hit enemy and crit enemy last swing
             float hit = CombatManager.Instance.PlayerHitChance * 100f;
             float crit = CombatManager.Instance.PlayerCritChance * 100f;
 
@@ -130,7 +136,6 @@ public class Attributes_UI : MonoBehaviour
         }
         else
         {
-            // fallback when not in combat yet
             if (hitchanceText)
                 hitchanceText.text = "--";
 
@@ -139,7 +144,7 @@ public class Attributes_UI : MonoBehaviour
         }
     }
 
-    // same preview logic we talked about for stance-modified armor
+    // stance-modified armor preview logic
     private int CombatCalculator_GetEffectiveArmorPreview(StanceType stance, int baseArmor)
     {
         // Defensive: +5% of base armor (min +1)

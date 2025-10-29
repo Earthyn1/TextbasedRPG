@@ -25,7 +25,70 @@ public class PlayerSkills : MonoBehaviour
     public Dictionary<Enum_Skills, SkillData> skills = new Dictionary<Enum_Skills, SkillData>();
     private List<Skills_Slot> registeredSkillUIs = new List<Skills_Slot>();
 
+    // icons per skill
+    [Header("XP Icons")]
+    public Sprite StrengthIcon;
+    public Sprite SpeedIcon;
+    public Sprite DefenceIcon;
+    public Sprite PrecisionIcon;
+    public Sprite FortitudeIcon;
+    public Sprite AetherIcon;
+    public Sprite GenericXP;
 
+    public Sprite GetIconForSkill(Enum_Skills skill)
+    {
+        switch (skill)
+        {
+            case Enum_Skills.Strength: return StrengthIcon;
+            case Enum_Skills.Defence: return DefenceIcon;
+            case Enum_Skills.Precision: return SpeedIcon;      // using Speed icon for Precision stance
+            case Enum_Skills.Speed: return SpeedIcon;
+            case Enum_Skills.Fortitude: return FortitudeIcon;
+            case Enum_Skills.Aethur: return AetherIcon;
+            default: return GenericXP;
+        }
+    }
+
+    // This is what CombatManager calls after a successful player hit
+    public void AwardCombatXPFromHit(int damageDealt, StanceType stanceUsed)
+    {
+        Enum_Skills skillToTrain;
+        int xpAmount;
+
+        switch (stanceUsed)
+        {
+            case StanceType.Berserker:
+                skillToTrain = Enum_Skills.Strength;
+                xpAmount = damageDealt * 4;
+                break;
+
+            case StanceType.Defensive:
+                skillToTrain = Enum_Skills.Defence;
+                xpAmount = damageDealt * 4;
+                break;
+
+            case StanceType.Precision:
+                skillToTrain = Enum_Skills.Precision;
+                xpAmount = damageDealt * 4;
+                break;
+
+            case StanceType.None:
+            default:
+                return; // no xp in neutral stance
+        }
+
+        // 1. Actually add XP. This updates skills dict,
+        //    logs to GameLog, handles level ups, and refreshes UIs.
+        AddXP(skillToTrain, xpAmount);
+
+        // 2. Pop the floating "+12 xp" toast
+        if (XPToastSpawner.Instance != null)
+        {
+            string xpText = xpAmount + " xp";
+            Sprite icon = GetIconForSkill(skillToTrain);
+            XPToastSpawner.Instance.ShowXPToast(xpText, icon);
+        }
+    }
     public void RegisterSkillUI(Skills_Slot ui)
     {
         if (!registeredSkillUIs.Contains(ui))

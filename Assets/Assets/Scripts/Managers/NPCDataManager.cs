@@ -12,6 +12,10 @@ public class NPCData_Manager : MonoBehaviour
     // Lookup dictionary for enemies
     private Dictionary<string, NPCData> allNPCS = new Dictionary<string, NPCData>();
 
+    // --- Loot tables ---
+    private Dictionary<string, LootTableDef> allLootTables = new Dictionary<string, LootTableDef>();
+
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -23,6 +27,8 @@ public class NPCData_Manager : MonoBehaviour
         DontDestroyOnLoad(gameObject); // optional, keep across scenes
     }
 
+
+    // ====== COMBAT START HOOK ======
     public void SetupCombatUI(string enemy)
     {
         GameManager.Instance.clearMiddlePanels();
@@ -32,6 +38,9 @@ public class NPCData_Manager : MonoBehaviour
         CombatManager.Instance.StartEncounter(enemy);
 
     }
+
+
+    // ====== NPC REGISTRATION ======
     public void SetAllNPCS(List<NPCData> Npcs)
     {
         allNPCS.Clear();
@@ -62,4 +71,24 @@ public class NPCData_Manager : MonoBehaviour
     {
         return allNPCS.Values;
     }
+
+    // ====== LOOT TABLE REGISTRATION ======
+    public void SetAllLootTables(Dictionary<string, LootTableDef> lootDict)
+    {
+        allLootTables = lootDict ?? new Dictionary<string, LootTableDef>();
+        Debug.Log($"NPCData_Manager stored {allLootTables.Count} loot tables.");
+    }
+
+    public LootTableDef GetLootTable(string lootID)
+    {
+        if (string.IsNullOrEmpty(lootID))
+            return null;
+
+        if (allLootTables.TryGetValue(lootID, out var table))
+            return table;
+
+        Debug.LogWarning($"Loot table not found: {lootID}");
+        return null;
+    }
 }
+

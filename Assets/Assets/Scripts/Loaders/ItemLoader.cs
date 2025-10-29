@@ -64,19 +64,11 @@ public class ItemLoader : MonoBehaviour
                 {
                     if (item.IsConsumable())
                     {
-                        var c = item.consumable;
-                        // DEBUG BEGIN
-                        Debug.Log($"[ItemLoader] {item.itemID} " +
-                                  $"type={item.itemType} " +
-                                  $"isConsumable={item.IsConsumable()} " +
-                                  $"hasConsumableBlock={(item.consumable != null)} " +
-                                  $"healFlat={(item.consumable != null ? item.consumable.healHPFlat.ToString() : "n/a")} " +
-                                  $"healPct={(item.consumable != null ? item.consumable.healHPPercent.ToString() : "n/a")}");
-                        // DEBUG END
+                        var c = item.consumable;   
                     }
                     else
                     {
-                        Debug.Log($"[ItemLoader] 🧱 Loaded {item.itemID} ({item.itemType})");
+                      //  Debug.Log($"[ItemLoader] 🧱 Loaded {item.itemID} ({item.itemType})");
                     }
                 }
             }

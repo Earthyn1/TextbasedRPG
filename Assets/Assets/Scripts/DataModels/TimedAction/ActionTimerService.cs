@@ -287,7 +287,7 @@ public class ActionTimerService : MonoBehaviour
             {
                 xp._Text.text = g.amount + " xp";
 
-                var icon = CombatManager.Instance?.GetSkillSprite(g.skill);
+                var icon = PlayerSkills.Instance?.GetIconForSkill(g.skill);
                 if (icon != null)
                 {
                     xp._Image.sprite = icon;

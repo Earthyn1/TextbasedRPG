@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FoodUseSystem : MonoBehaviour
 {
@@ -43,23 +43,20 @@ public class FoodUseSystem : MonoBehaviour
         if (c == null)
             return $"{itemData.itemName} is missing consumable data.";
 
-        // Are we in combat?
-        bool inCombat = (combatManager != null && combatManager.IsPlayerInCombat());
+        bool inCombat = CombatManager.Instance != null && CombatManager.Instance.IsActive;
 
-        // Allowed in combat?
         if (inCombat && !c.usableInCombat)
         {
             return $"{itemData.itemName} can't be used during combat.";
         }
 
-        // Cooldown?
         if (cooldowns != null && cooldowns.IsOnCooldown(itemData))
         {
             float remain = Mathf.Ceil(cooldowns.GetRemaining(itemData));
             return $"{itemData.itemName} is still on cooldown ({remain}s).";
         }
 
-        // figure out how much we�re gonna heal
+        // figure out how much we’re gonna heal
         bool healsHP = (c.healHPFlat > 0 || c.healHPPercent > 0f);
         bool healsMP = (c.healMPFlat > 0 || c.healMPPercent > 0f);
 
@@ -95,23 +92,31 @@ public class FoodUseSystem : MonoBehaviour
         // mark cooldown
         cooldowns?.MarkUsed(itemData);
 
-        // tell combat manager so combat log / heal pop can fire
-        if (inCombat && combatManager != null)
+        // build the log line that describes what happened
+        string msg;
+        if (healedHP > 0 && healedMP > 0)
         {
-            combatManager.RegisterPlayerConsumedFoodThisTurn(itemData, healedHP, healedMP);
+            msg = $"You use {itemData.itemName}, restoring {healedHP} HP and {healedMP} MP.";
+        }
+        else if (healedHP > 0)
+        {
+            msg = $"You use {itemData.itemName}, restoring {healedHP} HP.";
+        }
+        else if (healedMP > 0)
+        {
+            msg = $"You drink {itemData.itemName}, restoring {healedMP} MP.";
+        }
+        else
+        {
+            msg = $"You use {itemData.itemName}.";
         }
 
-        // build log string returned to caller
-        if (healedHP > 0 && healedMP > 0)
-            return $"You use {itemData.itemName}, restoring {healedHP} HP and {healedMP} MP.";
+        // ✅ log to the combat log / gamelog directly (green good text)
+        GameLog_Manager.Instance?.AddEntry(msg, "#32CD32");
 
-        if (healedHP > 0)
-            return $"You use {itemData.itemName}, restoring {healedHP} HP.";
-
-        if (healedMP > 0)
-            return $"You drink {itemData.itemName}, restoring {healedMP} MP.";
-
-        return $"You use {itemData.itemName}.";
+        // and also return it to caller in case UI wants to surface it somewhere else
+        return msg;
     }
+
 
 }

@@ -164,34 +164,34 @@
     "critChance": 0,
     "critMultiplier": 1.25
   },
-  {
-    "npcID": "angryChicken",
-    "displayName": "Angry Chicken",
-    "description": "A large chicken ready to fight anyone who nears.",
-    "lootTable": "",
-    "level": 1,
-    "maxHP": 25,
-    "damage": 4,
-    "attackSpeed": 1.5,
-    "block": 1,
-    "hitChance": 0.9,
-    "evasion": 0.1,
-    "critChance": 0.45,
-    "critMultiplier": 1.4
-  },
-  {
-    "npcID": "angryChicken2",
-    "displayName": "Angry Chicken",
-    "description": "A large chicken ready to fight anyone who nears.",
-    "lootTable": "",
-    "level": 1,
-    "maxHP": 25,
-    "damage": 4,
-    "attackSpeed": 1.5,
-    "block": 0,
-    "hitChance": 0.9,
-    "evasion": 0.1,
-    "critChance": 0.05,
-    "critMultiplier": 1.4
-  }
+    {
+        "npcID": "angryChicken",
+        "displayName": "Angry Chicken",
+        "description": "A large chicken ready to fight anyone who nears.",
+        "lootTable": "angryChicken",
+        "level": 1,
+        "maxHP": 25,
+        "damage": 4,
+        "attackSpeed": 1.5,
+        "block": 1,
+        "hitChance": 0.9,
+        "evasion": 0.1,
+        "critChance": 0.45,
+        "critMultiplier": 1.4
+    },
+    {
+        "npcID": "angryChicken2",
+        "displayName": "Angry Chicken",
+        "description": "A large chicken ready to fight anyone who nears.",
+        "lootTable": "angryChicken",
+        "level": 1,
+        "maxHP": 25,
+        "damage": 4,
+        "attackSpeed": 1.5,
+        "block": 0,
+        "hitChance": 0.9,
+        "evasion": 0.1,
+        "critChance": 0.05,
+        "critMultiplier": 1.4
+    }
 ]

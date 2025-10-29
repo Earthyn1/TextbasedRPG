@@ -266,7 +266,7 @@ public class ActionTimerUI : MonoBehaviour
         {
             // Get skill icon from CombatManager / UI manager / PlayerSkills
             var skill = def.skillCheck.skill;
-            var icon = CombatManager.Instance?.GetSkillSprite(skill);
+            var icon = PlayerSkills.Instance?.GetIconForSkill(skill);
             if (icon != null)
             {
                 TimerIcon.sprite = icon;     // Set skill icon

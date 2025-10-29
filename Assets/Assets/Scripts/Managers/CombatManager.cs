@@ -1,24 +1,11 @@
 ﻿using System;
 using System.Collections;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.EventSystems.EventTrigger;
-
 
 public class CombatManager : MonoBehaviour
 {
     public static CombatManager Instance { get; private set; }
-
-    public GameObject xppanel;
-    public GameObject XPPrefab;
-    public Sprite Strength;
-    public Sprite Speed;
-    public Sprite Defence;
-    public Sprite Fortitude;
-    public Sprite Precision;
-    public Sprite Aether;
-    public Sprite GenericXP; // optional fallback
 
     public GameObject enemyProgressBar;
     public Animator endCombatUIAnimation;
@@ -55,12 +42,12 @@ public class CombatManager : MonoBehaviour
     // Debug cache for hit/crit chances
     private float lastPlayerHit, lastPlayerCrit;
     private float lastEnemyHit, lastEnemyCrit;
-
     public float PlayerHitChance => lastPlayerHit;        // 0..1
     public float PlayerCritChance => lastPlayerCrit;      // 0..1
     public float EnemyHitChance => lastEnemyHit;          // 0..1
     public float EnemyCritChance => lastEnemyCrit;        // 0..1
 
+    public LootRoller.LootResult rolledLoot;
 
     public event Action<string, int> OnEnemyDefeated; // (enemyIdOrTag, count)
     private bool _killReported; // guard to avoid double credit
@@ -79,7 +66,6 @@ public class CombatManager : MonoBehaviour
             Armor = ps.Armor
         };
     }
-
     public static CombatSnapshot BuildEnemySnapshot(NPCData e)
     {
         float critMult = e.critMultiplier;
@@ -94,50 +80,19 @@ public class CombatManager : MonoBehaviour
             Armor = Mathf.RoundToInt(e.block)
         };
     }
-
-
-
-
-
-
-
-
-    public Sprite GetSkillSprite(Enum_Skills skill)
-    {
-        switch (skill)
-        {
-            case Enum_Skills.Strength: return Strength;
-            case Enum_Skills.Speed: return Speed;
-            case Enum_Skills.Defence: return Defence;
-            case Enum_Skills.Precision: return Precision;
-            case Enum_Skills.Fortitude: return Fortitude;
-            case Enum_Skills.Aethur: return Aether;
-
-            default: return GenericXP; // can be null if you don’t have one
-        }
-    }
     private void Start()
     {
         // Hook up button listeners
         ReturnButton.onClick.AddListener(() => ReturnToLastzone());
         NextFightButton.onClick.AddListener(() => NextFight());
     }
-
-
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
     public bool IsActive => _active;
-
-    public bool IsPlayerInCombat()
-    {
-        return _active;
-    }
-
     private IEnumerator FadeCanvas(CanvasGroup cg, float targetAlpha, float duration)
     {
         float startAlpha = cg.alpha;
@@ -162,7 +117,6 @@ public class CombatManager : MonoBehaviour
 
         _killReported = false;
 
-
         var ps = PlayerStats.Instance;
         if (ps == null) { Debug.LogError("CombatManager: PlayerStats not found."); return; }
 
@@ -186,13 +140,6 @@ public class CombatManager : MonoBehaviour
         // initial UI push
         OnEnemyHPChanged?.Invoke(_enemyHP, _enemyData.maxHP);
         PushTimerUpdate();
-
-        // Precompute and store expected hit/crit before first swing
-        var pSnap = CombatManager.BuildPlayerSnapshot(ps);
-        var eSnap = CombatManager.BuildEnemySnapshot(_enemyData);
-
-        // Use a neutral stance (or current stance if set)
-        var stance = PlayerStance.Instance ? PlayerStance.Instance.currentStance : StanceType.None;
 
         // snapshots
         var playerSnap = BuildPlayerSnapshot(ps);
@@ -226,8 +173,6 @@ public class CombatManager : MonoBehaviour
         lastEnemyHit = previewEnemyHit;
         lastEnemyCrit = previewEnemyCrit;
 
-        // now that lastPlayerHit / lastPlayerCrit etc are set using the SAME formulas
-        // Attributes_UI will show the "true" 77% (or whatever) from the start
         Attributes_UI.Instance?.Refresh();
     }
 
@@ -237,18 +182,32 @@ public class CombatManager : MonoBehaviour
         CanvasGroup canvasGroup = enemyProgressBar.GetComponent<CanvasGroup>();
         StartCoroutine(FadeCanvas(canvasGroup, 0f, 0.5f));
         endCombatUIAnimation.SetTrigger("EndCombat");
+        RollLootForCurrentEnemy();
     }
 
     public void PlayerDiedInCombat(bool clear = true)
     {
         _active = false;
-      //  CanvasGroup canvasGroup = enemyProgressBar.GetComponent<CanvasGroup>();
-       // StartCoroutine(FadeCanvas(canvasGroup, 0f, 0.5f));
         endCombatUIAnimation.SetTrigger("PlayerDied");
     }
 
+    public void RollLootForCurrentEnemy()
+    {
+        if (_enemyData == null)
+        {
+            return;
+        }
 
+        string lootTableID = _enemyData.lootTable;
+        LootTableDef table = NPCData_Manager.Instance.GetLootTable(lootTableID);
+        if (table == null)
+        {
+            return;
+        }
 
+        rolledLoot = LootRoller.Roll(table);
+        NPCData_Manager.Instance.combatUI.UpdateLootSlotsUI(rolledLoot.items);
+    }
 
     public void NextFight()
     {
@@ -258,7 +217,6 @@ public class CombatManager : MonoBehaviour
             NPCData_Manager.Instance.combatUI.InitialSetup(_enemyData.npcID);
             _buttonPressed = true;
         }
-  
     }
 
     public void TriggerNextFightAuto()
@@ -273,10 +231,7 @@ public class CombatManager : MonoBehaviour
             Debug.Log("Return!!");
             GameManager.Instance.zoneUIManager.DisplayZone(GameManager.Instance.zoneUIManager.LastZoneEntered);
             _buttonPressed = true;
-        }
-
-           
-        
+        }     
     }
     private void Update()
     {
@@ -372,7 +327,7 @@ public class CombatManager : MonoBehaviour
         OnEnemyHit?.Invoke(applied);
         OnEnemyHPChanged?.Invoke(_enemyHP, _enemyData.maxHP);
 
-        AddXP(applied);
+        PlayerSkills.Instance.AwardCombatXPFromHit(applied, PlayerStance.Instance.currentStance);
 
         CombatDebugUI.Instance?.ShowChances(lastPlayerHit, lastPlayerCrit, lastEnemyHit, lastEnemyCrit);
 
@@ -384,22 +339,16 @@ public class CombatManager : MonoBehaviour
             enemyTextSpawner?.ShowCritHit(result.finalDamage);
             GameLog_Manager.Instance.AddEntry(
             $"Critical! You {verb} {_enemyData.displayName} for {result.finalDamage}!", "#FFD633");
-        }
-                
+        }          
         else
         {
-
             enemyTextSpawner?.ShowNormalHit(result.finalDamage);
 
             GameLog_Manager.Instance.AddEntry(
                $"You {verb} {_enemyData.displayName} for {result.finalDamage}.",
                "#32CD32"
            );
-
-
         }
-           
-
         if (_enemyHP <= 0)
         {
             if (!_killReported)
@@ -407,14 +356,11 @@ public class CombatManager : MonoBehaviour
                 string enemyKey = _enemyData.npcID;
                 QuestManager.Instance.ReportAction($"Action_Kill_{enemyKey}", 1);
                 _killReported = true;
-            }
-
-            Debug.Log("We won!!");
+            } 
             EndEncounter();
             OnWin?.Invoke();
         }
     }
-
     private void ResolveEnemyAttack()
     {
         if (!_active) return;
@@ -523,9 +469,6 @@ public class CombatManager : MonoBehaviour
             );
         }
     }
-
-   
-
     public void RefreshPreviewsForCurrentStance()
     {
         if (!_active || _enemyData == null || PlayerStats.Instance == null)
@@ -571,135 +514,20 @@ public class CombatManager : MonoBehaviour
 
         PlayerDiedInCombat();
 
-        // Stop ongoing combat loops
         StopAllCoroutines();
+        _active = false;
 
-        // Optional: freeze UI / disable buttons
         OnLose?.Invoke();
 
-        // Respawn after short delay
-        StartCoroutine(RespawnAfterDelay(2f));
-    }
-
-    private IEnumerator RespawnAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-
-        // restore vitals
-        var ps = PlayerStats.Instance;
-        ps.RestoreHalfVitals();
-
-        // figure out which zone we should go back to
-        var gm = GameManager.Instance;
-        ZoneData zone = null;
-        if (gm != null)
-            zone = gm.GetZoneByID(WorldState.CurrentZoneId);
-
-        Debug.Log($"[Respawn] Returning to zone {zone?.id ?? "NULL"}");
-
-        // reset UI state cleanly
-        ZoneUIManager.Instance?.PrepareZoneTransition();
-        if (zone != null)
+        if (RespawnUI.Instance != null)
         {
-            ZoneUIManager.Instance?.DisplayZone(zone);
-            GameLog_Manager.Instance?.AddEntry(
-    "You come to... weak, aching.",
-    "#FFAACC"
-);
-
+            RespawnUI.Instance.BeginRespawnSequence();
         }
         else
         {
-            Debug.LogWarning("[Respawn] No zone found via WorldState.CurrentZoneId. Falling back to LastZoneEntered.");
-            ZoneUIManager.Instance?.DisplayZone(ZoneUIManager.Instance.LastZoneEntered);
+            Debug.LogError("CombatManager: RespawnUI.Instance is null! Did you forget to put RespawnUI in the scene?");
         }
     }
-
-
-
-    public void RegisterPlayerConsumedFoodThisTurn(Item_Data item, int healedHP, int healedMP)
-    {
-        // Build nice log line
-        string msg;
-        if (healedHP > 0 && healedMP > 0)
-        {
-            msg = $"You use {item.itemName}, restoring {healedHP} HP and {healedMP} MP.";
-        }
-        else if (healedHP > 0)
-        {
-            msg = $"You use {item.itemName}, restoring {healedHP} HP.";
-        }
-        else if (healedMP > 0)
-        {
-            msg = $"You drink {item.itemName}, restoring {healedMP} MP.";
-        }
-        else
-        {
-            msg = $"You use {item.itemName}.";
-        }
-
-        GameLog_Manager.Instance?.AddEntry(msg, "#32CD32"); // green text for "good"
-
-    }
-
-
-
-
-
-    private void AddXP(int damage)
-    {
-        var stanceType = PlayerStance.Instance.currentStance;
-
-        int xpAmount = 0;
-        string xpText = "";
-        Sprite xpIcon = null;
-
-        switch (stanceType)
-        {
-            case StanceType.Berserker:
-                xpAmount = damage * 4;
-                PlayerSkills.Instance.AddXP(Enum_Skills.Strength, xpAmount);
-                xpText = xpAmount + " xp";
-                xpIcon = Strength;
-                break;
-
-            case StanceType.Defensive:
-                xpAmount = damage * 4;
-                PlayerSkills.Instance.AddXP(Enum_Skills.Defence, xpAmount);
-                xpText = xpAmount + " xp";
-                xpIcon = Defence;
-                break;
-
-            case StanceType.Precision:
-                xpAmount = damage * 4;
-                PlayerSkills.Instance.AddXP(Enum_Skills.Precision, xpAmount);
-                xpText = xpAmount + " xp";
-                xpIcon = Speed;
-                break;
-
-            case StanceType.None:
-            default:
-                // No XP gain
-                return;
-        }
-
-        // Create new XP UI element
-        var go = Instantiate(XPPrefab, xppanel.transform, false);
-
-        // Look for XPNumbers on children too
-        var xp = go.GetComponentInChildren<XPNumbers>();
-        if (xp != null)
-        {
-            xp._Text.text = xpText;
-            xp._Image.sprite = xpIcon;
-        }
-        else
-        {
-            Debug.LogError("XPNumbers component missing on the XPPrefab instance or its children.");
-        }
-    }
-
-
     private void PushTimerUpdate()
     {
         float p = Mathf.Clamp01(_playerTimer / _playerCd);

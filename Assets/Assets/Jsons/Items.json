@@ -251,14 +251,14 @@
     "maxQuantity": 1
   },
   {
-    "itemID": "chicken_Egg",
+    "itemID": "chicken_egg",
     "itemName": "Chicken Egg",
     "description": "no desc",
     "itemType": "Resource",
     "maxQuantity": 10
   },
   {
-    "itemID": "chicken_Feather",
+    "itemID": "chicken_feather",
     "itemName": "Chicken Feather",
     "description": "no desc",
     "itemType": "Resource",

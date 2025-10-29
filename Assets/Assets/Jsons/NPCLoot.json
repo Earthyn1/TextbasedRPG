@@ -1,0 +1,77 @@
+[
+  {
+    "id": "smallRat",
+    "drops": [
+      {
+        "itemId": "rat_tail",
+        "minQty": 1,
+        "maxQty": 2,
+        "dropChance": 0.6
+      },
+      {
+        "itemId": "torn_cloth",
+        "minQty": 1,
+        "maxQty": 1,
+        "dropChance": 0.15
+      }
+    ],
+    "xpOnKill": 4,
+    "goldMin": 0,
+    "goldMax": 1,
+    "shouldFallback": true,
+    "fallbackItemId": "rat_tail",
+    "fallbackQty": 1
+  },
+  {
+    "id": "largeRat",
+    "drops": [
+      {
+        "itemId": "rat_tail",
+        "minQty": 1,
+        "maxQty": 3,
+        "dropChance": 0.75
+      },
+      {
+        "itemId": "rat_meat",
+        "minQty": 1,
+        "maxQty": 1,
+        "dropChance": 0.4
+      }
+    ],
+    "xpOnKill": 5,
+    "goldMin": 1,
+    "goldMax": 2,
+    "shouldFallback": true,
+    "fallbackItemId": "rat_tail",
+    "fallbackQty": 1
+  },
+  {
+    "id": "angryChicken",
+    "drops": [
+      {
+        "itemId": "chicken_meat",
+        "minQty": 1,
+        "maxQty": 1,
+        "dropChance": 0.75
+      },
+      {
+        "itemId": "chicken_feather",
+        "minQty": 1,
+        "maxQty": 3,
+        "dropChance": 0.6
+      },
+      {
+        "itemId": "chicken_egg",
+        "minQty": 1,
+        "maxQty": 1,
+        "dropChance": 1
+      }
+    ],
+    "xpOnKill": 6,
+    "goldMin": 0,
+    "goldMax": 1,
+    "shouldFallback": true,
+    "fallbackItemId": "chicken_feather",
+    "fallbackQty": 1
+  }
+]
