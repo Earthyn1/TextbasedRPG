@@ -64,7 +64,8 @@
         "itemId": "chicken_egg",
         "minQty": 1,
         "maxQty": 1,
-        "dropChance": 1
+        "dropChance": 1,
+        "drop_when": "quest_active(chicken_egg_delivery) && quest_item_needed(chicken_egg_delivery, chicken_egg, 6)"
       }
     ],
     "xpOnKill": 6,

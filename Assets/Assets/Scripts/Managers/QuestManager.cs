@@ -234,6 +234,58 @@ public class QuestManager : MonoBehaviour
         }
     }
 
+    // How many of a specific item this quest has credited so far.
+    // This works for collection quests that listen for Action_ItemGain_{itemId}
+    public int GetQuestItemCount(string questId, string itemId)
+    {
+        if (string.IsNullOrEmpty(questId) || string.IsNullOrEmpty(itemId))
+            return 0;
+
+        string actionId = $"Action_ItemGain_{itemId}";
+
+        // active quests first
+        if (activeQuests.TryGetValue(questId, out var q))
+        {
+            var req = q.requiredActions?.Find(a => a.actionID == actionId);
+            if (req != null)
+                return req.currentQty;
+        }
+
+        // completed quests too (so drops stop)
+        if (completedQuests.TryGetValue(questId, out var qc))
+        {
+            var req = qc.requiredActions?.Find(a => a.actionID == actionId);
+            if (req != null)
+                return req.currentQty;
+        }
+
+        return 0;
+    }
+
+
+
+    // (optional) what was the target amount for that item in that quest?
+    public int GetQuestItemRequired(string questId, string itemId)
+    {
+        if (string.IsNullOrEmpty(questId) || string.IsNullOrEmpty(itemId))
+            return 0;
+
+        if (activeQuests.TryGetValue(questId, out var q))
+        {
+            string actionId = $"Action_ItemGain_{itemId}";
+            var req = q.requiredActions?.Find(a => a.actionID == actionId);
+            return req != null ? req.requiredQty : 0;
+        }
+
+        if (completedQuests.TryGetValue(questId, out var qc))
+        {
+            string actionId = $"Action_ItemGain_{itemId}";
+            var req = qc.requiredActions?.Find(a => a.actionID == actionId);
+            return req != null ? req.requiredQty : 0;
+        }
+
+        return 0;
+    }
 
     // --- Rewards ---
 

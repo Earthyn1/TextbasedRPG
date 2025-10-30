@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -40,12 +40,20 @@ public static class LootRoller
         {
             foreach (var drop in table.drops)
             {
-                // chance gate
+                // ✅ add this here
+                if (!string.IsNullOrEmpty(drop.drop_when))
+                {
+                    bool ok = RequirementEvaluator.Eval(drop.drop_when);
+                    Debug.Log($"[Loot] drop_when='{drop.drop_when}' -> {ok}");
+                    if (!ok) continue; // skip if condition failed
+                }
+
+                // --- existing chance gate ---
                 float r = Random.value;
                 if (r > drop.dropChance)
                     continue;
 
-                // quantity roll
+                // --- existing quantity roll ---
                 int qtyMin = Mathf.Min(drop.minQty, drop.maxQty);
                 int qtyMax = Mathf.Max(drop.minQty, drop.maxQty);
                 int qty = Random.Range(qtyMin, qtyMax + 1);
@@ -57,6 +65,8 @@ public static class LootRoller
             }
         }
 
+
+
         // 4. Fallback (ex: always drop at least 1 bone or whatever)
         if (result.items.Count == 0 && table.shouldFallback)
         {
@@ -65,6 +75,8 @@ public static class LootRoller
                 result.items.Add((table.fallbackItemId, table.fallbackQty));
             }
         }
+
+
 
         return result;
     }

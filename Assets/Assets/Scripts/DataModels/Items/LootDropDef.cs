@@ -8,6 +8,8 @@ public class LootDropDef
     public int minQty;
     public int maxQty;
     public float dropChance;
+    public string drop_when;
+
 }
 
 [System.Serializable]

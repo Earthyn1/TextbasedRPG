@@ -77,7 +77,7 @@ public class CombatUI : MonoBehaviour
             return;
         }
 
-        PlayerName.text = "Kolf";
+        PlayerName.text = "Player";
         EnemyName.text = _enemyData.displayName;
 
         EnemyHPBar.SetProgress(1.0f, _enemyData.maxHP + "/" + _enemyData.maxHP);

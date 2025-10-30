@@ -109,6 +109,8 @@ public class CombatManager : MonoBehaviour
 
     public void StartEncounter(string enemyId)
     {
+
+        ZoneUIManager.Instance.descriptionGroup.alpha = 0f;
         var enemy = NPCData_Manager.Instance.GetNPCS(enemyId);
         if (enemy == null) { Debug.LogError($"CombatManager: enemy '{enemyId}' not found."); return; }
 
@@ -182,6 +184,9 @@ public class CombatManager : MonoBehaviour
         CanvasGroup canvasGroup = enemyProgressBar.GetComponent<CanvasGroup>();
         StartCoroutine(FadeCanvas(canvasGroup, 0f, 0.5f));
         endCombatUIAnimation.SetTrigger("EndCombat");
+
+        Debug.Log("Q? active=" + QuestManager.Instance.IsActive("chicken_egg_delivery"));
+
         RollLootForCurrentEnemy();
     }
 

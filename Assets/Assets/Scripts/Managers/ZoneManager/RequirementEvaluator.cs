@@ -1,11 +1,77 @@
-// RequirementEvaluator.cs
+﻿// RequirementEvaluator.cs
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public static class RequirementEvaluator
 {
-    public static bool Eval(string s) => EvaluateAll(new[] { s });
+    private static List<string> SplitTopLevel(string expr)
+    {
+        var result = new List<string>();
+        if (string.IsNullOrWhiteSpace(expr))
+            return result;
+
+        int depth = 0;
+        int start = 0;
+
+        for (int i = 0; i < expr.Length; i++)
+        {
+            char c = expr[i];
+
+            if (c == '(') depth++;
+            else if (c == ')') depth--;
+
+            // split on commas/semicolons/&& only at depth 0
+            bool atTop = (depth == 0);
+
+            // handle &&
+            if (atTop && i + 1 < expr.Length && expr[i] == '&' && expr[i + 1] == '&')
+            {
+                // add segment before &&
+                string seg = expr.Substring(start, i - start);
+                if (!string.IsNullOrWhiteSpace(seg))
+                    result.Add(seg.Trim());
+                i++; // skip second &
+                start = i + 1;
+                continue;
+            }
+
+            // handle comma / semicolon
+            if (atTop && (c == ',' || c == ';'))
+            {
+                string seg = expr.Substring(start, i - start);
+                if (!string.IsNullOrWhiteSpace(seg))
+                    result.Add(seg.Trim());
+                start = i + 1;
+            }
+        }
+
+        // last segment
+        if (start < expr.Length)
+        {
+            string seg = expr.Substring(start);
+            if (!string.IsNullOrWhiteSpace(seg))
+                result.Add(seg.Trim());
+        }
+
+        return result;
+    }
+
+    public static bool Eval(string s)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+            return true;
+
+        // we now let SplitTopLevel handle && and commas
+        var parts = SplitTopLevel(s);
+        foreach (var p in parts)
+        {
+            if (!EvalOne(p))
+                return false;
+        }
+        return true;
+    }
+
 
     static bool TryParenArg(string s, out string arg)
     {
@@ -62,6 +128,58 @@ public static class RequirementEvaluator
         if (s.StartsWith("QuestHandedIn(", StringComparison.OrdinalIgnoreCase) && s.EndsWith(")"))
             return TryParenArg(s, out var q5) && qm != null && qm.WasEverHandedIn(q5);
 
+        // quest_active(chicken_egg_delivery)
+        if (s.StartsWith("quest_active(", System.StringComparison.OrdinalIgnoreCase) && s.EndsWith(")"))
+        {
+            if (TryParenArg(s, out var questId))
+            {
+                bool active = QuestManager.Instance != null && QuestManager.Instance.IsActive(questId);
+                Debug.Log($"[REQ] quest_active('{questId}') -> {active}");
+                return active;
+            }
+            Debug.Log("[REQ] quest_active(...) bad arg");
+            return false;
+        }
+
+        // quest_item_needed(questId, itemId, required)
+        if (s.StartsWith("quest_item_needed(", System.StringComparison.OrdinalIgnoreCase) && s.EndsWith(")"))
+        {
+            if (TryParenArg(s, out var argsStr))
+            {
+                var parts = argsStr.Split(',');
+                if (parts.Length >= 3)
+                {
+                    string questId = parts[0].Trim();
+                    string itemId = parts[1].Trim();
+                    string reqStr = parts[2].Trim();
+
+                    if (int.TryParse(reqStr, out int required))
+                    {
+                        int current = QuestManager.Instance != null
+                            ? QuestManager.Instance.GetQuestItemCount(questId, itemId)
+                            : 0;
+
+                        bool needed = current < required;
+                        Debug.Log($"[REQ] quest_item_needed('{questId}','{itemId}',{required}) -> have={current} needed={needed}");
+                        return needed;
+                    }
+                    else
+                    {
+                        Debug.Log($"[REQ] quest_item_needed(...) bad required='{reqStr}'");
+                        return false;
+                    }
+                }
+                Debug.Log("[REQ] quest_item_needed(...) not enough args");
+                return false;
+            }
+            Debug.Log("[REQ] quest_item_needed(...) bad parens");
+            return false;
+        }
+
+
+
+
+
         // Colon style: "State:QuestId" or "QuestId:State"
         int colon = s.IndexOf(':');
         if (colon > 0 && colon < s.Length - 1)
@@ -90,18 +208,47 @@ public static class RequirementEvaluator
         return false;
     }
 
-    public static bool EvaluateAll(string csvOrSemi)
+    public static bool EvaluateAll(string expr)
     {
-        if (string.IsNullOrWhiteSpace(csvOrSemi)) return true;
-        var tokens = csvOrSemi.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
-        foreach (var raw in tokens) if (!EvalOne(raw.Trim())) return false;
+        if (string.IsNullOrWhiteSpace(expr))
+            return true;
+
+        // support: commas, semicolons, and "&&" (AND)
+        // we'll just treat them all as AND
+        var rawTokens = expr
+            .Replace("&&", ",")   // normalize && to comma
+            .Split(new[] { ',', ';' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var raw in rawTokens)
+        {
+            var token = raw.Trim();
+            if (!EvalOne(token))
+                return false;
+        }
+
         return true;
     }
+
 
     public static bool EvaluateAll(IEnumerable<string> list)
     {
         if (list == null) return true;
-        foreach (var cond in list) if (!EvalOne(cond)) return false;
+
+        foreach (var cond in list)
+        {
+            if (string.IsNullOrWhiteSpace(cond))
+                continue;
+
+            var parts = SplitTopLevel(cond);
+            foreach (var p in parts)
+            {
+                if (!EvalOne(p))
+                    return false;
+            }
+        }
+
         return true;
     }
+
+
 }

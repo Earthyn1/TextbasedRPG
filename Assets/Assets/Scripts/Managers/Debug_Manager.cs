@@ -30,7 +30,7 @@ public class Debug_Manager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             // Grab the quest from your GameManager by ID
-            QuestData goblinQuest = GameManager.Instance.GetQuestById("GroomMaple");
+            QuestData goblinQuest = GameManager.Instance.GetQuestById("chicken_egg_delivery");
 
             if (goblinQuest != null)
             {

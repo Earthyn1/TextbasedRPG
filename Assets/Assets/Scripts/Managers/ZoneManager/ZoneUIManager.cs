@@ -25,7 +25,7 @@ public class ZoneUIManager : MonoBehaviour
     [SerializeField] Image npcPortraitImage;
     [SerializeField] Image npcPortraitImage2;
     [SerializeField] Sprite defaultNarratorPortrait;
-    [SerializeField] CanvasGroup descriptionGroup;
+    public CanvasGroup descriptionGroup;
     [SerializeField] CanvasGroup actionsGroup;
     [SerializeField] float fadeDuration = 0.25f;
 
