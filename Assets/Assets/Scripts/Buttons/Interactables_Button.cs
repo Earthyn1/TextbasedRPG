@@ -8,6 +8,7 @@ public class Interactables_Button : MonoBehaviour
 {
     public TMP_Text text;
     public string InteractableName;
+    public string FriendlyName;
     public Image NPCImage;
     public Image BGImage;
     public Image IconType;
@@ -20,6 +21,7 @@ public class Interactables_Button : MonoBehaviour
     {
         isNPC = true;
         text.text = zoneData.displayName;
+        FriendlyName = zoneData.displayName;
         InteractableName = NPCData.id;
 
         // === SAFE PORTRAIT LOAD ===
@@ -113,6 +115,8 @@ public class Interactables_Button : MonoBehaviour
         string portraitPath = $"Portraits/{zoneData.portrait}";
         Sprite loadedSprite = Resources.Load<Sprite>(portraitPath);
 
+        FriendlyName = zoneData.displayName;
+
         if (loadedSprite != null)
         {
             NPCImage.sprite = loadedSprite;
@@ -154,6 +158,7 @@ public class Interactables_Button : MonoBehaviour
 
 public void ButtonPressed()
     {
+        //Here we setup new interactable world object ui
 
         if (!string.IsNullOrEmpty(autoDialogID))
         {
@@ -174,11 +179,13 @@ public void ButtonPressed()
         }
 
         GameLog_Manager.Instance.AddEntry(isNPC
-            ? "You approach " + InteractableName
-            : "You approach the " + InteractableName);
+            ? "You approach " + FriendlyName
+            : "You approach the " + FriendlyName);
 
         // record intent, then start the transition
         GameManager.Instance.QueueNpcInfo(nextZone, isNPC);
         GameManager.Instance.zoneUIManager.DisplayZone(nextZone, suppressHeader: true);
+
+        
     }
 }

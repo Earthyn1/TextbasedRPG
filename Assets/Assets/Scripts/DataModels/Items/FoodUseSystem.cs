@@ -4,7 +4,7 @@ public class FoodUseSystem : MonoBehaviour
 {
     public static FoodUseSystem Instance { get; private set; }
 
-    [SerializeField] private Inventory_Manager inventoryManager;
+    [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private CombatManager combatManager;
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private ConsumableCooldowns cooldowns;
@@ -23,7 +23,7 @@ public class FoodUseSystem : MonoBehaviour
         if (combatManager == null) combatManager = CombatManager.Instance;
         if (playerStats == null) playerStats = PlayerStats.Instance;
         if (cooldowns == null) cooldowns = ConsumableCooldowns.Instance;
-        if (inventoryManager == null) inventoryManager = Inventory_Manager.Instance;
+        if (inventoryManager == null) inventoryManager = InventoryManager.Instance;
     }
 
 
@@ -47,6 +47,9 @@ public class FoodUseSystem : MonoBehaviour
 
         if (inCombat && !c.usableInCombat)
         {
+            string combatMsg = $"You can't eat {itemData.itemName} during combat.";
+
+            GameLog_Manager.Instance?.AddEntry(combatMsg, "#FF5555");
             return $"{itemData.itemName} can't be used during combat.";
         }
 

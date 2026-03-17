@@ -6,13 +6,13 @@ public class Debug_Manager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            Inventory_Manager.Instance.AddItem("iron_sword", 1);
-            Inventory_Manager.Instance.AddItem("potion_health", 1);
-            Inventory_Manager.Instance.AddItem("bread_loaf", 1);
-            Inventory_Manager.Instance.AddItem("meat_cooked", 1);
-            Inventory_Manager.Instance.AddItem("leather_pants", 1);
-            Inventory_Manager.Instance.AddItem("leather_boots", 1);
-            Inventory_Manager.Instance.AddItem("iron_longsword", 1);
+            InventoryManager.Instance.AddItem("iron_sword", 1);
+            InventoryManager.Instance.AddItem("potion_health", 1);
+            InventoryManager.Instance.AddItem("bread_loaf", 1);
+            InventoryManager.Instance.AddItem("meat_cooked", 1);
+            InventoryManager.Instance.AddItem("leather_pants", 1);
+            InventoryManager.Instance.AddItem("leather_boots", 1);
+            InventoryManager.Instance.AddItem("chicken_egg", 5);
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha2))

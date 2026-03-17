@@ -185,8 +185,6 @@ public class CombatManager : MonoBehaviour
         StartCoroutine(FadeCanvas(canvasGroup, 0f, 0.5f));
         endCombatUIAnimation.SetTrigger("EndCombat");
 
-        Debug.Log("Q? active=" + QuestManager.Instance.IsActive("chicken_egg_delivery"));
-
         RollLootForCurrentEnemy();
     }
 

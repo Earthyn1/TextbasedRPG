@@ -125,7 +125,7 @@ public class EquipmentManager : MonoBehaviour
     /// <summary>Convenience: equip by itemID (right-click via ID). Takes 1 from inventory if present.</summary>
     public bool EquipByItemID(string itemID, bool preferOffhandIfPossible = false)
     {
-        var inv = Inventory_Manager.Instance;
+        var inv = InventoryManager.Instance;
         if (inv == null) { Debug.LogWarning("[EquipmentManager] No Inventory_Manager found."); return false; }
 
         // Check availability
@@ -188,11 +188,11 @@ public class EquipmentManager : MonoBehaviour
             ForceUnequip(EquipSlot.OffHand);
 
         if (equipped[slot] != null)
-            Inventory_Manager.Instance.AddItem(equipped[slot].itemID, 1, silent: true); // 🔇
+            InventoryManager.Instance.AddItem(equipped[slot].itemID, 1, silent: true); // 🔇
 
-        Inventory_Manager.Instance.RemoveItem(invItem.itemID, 1, silent: true); // 🔇
+        InventoryManager.Instance.RemoveItem(invItem.itemID, 1, silent: true); // 🔇
 
-        var template = Inventory_Manager.Instance.GetItemTemplate(invItem.itemID);
+        var template = InventoryManager.Instance.GetItemDefinition(invItem.itemID); 
         template.quantity = 1;
         equipped[slot] = template;
 
@@ -205,7 +205,7 @@ public class EquipmentManager : MonoBehaviour
         var cur = GetEquipped(slot);
         if (cur == null) return;
 
-        Inventory_Manager.Instance.AddItem(cur.itemID, 1, silent: true); // 🔇
+        InventoryManager.Instance.AddItem(cur.itemID, 1, silent: true); // 🔇
         equipped[slot] = null;
 
         GameLog_Manager.Instance.AddEntry($"Player unequipped {cur.itemName}", "#FFB300");    // amber

@@ -11,7 +11,7 @@ public class BookLoader : MonoBehaviour
 
     private void Awake()
     {
-        LoadBooks();
+       // LoadBooks();
     }
 
     private void Start()

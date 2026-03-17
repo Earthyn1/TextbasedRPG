@@ -34,7 +34,7 @@ public class TimedActionLoader : MonoBehaviour
             // Optional sanity checks (warns but doesn’t fail)
             Validate(actions);
 
-            LogActionsBrief(actions);
+          //  LogActionsBrief(actions);
             return actions;
         }
         catch (System.Exception e)

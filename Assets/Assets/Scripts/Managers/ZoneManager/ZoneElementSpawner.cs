@@ -56,7 +56,7 @@ public class ZoneElementSpawner : MonoBehaviour
             var go = Instantiate(actionButtonPrefab, actionsParent);
             var btn = go.GetComponent<Action_Button>();
             btn.SetupButton(a);
-            btn.examineText = zone.examine; // optional, useful for Examine logs
+           
 
             // soft gate for timed
             var timer = go.GetComponent<ActionTimerUI>();

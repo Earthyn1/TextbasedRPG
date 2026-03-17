@@ -33,6 +33,9 @@ public class ZoneUIManager : MonoBehaviour
     [SerializeField] DialogUI dialogUI;
     [SerializeField] ZoneElementSpawner elementSpawner;
 
+    [SerializeField] private ZoneScenePropSpawner propSpawner;
+
+
 
     // state
     public ZoneData LastZoneEntered { get; private set; }
@@ -357,7 +360,12 @@ public class ZoneUIManager : MonoBehaviour
 
         // Header bits
         SetPortraitToNarrator();
-        LastZoneEntered = zone;
+
+        if (zone.type == "Zone")
+        {
+            LastZoneEntered = zone;
+        }
+
         if (zoneNameText) zoneNameText.text = zone.displayName;
         if (zoneDescriptionText) zoneDescriptionText.text = $"<b>Narrator:</b> <i>{zone.description}</i>";
 
@@ -382,8 +390,9 @@ public class ZoneUIManager : MonoBehaviour
         GameManager.Instance.clearRightPanels();
 
         if (actionPanel) actionPanel.gameObject.SetActive(true);
-        if (interactablesHolders) interactablesHolders.gameObject.SetActive(true);
-        if (interactablesTitle) interactablesTitle.text = "Interactables";
+        if (!suppressHeader) interactablesHolders.gameObject.SetActive(true);
+        if (!suppressHeader) interactablesTitle.text = "Interactables";
+
 
         if (zone == null)
         {
@@ -393,7 +402,10 @@ public class ZoneUIManager : MonoBehaviour
         }
         else
         {
-            LastZoneEntered = zone;
+            if (zone.type == "Zone")
+            {
+                LastZoneEntered = zone;
+            }
 
             SetPortraitToNarrator();
             if (!suppressHeader && zoneNameText) zoneNameText.text = zone.displayName;
@@ -459,6 +471,10 @@ public class ZoneUIManager : MonoBehaviour
             gm.SetupNPCInfo_Panel(zone);
         }
 
+        Debug.Log("We are here!!!" + zoneId);
+
+
+
         // If we pre-faded BOTH groups, bring BOTH back in; otherwise only actions
         if (_takeoverPreFaded)
             yield return FadeGroupsIn(descriptionGroup, actionsGroup, fadeDuration, 0.05f);
@@ -486,5 +502,14 @@ public class ZoneUIManager : MonoBehaviour
         if (string.IsNullOrEmpty(CurrentDialogId)) return;
         var node = GameManager.Instance.GetDialogById(CurrentDialogId);
         if (node != null) DisplayDialogNode(node);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            var z = LastZoneEntered;
+            Debug.Log($"[ZoneUI] F9 dump: LastZoneEntered={z?.id} ({z?.displayName}) | CurrentZoneId={WorldState.CurrentZoneId} frame={Time.frameCount}");
+        }
     }
 }

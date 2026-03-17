@@ -86,8 +86,9 @@ public class Book_Manager : MonoBehaviour
         {
             child.gameObject.SetActive(false);
         }
+    }
 
-        foreach (Inventory_Slot slot in Inventory_Manager.Instance.slots)
+      /*  foreach (Inventory_Slot slot in InventoryManager.Instance.slots)
         {
             if (slot.inventoryData.itemType == ItemType.Literacy)
             {
@@ -129,7 +130,7 @@ public class Book_Manager : MonoBehaviour
                     Debug.Log(newSlot.Text.text);
             }
         }
-    }
+    }*/
 
     public void SetupLiteracyPanel(string bookID)
     {
@@ -345,7 +346,7 @@ public class Book_Manager : MonoBehaviour
         ProgressBarsHolder.gameObject.SetActive(false);
         // Example: grant bonus XP, unlock a new book, or show UI popup
         GameLog_Manager.Instance.AddEntry($"You finished {allBooks[bookID].BookName}!");
-        Inventory_Manager.Instance.RemoveItem(bookID, 1);
+        InventoryManager.Instance.RemoveItem(bookID, 1);
         BookData bookData = GetBook(bookID);
         PlayerSkills.Instance.AddXP(Enum_Skills.Aethur, bookData.LiteracyXP); // reward bonus XP
         PlayerSkills.Instance.AddXP(bookData.SkillReward, bookData.XPReward); // reward bonus XP

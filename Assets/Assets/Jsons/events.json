@@ -39,65 +39,6 @@
       "Zone(stableHorseStalls)"
     ]
   },
-    {
-        "id": "OLDbrush_maple_completed",
-        "scope": "zone",
-        "zoneId": "adventurersStable",
-        "triggers": [
-            "action.BrushMapleTimed.complete"
-        ],
-        "priority": 0,
-        "once": true,
-        "blocking": false,
-        "actions": [
-            "SetFlag(ACT_DONE_BrushMapleTimed,true)",
-            "Narrate(Maple flicks her ears, content.)"
-        ]
-    },
-  {
-    "id": "OLDstable_cupboard_upper_completed",
-    "scope": "zone",
-    "zoneId": "stableFront",
-    "triggers": [
-      //"action.stableCupboardUpperSearch.complete"
-    ],
-    "priority": 0,
-    "once": true,
-    "blocking": false,
-    "actions": [
-      "SetFlag(ACT_DONE_stableCupboardUpperSearch,true)",
-      "GiveItem(brush,1)"
-    ]
-  },
-    {
-        "id": "OLDstable_cupboard_lower_completed",
-        "scope": "zone",
-        "zoneId": "stableFront",
-        "triggers": [
-            "action.stableCupboardLowerSearch.complete"
-        ],
-        "priority": 0,
-        "once": true,
-        "blocking": false,
-        "actions": [
-            "SetFlag(ACT_DONE_stableCupboardLowerSearch,true)",
-            "GiveItem(gold_coin,4)"
-        ]
-    },
-    {
-        "id": "OLDsearch_haystack_complete",
-        "scope": "zone",
-        "zoneId": "stableHorseStalls",
-        "triggers": [
-            "action.SearchHaystackTimed.complete"
-        ],
-        "priority": 0,
-        "once": true,
-        "blocking": false,
-        "actions": [
-            "GiveItem(dog_bone,1)"
-        ]
-    },
   {
     "id": "townsquare_injured_adventurer",
     "scope": "zone",
@@ -114,7 +55,7 @@
       ]
     },
     "actions": [
-      "Zone(Start_CarriageScene)"
+      "StartDialog(Start_CarriageScene)"
     ]
   },
   {

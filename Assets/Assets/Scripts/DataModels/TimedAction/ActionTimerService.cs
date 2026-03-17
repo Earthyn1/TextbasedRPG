@@ -336,11 +336,11 @@ public class ActionTimerService : MonoBehaviour
         // Items
         if (branch.giveItems != null)
             foreach (var g in branch.giveItems)
-                Inventory_Manager.Instance?.AddItem(g.id, g.amount);
+                InventoryManager.Instance?.AddItem(g.id, g.amount);
 
         if (branch.takeItems != null)
             foreach (var t in branch.takeItems)
-                Inventory_Manager.Instance?.TakeClamped(t.id, t.amount);
+                InventoryManager.Instance?.TakeClamped(t.id, t.amount);
 
         // Flags
         if (branch.setFlags != null)

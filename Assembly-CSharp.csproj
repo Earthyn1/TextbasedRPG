@@ -65,20 +65,26 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\WorldEvents\GameEventDef.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Equippable_Data.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\HitSplatUISpawner.cs" />
-    <Compile Include="Assets\Assets\Scripts\Managers\Inventory_Manager.cs" />
+    <Compile Include="Assets\Assets\Scripts\Inventory\InventoryRowUI.cs" />
+    <Compile Include="Assets\Assets\Scripts\ImageHitMask\HitmaskPicker.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\HitSplatUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Skills_Slot.cs" />
+    <Compile Include="Assets\Assets\Scripts\Managers\RightPanelTabs.cs" />
+    <Compile Include="Assets\Assets\Scripts\Managers\InteractionUI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\Attributes_UI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\TimedAction\ActionTimerUI.cs" />
+    <Compile Include="Assets\Assets\Scripts\Dialog\WorldStateManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\ItemHoverTooltip.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\EventManager.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\DialogUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Equip_Slot.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\QuestLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\TimedAction\TimedActionModels.cs" />
+    <Compile Include="Assets\Assets\Scripts\Loaders\LootTableLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\ZoneUIManager.cs" />
     <Compile Include="Assets\Assets\Scripts\TimersAndTrackers\ReadingSession.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\QuestData\QuestData.cs" />
+    <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\RespawnUI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\QuestData\QuestReward.cs" />
     <Compile Include="Assets\Assets\Scripts\TimersAndTrackers\XPNumbers.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\ZoneData.cs" />
@@ -97,10 +103,12 @@
     <Compile Include="Assets\Assets\Scripts\Managers\Debug_Manager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\WordProgress.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\PlayerStance.cs" />
+    <Compile Include="Assets\Assets\Scripts\Dialog\PropVisual.cs" />
     <Compile Include="Assets\Assets\Scripts\DebugScripts\CombatDebugUI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\TimedAction\ActionTimerService.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\ZoneElementSpawner.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\GameLog_Manager.cs" />
+    <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\XPToastSpawner.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\ItemLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\EventsDataLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\BookManager.cs" />
@@ -109,7 +117,11 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\Enum_ActionType.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\XPFormula.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\EquippableLoader.cs" />
+    <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\ZoneScenePropSpawner.cs" />
+    <Compile Include="Assets\Assets\Scripts\Dialog\DialogManager.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Interactables_Button.cs" />
+    <Compile Include="Assets\Ink\Demos\Basic Demo\Scripts\QuitGameOnKeypress.cs" />
+    <Compile Include="Assets\Assets\Scripts\Interfaces\IWorldInteractionUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\QuestManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\WorldEvents\WorldState.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Quest_Slot.cs" />
@@ -118,24 +130,34 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\BookProgress.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Action_Button.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\FocusModeUI.cs" />
+    <Compile Include="Assets\Assets\Scripts\Inventory\Inventory_Manager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\BookData.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\TimedActionLoader.cs" />
+    <Compile Include="Assets\Assets\Scripts\Dialog\GameStateBridge.cs" />
+    <Compile Include="Assets\Assets\Scripts\DataModels\Items\LootBox_UI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Item_Data.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\RequirementEvaluator.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\BookLoader.cs" />
+    <Compile Include="Assets\Assets\Scripts\DataModels\Items\LootDropDef.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Enum_ItemType.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\WordData.cs" />
+    <Compile Include="Assets\Ink\Demos\Basic Demo\Scripts\BasicInkExample.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\QuestData\QuestRequiredActions.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\NPCDataLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\NPCDataManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\CombatSnapshot.cs" />
+    <Compile Include="Assets\Assets\Scripts\Dialog\WorldInteractableManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\FoodUseSystem.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\Enum_Skills.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Inventory_Slot_RightClickAction.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\PlayerSkills.cs" />
+    <Compile Include="Assets\Assets\Scripts\Inventory\InventoryUI.cs" />
+    <Compile Include="Assets\Assets\Scripts\ImageHitMask\ZoneHitmaskInteractor.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\CombatManager.cs" />
+    <Compile Include="Assets\Assets\Scripts\Interfaces\InkStateStore.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\InteractableData.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\ZoneLoader.cs" />
+    <Compile Include="Assets\Assets\Scripts\DataModels\Items\LootRoller.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Inventory_Slot.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\EquipmentManager.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\GameManager.cs" />
@@ -145,6 +167,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile-2-Pass.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
+    <None Include="Assets\Assets\Scripts\ImageHitMask\UI_HoverReveal.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
@@ -1416,6 +1439,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Ink-Libraries.csproj">
+      <Project>{F07581D3-1D18-85B8-E592-AF58995FEDA2}</Project>
+      <Name>Ink-Libraries</Name>
+    </ProjectReference>
+    <ProjectReference Include="InkEditor.csproj">
+      <Project>{82A2CB52-1BC9-C820-C52B-D01FB64F0F3C}</Project>
+      <Name>InkEditor</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

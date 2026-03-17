@@ -736,8 +736,22 @@
     "npcId": "farmerJack",
     "npcPortrait": "farmerJack",
     "onEnterGiveItems": [],
-    "onEnterTakeItems": [],
-    "playerOptions": []
+    "onEnterTakeItems": [
+      {
+        "id": "chicken_egg",
+        "amount": 5
+      }
+    ],
+    "playerOptions": [
+      {
+        "ord": 1,
+        "optionText": "Good luck with your chickens...",
+        "type": "Zone",
+        "nextDialogId": "stableDirtRoad",
+        "questId": null,
+        "requirement": null
+      }
+    ]
   },
   {
     "dialogId": "FarmerJack_Remind",

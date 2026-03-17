@@ -46,15 +46,26 @@ public class QuestManager : MonoBehaviour
 
     private void Start()
     {
-        if (Inventory_Manager.Instance != null)
-            Inventory_Manager.Instance.OnItemDelta += HandleItemDelta;
+        if (InventoryManager.Instance != null)
+            InventoryManager.Instance.OnItemDelta += HandleItemDelta;
     }
 
     private void HandleItemDelta(string itemId, int delta)
     {
-        if (delta <= 0) return; // only count gains for collection quests
+        if (delta <= 0) return;
+
         string actionId = $"Action_ItemGain_{itemId}";
-        ReportAction(actionId, delta); // will cap at requiredQty and auto-complete
+        Debug.Log($"[Quest] Item gained: {itemId} (+{delta}) -> actionId='{actionId}'");
+
+        // Dump active quests + their requiredActions to prove match/mismatch
+        foreach (var q in activeQuests.Values)
+        {
+            if (q?.requiredActions == null) continue;
+            foreach (var ra in q.requiredActions)
+                Debug.Log($"[Quest] Active '{q.questId}' requires '{ra.actionID}' {ra.currentQty}/{ra.requiredQty}");
+        }
+
+        ReportAction(actionId, delta);
     }
     public void AddQuest(QuestData quest)
     {
@@ -294,14 +305,14 @@ public class QuestManager : MonoBehaviour
         // Gold
         if (quest.reward.rewardGold > 0)
         {
-            Inventory_Manager.Instance.AddItem("gold_coin", quest.reward.rewardGold);
+            InventoryManager.Instance.AddItem("gold_coin", quest.reward.rewardGold);
             GameLog_Manager.Instance.AddEntry($"+{quest.reward.rewardGold} gold for completing {quest.questId}");
         }
 
         // Item
         if (quest.reward.rewardItem != null && !string.IsNullOrEmpty(quest.reward.rewardItem.itemID))
         {
-            Inventory_Manager.Instance.AddItem(quest.reward.rewardItem.itemID, quest.reward.rewardItem.quantity);
+            InventoryManager.Instance.AddItem(quest.reward.rewardItem.itemID, quest.reward.rewardItem.quantity);
             // Optionally log the item reward here
             // GameLog_Manager.Instance.AddEntry($"Received item: {quest.reward.rewardItem.itemID} x{quest.reward.rewardItem.quantity}");
         }

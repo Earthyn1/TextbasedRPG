@@ -34,6 +34,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] public ZoneUIManager zoneUIManager; // assign in inspector
     [SerializeField] public QuestManager questManager; // assign in inspector
 
+    [SerializeField] private ZoneHitmaskInteractor hitmaskInteractor; // assign in inspector
+    [SerializeField] private ZoneScenePropSpawner zoneScenePropSpawner; // assign in inspector
+
+
+    [SerializeField] private MonoBehaviour interactionUIBehaviour;
+    private IWorldInteractionUI interactionUI;
+
     public RectTransform middlePanel_Panels;
     public RectTransform rightPanel_Panels;
 
@@ -41,6 +48,12 @@ public class GameManager : MonoBehaviour
     private bool _wantNpcPanel;
 
     public static event System.Action<ZoneData> OnZoneWillChange;
+
+    [SerializeField] private ZoneScenePropSpawner propSpawner; // drag in inspector if GameManager is a scene object
+    private ZoneData _currentZone;
+
+    private Coroutine _subRoutine;
+
 
     private bool _navLocked;
     public bool IsNavigationLocked => _navLocked;
@@ -64,11 +77,62 @@ public class GameManager : MonoBehaviour
 
         zoneUIManager.OnZoneDisplayed += OnZoneDisplayedHandler;
 
+        OnZoneWillChange += HandleZoneWillChangeForHitmask;
+
+        if (hitmaskInteractor != null)
+            hitmaskInteractor.OnInteractableClicked += HandleHitmaskInteractableClicked;
+        else
+            Debug.LogWarning("[GameManager] hitmaskInteractor not assigned.");
+
+        interactionUI = interactionUIBehaviour as IWorldInteractionUI;
+        if (interactionUI == null)
+            Debug.LogWarning("[GameManager] interactionUIBehaviour does not implement IWorldInteractionUI");
+
     }
 
     private void Start()
     {
         StartCoroutine(BootSequence());
+    }
+
+
+    private void OnEnable()
+    {
+        GameManager.OnZoneWillChange += HandleZoneWillChangeForHitmask;
+
+        // subscribe when WorldStateManager is ready
+        _subRoutine = StartCoroutine(SubscribeToWorldStateWhenReady());
+    }
+
+    private void OnDisable()
+    {
+        GameManager.OnZoneWillChange -= HandleZoneWillChangeForHitmask;
+
+        if (_subRoutine != null)
+        {
+            StopCoroutine(_subRoutine);
+            _subRoutine = null;
+        }
+
+        if (WorldStateManager.Instance != null)
+            WorldStateManager.Instance.OnFlagChanged -= HandleFlagChanged;
+    }
+
+    private IEnumerator SubscribeToWorldStateWhenReady()
+    {
+        while (WorldStateManager.Instance == null)
+            yield return null;
+
+        WorldStateManager.Instance.OnFlagChanged -= HandleFlagChanged; // avoid double-subscribe
+        WorldStateManager.Instance.OnFlagChanged += HandleFlagChanged;
+    }
+
+    private void HandleFlagChanged(string key)
+    {
+        Debug.Log($"[FlagChanged] key='{key}'  currentZone='{_currentZone?.id ?? "NULL"}'  startsWith='{_currentZone?.id}.': {(_currentZone != null && key.StartsWith(_currentZone.id + "."))}");
+
+        if (_currentZone != null && key.StartsWith(_currentZone.id + "."))
+            zoneScenePropSpawner.RefreshVisibility();
     }
 
     private IEnumerator BootSequence()
@@ -106,6 +170,182 @@ public class GameManager : MonoBehaviour
             ui.DisplayZone(startingZone);
     }
 
+    private void HandleZoneWillChangeForHitmask(ZoneData zone)
+    {
+       
+
+        try
+        {
+            _currentZone = zone;
+
+            try
+            {
+                if (zoneScenePropSpawner != null && zone != null)
+                    zoneScenePropSpawner.Build(zone);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[Props] Build failed for zone '{zone?.id}': {e}");
+            }
+
+            if (hitmaskInteractor == null || zone == null)
+            {
+                Debug.LogWarning($"[Hitmask] EARLY RETURN hitmaskInteractor={(hitmaskInteractor == null ? "NULL" : "OK")} zone={(zone == null ? "NULL" : "OK")}");
+                return;
+            }
+
+            var map = hitmaskInteractor.hitIdToInteractable;
+            map.Clear();
+
+            void Add(string id, string hitColor)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return;
+            if (string.IsNullOrWhiteSpace(hitColor)) return;
+            if (!byte.TryParse(hitColor, out var key)) return;
+            if (key == 0) return;
+
+            if (map.ContainsKey(key))
+                Debug.LogWarning($"Duplicate hitColor '{key}' in zone '{zone.id}'");
+            else
+                map[key] = id;
+        }
+
+        if (zone.npcInteractables != null)
+            foreach (var n in zone.npcInteractables)
+                Add(n.id, n.hitColor);
+
+        if (zone.worldInteractables != null)
+            foreach (var w in zone.worldInteractables)
+                Add(w.id, w.hitColor);
+
+        // Only navigation actions for now (optional but safer)
+        if (zone.actions != null)
+            foreach (var action in zone.actions)
+                if (!string.IsNullOrWhiteSpace(action.zone) && action.type == ActionType.Zone)
+                    Add(action.zone, action.hitColor);
+
+       
+
+        // 2) Load per-zone textures based on bgImage naming convention
+        if (string.IsNullOrWhiteSpace(zone.bgImage))
+        {
+            hitmaskInteractor.hitmask = null;
+            Debug.LogWarning($"[Hitmask] Zone '{zone.id}' has no bgImage set.");
+            return;
+        }
+
+        string baseName = zone.bgImage;
+
+        // CPU / picker hitmask
+        var hitTex = Resources.Load<Texture2D>($"BG_Hit/{baseName}_Hitmask");
+        if (hitTex == null)
+            Debug.LogWarning($"[Hitmask] Missing: Resources/BG_Hit/{baseName}_Hitmask");
+        hitmaskInteractor.hitmask = hitTex;
+
+        // Shader / material setup
+        if (hitmaskInteractor.hoverMaterial != null)
+        {
+            // hit ID texture for shader
+            hitmaskInteractor.hoverMaterial.SetTexture("_HitTex", hitTex);
+
+            // Your overlay shape texture (solid white where interactables are)
+            var maskTex = Resources.Load<Texture2D>($"BG_Mask/{baseName}_Mask");
+            if (maskTex == null)
+                Debug.LogWarning($"[Mask] Missing: Resources/BG_Mask/{baseName}_Mask");
+
+            hitmaskInteractor.hoverMaterial.SetTexture("_MainTex", maskTex);
+            hitmaskInteractor.backgroundImage.sprite = Resources.Load<Sprite>($"BG/{baseName}");
+            hitmaskInteractor.visualOverlayImage.sprite = Resources.Load<Sprite>($"BG_Mask/{baseName}_Mask");
+
+            // Reset hover state to avoid “stuck glow” when swapping zones
+            hitmaskInteractor.ClearHover();       
+        }
+            Debug.Log($"[Hitmask] Built {map.Count} mappings for zone '{zone.id}'");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[Hitmask] EXCEPTION in HandleZoneWillChangeForHitmask: {e}");
+        }
+       // Debug.Log($"[Hitmask] Built {map.Count} mappings for zone '{zone.id}'");
+    }
+
+    private void HandleHitmaskInteractableClicked(string interactableId, byte hitId)
+    {
+        Debug.Log($"[HitmaskClick] interactableId='{interactableId}'  hitId={hitId}");
+
+        var place = GetZoneByID(interactableId);
+        if (place == null)
+        {
+            Debug.LogWarning($"[HitmaskClick] No ZoneData found for '{interactableId}'");
+            return;
+        }
+
+        // NPC
+        if (!string.IsNullOrEmpty(place.type) &&
+          place.type.Equals("NPC", System.StringComparison.OrdinalIgnoreCase))
+        {
+            QueueNpcInfo(place, true);
+
+            Debug.Log($"[NPC Click] id='{place.id}' autoDialog='{place.autoDialog}'");
+
+            if (string.IsNullOrEmpty(place.autoDialog))
+            {
+                Debug.LogError($"[NPC Click] NPC '{place.id}' has NO autoDialog knot set!");
+                return;
+            }
+
+            if (interactionUI != null)
+            {
+                interactionUI.OpenNpcDialog(place, place.autoDialog.Trim());
+            }
+            else
+            {
+                Debug.LogError("[NPC Click] interactionUI is NULL!");
+            }
+
+            return;
+        }
+
+        // World object
+        if (!string.IsNullOrEmpty(place.type) &&
+            place.type.Equals("World", System.StringComparison.OrdinalIgnoreCase))
+        {
+            if (interactionUI == null)
+            {
+                Debug.LogError("[World Click] interactionUI is NULL! (not wired in inspector?)");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(place.autoDialog))
+            {
+                Debug.LogError($"[World Click] World '{place.id}' has NO autoDialog set!");
+                return;
+            }
+
+            interactionUI.OpenWorldObject(place, place.autoDialog.Trim());
+            return;
+        }
+
+        // Zone
+        if (!string.IsNullOrEmpty(place.type) &&
+            place.type.Equals("Zone", System.StringComparison.OrdinalIgnoreCase))
+        {
+            if (interactionUI != null)
+                interactionUI.OpenZoneTravel(place);
+            else
+                Debug.Log("Open Zone!! (no interactionUI wired)");
+
+            return;
+        }
+
+        Debug.LogWarning($"[HitmaskClick] Unhandled type '{place.type}' for '{place.id}'");
+    }
+
+    private void OnDestroy()
+    {
+        if (hitmaskInteractor != null)
+            hitmaskInteractor.OnInteractableClicked -= HandleHitmaskInteractableClicked;
+    }
 
     public void SetNavigationLocked(bool locked)
     {

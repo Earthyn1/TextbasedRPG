@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a30ffc737ab5eae4b8c3ca77243be828, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 623e2ab22468d0f4891d8f6ff03c8f7f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -281,7 +281,7 @@ MonoBehaviour:
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 0.738
+  m_FillAmount: 0
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
@@ -319,6 +319,7 @@ RectTransform:
   - {fileID: 7655164395735672694}
   - {fileID: 6144365928792273171}
   - {fileID: 840809458182527841}
+  - {fileID: 504013825087421706}
   m_Father: {fileID: 5466543481371838569}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -462,6 +463,81 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &6874752038331056329
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 504013825087421706}
+  - component: {fileID: 5907489287611864843}
+  - component: {fileID: 4964204400558952674}
+  m_Layer: 5
+  m_Name: DirectionIcon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &504013825087421706
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6874752038331056329}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 405525210988809688}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -252.8, y: 0.24695015}
+  m_SizeDelta: {x: 50.2287, y: 50.2293}
+  m_Pivot: {x: 0.49999964, y: 0.4727877}
+--- !u!222 &5907489287611864843
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6874752038331056329}
+  m_CullTransparentMesh: 1
+--- !u!114 &4964204400558952674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6874752038331056329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 0
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 9d938e6e96a4eb94a968960c59fabc26, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7005172182742108524
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,6 +692,15 @@ MonoBehaviour:
   actionType: 0
   actionRequirement: 
   examineText: 
+  directionIcon: {fileID: 4964204400558952674}
+  buttonImage: {fileID: 1498315862707864389}
+  upIcon: {fileID: 21300000, guid: a45257996b62e1c448760c459466ea37, type: 3}
+  downIcon: {fileID: 21300000, guid: 79b7ca3a80564ef428de5ac866aa5fce, type: 3}
+  leftIcon: {fileID: 21300000, guid: 9d938e6e96a4eb94a968960c59fabc26, type: 3}
+  rightIcon: {fileID: 21300000, guid: 53799dd6f1f66074db8eb4c7f5abbab9, type: 3}
+  actionIcon: {fileID: 21300000, guid: 2c6d117e084345c42a58ec248433ad5a, type: 3}
+  actionButton: {fileID: -7881297063393479990, guid: 85eb09021fb67a14aa20eb4e8114bd2d, type: 3}
+  normalButton: {fileID: 21300000, guid: 623e2ab22468d0f4891d8f6ff03c8f7f, type: 3}
   _btn: {fileID: 5684034845764321318}
 --- !u!114 &3478966307017244554
 MonoBehaviour:

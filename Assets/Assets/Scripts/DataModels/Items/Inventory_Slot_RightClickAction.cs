@@ -45,13 +45,12 @@ public class Inventory_Slot_RightClickAction : MonoBehaviour, IPointerClickHandl
             string resultMsg = FoodUseSystem.Instance.TryConsume(item);
 
             bool inCombat = CombatManager.Instance != null && CombatManager.Instance.IsActive;
-            if (!inCombat)
-            {
-                GameLog_Manager.Instance?.AddEntry(resultMsg, "#32CD32");
-            }
+          //  if (!inCombat)
+           // {
+        //        GameLog_Manager.Instance?.AddEntry(resultMsg, "#32CD32");
+          //  }
 
-            // item count may have changed
-            slot.inventoryManager.UpdateSlots();
+          
             return;
         }
 

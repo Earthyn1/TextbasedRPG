@@ -8,7 +8,7 @@ public class Inventory_Slot : MonoBehaviour
 {
     public TMP_Text itemQty;
     public Item_Data inventoryData;
-    public Inventory_Manager inventoryManager;
+    public InventoryManager inventoryManager;
     public Image itemImage;
 
     public Image cooldownRadial;
@@ -18,7 +18,7 @@ public class Inventory_Slot : MonoBehaviour
         UpdateCooldownUI();
     }
 
-    public void Initialize(Inventory_Manager manager)
+    public void Initialize(InventoryManager manager)
     {
         inventoryManager = manager;
     }

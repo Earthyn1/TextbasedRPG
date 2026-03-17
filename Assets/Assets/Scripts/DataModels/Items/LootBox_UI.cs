@@ -16,7 +16,7 @@ public class LootBox_UI : MonoBehaviour
         Loot.gameObject.SetActive(true);
         itemID = ItemID;
 
-        Item_Data data = Inventory_Manager.Instance.GetItemDefinition(itemID);
+        Item_Data data = InventoryManager.Instance.GetItemDefinition(itemID);
 
         if (data == null)
         {

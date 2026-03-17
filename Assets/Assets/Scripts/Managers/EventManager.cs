@@ -148,7 +148,7 @@ public class EventManager : MonoBehaviour
         if (a.StartsWith("GiveGold("))
         {
             int amount = int.Parse(Between(a, "GiveGold(", ")"));
-            Inventory_Manager.Instance?.AddItem("gold_coin", amount);
+            InventoryManager.Instance?.AddItem("gold_coin", amount);
             GameLog_Manager.Instance?.AddEntry($"+{amount} gold.");
             ZoneUIManager.Instance?.RefreshCurrentZone();
             return null;
@@ -158,7 +158,7 @@ public class EventManager : MonoBehaviour
             var body = Between(a, "GiveItem(", ")").Split(',');
             string itemId = body[0].Trim();
             int amount = int.Parse(body[1].Trim());
-            Inventory_Manager.Instance?.AddItem(itemId, amount);
+            InventoryManager.Instance?.AddItem(itemId, amount);
             GameLog_Manager.Instance?.AddEntry($"Received {itemId} x{amount}.");
             ZoneUIManager.Instance?.RefreshCurrentZone();
             return null;

@@ -43,7 +43,7 @@ public class DialogUI : MonoBehaviour
             foreach (var t in node.onEnterTakeItems)
                 if (t != null && !string.IsNullOrWhiteSpace(t.id) && t.amount > 0)
                 {
-                    Inventory_Manager.Instance?.RemoveItem(t.id, t.amount);
+                    InventoryManager.Instance?.RemoveItem(t.id, t.amount);
                     GameLog_Manager.Instance?.AddEntry($"-{t.amount} {t.id}");
                 }
 
@@ -51,7 +51,7 @@ public class DialogUI : MonoBehaviour
             foreach (var g in node.onEnterGiveItems)
                 if (g != null && !string.IsNullOrWhiteSpace(g.id) && g.amount > 0)
                 {
-                    Inventory_Manager.Instance?.AddItem(g.id, g.amount);
+                    InventoryManager.Instance?.AddItem(g.id, g.amount);
                     GameLog_Manager.Instance?.AddEntry($"+{g.amount} {g.id}");
                 }
 

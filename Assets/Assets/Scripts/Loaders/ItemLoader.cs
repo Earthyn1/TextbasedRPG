@@ -18,9 +18,9 @@ public class ItemLoader : MonoBehaviour
     private void Start()
     {
         // Pass the loaded database to the InventoryManager singleton
-        if (Inventory_Manager.Instance != null)
+        if (InventoryManager.Instance != null)
         {
-            Inventory_Manager.Instance.SetItemDatabase(itemDatabase);
+            InventoryManager.Instance.SetItemDatabase(itemDatabase);
         }
         else
         {

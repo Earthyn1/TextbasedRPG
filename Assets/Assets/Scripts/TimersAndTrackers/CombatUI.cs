@@ -161,7 +161,7 @@ public class CombatUI : MonoBehaviour
         {
             string itemId = item.itemId;
             int qty = item.qty;
-              Inventory_Manager.Instance.AddItem(itemId, qty);     
+            InventoryManager.Instance.AddItem(itemId, qty);     
         }     
     }
 

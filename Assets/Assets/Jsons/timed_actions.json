@@ -104,7 +104,7 @@
         "log": "A few gold coins glint in the dust — lucky find.",
         "giveItems": [
           {
-            "id": "gold",
+            "id": "gold_coin",
             "amount": 3
           }
         ]
@@ -156,7 +156,7 @@
         "log": "A bone! Someone must have hidden this here.",
         "giveItems": [
           {
-            "id": "bone",
+            "id": "dog_bone",
             "amount": 1
           }
         ]
@@ -213,7 +213,7 @@
         "skill": "Precision",
         "chance": {
           "base": -0.1,
-          "perLevel": 0.8,
+          "perLevel": 0.12,
           "min": 0.2,
           "max": 0.95
         }

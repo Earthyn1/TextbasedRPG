@@ -105,7 +105,7 @@ public static class RequirementEvaluator
             int close = s.IndexOf(')'); if (close < 5) return false;
             string itemId = s.Substring(5, close - 5).Trim();
             string rest = s.Substring(close + 1).Trim();
-            int have = Inventory_Manager.Instance?.CountOf(itemId) ?? 0;
+            int have = InventoryManager.Instance?.CountOf(itemId) ?? 0;
             if (string.IsNullOrEmpty(rest)) return have >= 1;
             bool N(string x, out int v) => int.TryParse(x, out v);
             if (rest.StartsWith(">=") && N(rest[2..], out var ge)) return have >= ge;
@@ -213,19 +213,12 @@ public static class RequirementEvaluator
         if (string.IsNullOrWhiteSpace(expr))
             return true;
 
-        // support: commas, semicolons, and "&&" (AND)
-        // we'll just treat them all as AND
-        var rawTokens = expr
-            .Replace("&&", ",")   // normalize && to comma
-            .Split(new[] { ',', ';' }, System.StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (var raw in rawTokens)
+        var parts = SplitTopLevel(expr); // ✅ respects parentheses depth
+        foreach (var p in parts)
         {
-            var token = raw.Trim();
-            if (!EvalOne(token))
+            if (!EvalOne(p))
                 return false;
         }
-
         return true;
     }
 

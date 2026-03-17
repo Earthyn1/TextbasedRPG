@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class InteractableData
 {
     public string id;
+    public string hitColor;
 
 }
 
@@ -21,6 +22,8 @@ public class NPCInteractableData
 
     [JsonConverter(typeof(StringEnumConverter))]
     public NPCType type;
+
+    public string hitColor;
 
     // Unity types shouldn't be (de)serialized from your JSON
     [JsonIgnore]

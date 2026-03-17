@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 
@@ -17,7 +17,10 @@ public class ZoneLoader : MonoBehaviour
         try
         {
             var zones = JsonConvert.DeserializeObject<List<ZoneData>>(zonesJsonFile.text);
-           
+
+            // 🔎 DEBUG: brief summary log
+         //   LogZonesBrief(zones);
+
             foreach (var z in zones)
             {
                 if (z?.npcInteractables == null) continue;
@@ -46,7 +49,7 @@ public class ZoneLoader : MonoBehaviour
         {
             if (z == null) continue;
             z.EnsureDefaults(); // keeps counts safe
-            Debug.Log($"- {z.id} ({z.displayName})  A:{z.actions.Count}  NPCs:{z.npcInteractables.Count}  World:{z.worldInteractables.Count}");
+            Debug.Log($"- {z.id} ({z.displayName})  ZoneType - :{z.type}  NPCs:{z.npcInteractables.Count}  World:{z.worldInteractables.Count}");
         }
     }
 

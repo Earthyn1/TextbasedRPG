@@ -14,6 +14,21 @@ public class Action_Button : MonoBehaviour
     public ActionType actionType;
     public string actionRequirement;   // used for dialog hand-in
     public string examineText;
+    public Image directionIcon;
+    public Image buttonImage;
+
+
+
+    public Sprite upIcon;
+    public Sprite downIcon;
+    public Sprite leftIcon;
+    public Sprite rightIcon;
+    public Sprite actionIcon;
+    public Sprite actionButton;
+    public Sprite normalButton;
+
+
+
 
 
     [SerializeField] private Button _btn;
@@ -48,6 +63,39 @@ public class Action_Button : MonoBehaviour
         actionType = action.type;
         nextAction = action.zone;
         actionName = action.name;
+        buttonImage.sprite = normalButton;
+
+
+        switch (action.icon?.ToLower())
+        {
+            case "up":
+                directionIcon.sprite = upIcon;
+                break;
+
+            case "down":
+                directionIcon.sprite = downIcon;
+                break;
+
+            case "left":
+                directionIcon.sprite = leftIcon;
+                break;
+
+            case "right":
+                directionIcon.sprite = rightIcon;
+
+                break;
+
+            case "action":
+                directionIcon.sprite = actionIcon;
+                buttonImage.sprite = actionButton;
+                break;
+
+            default:
+                directionIcon.gameObject.SetActive(false); // hide if no icon
+                break;
+        }
+
+       
         HideOnSuccess = action.hideOnSuccess;
         TimedId = (action.type == ActionType.Timed) ? action.zone : null;
 
