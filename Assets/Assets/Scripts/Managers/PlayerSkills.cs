@@ -29,9 +29,7 @@ public class PlayerSkills : MonoBehaviour
     [Header("XP Icons")]
     public Sprite StrengthIcon;
     public Sprite SpeedIcon;
-    public Sprite DefenceIcon;
-    public Sprite PrecisionIcon;
-    public Sprite FortitudeIcon;
+    public Sprite PerceptionIcon;
     public Sprite AetherIcon;
     public Sprite GenericXP;
 
@@ -39,12 +37,10 @@ public class PlayerSkills : MonoBehaviour
     {
         switch (skill)
         {
-            case Enum_Skills.Strength: return StrengthIcon;
-            case Enum_Skills.Defence: return DefenceIcon;
-            case Enum_Skills.Precision: return SpeedIcon;      // using Speed icon for Precision stance
-            case Enum_Skills.Speed: return SpeedIcon;
-            case Enum_Skills.Fortitude: return FortitudeIcon;
-            case Enum_Skills.Aethur: return AetherIcon;
+            case Enum_Skills.Strength:   return StrengthIcon;
+            case Enum_Skills.Speed:      return SpeedIcon;
+            case Enum_Skills.Perception: return PerceptionIcon;
+            case Enum_Skills.Aethur:     return AetherIcon;
             default: return GenericXP;
         }
     }
@@ -63,12 +59,12 @@ public class PlayerSkills : MonoBehaviour
                 break;
 
             case StanceType.Defensive:
-                skillToTrain = Enum_Skills.Defence;
+                skillToTrain = Enum_Skills.Speed;       // defensive = footwork, evasion
                 xpAmount = damageDealt * 4;
                 break;
 
             case StanceType.Precision:
-                skillToTrain = Enum_Skills.Precision;
+                skillToTrain = Enum_Skills.Perception;  // precision = finding weak spots
                 xpAmount = damageDealt * 4;
                 break;
 

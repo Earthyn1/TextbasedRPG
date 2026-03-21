@@ -21,13 +21,6 @@ public class ZoneLoader : MonoBehaviour
             // 🔎 DEBUG: brief summary log
          //   LogZonesBrief(zones);
 
-            foreach (var z in zones)
-            {
-                if (z?.npcInteractables == null) continue;
-                foreach (var npc in z.npcInteractables)
-                {
-                }
-            }
             return zones;
 
            
@@ -49,7 +42,7 @@ public class ZoneLoader : MonoBehaviour
         {
             if (z == null) continue;
             z.EnsureDefaults(); // keeps counts safe
-            Debug.Log($"- {z.id} ({z.displayName})  ZoneType - :{z.type}  NPCs:{z.npcInteractables.Count}  World:{z.worldInteractables.Count}");
+            Debug.Log($"- {z.id} ({z.displayName})  NPCs:{z.npcs.Count}  World:{z.worldObjects.Count}");
         }
     }
 

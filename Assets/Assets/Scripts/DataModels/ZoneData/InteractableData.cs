@@ -8,20 +8,25 @@ using UnityEngine.UI;
 public class InteractableData
 {
     public string id;
+    public string displayName;
+    public string portrait;
+    public string autoDialog;
     public string hitColor;
-
 }
 
 [JsonConverter(typeof(StringEnumConverter))]
-public enum NPCType { Neutral, Friendly, Aggressive }
+public enum NPCDisposition { Neutral, Friendly, Aggressive }
 
 [Serializable]
 public class NPCInteractableData
 {
     public string id;
+    public string displayName;
+    public string portrait;
+    public string autoDialog;
 
     [JsonConverter(typeof(StringEnumConverter))]
-    public NPCType type;
+    public NPCDisposition disposition;
 
     public string hitColor;
 

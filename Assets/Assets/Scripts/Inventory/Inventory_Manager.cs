@@ -32,6 +32,10 @@ public class InventoryManager : MonoBehaviour
     // Called by ItemLoader
     public void SetItemDatabase(Dictionary<string, Item_Data> db) => itemDatabase = db;
 
+    /// <summary>Returns all item definitions — used by minigames to pick random distractors.</summary>
+    public IReadOnlyCollection<Item_Data> GetAllItemDefinitions() =>
+        itemDatabase != null ? itemDatabase.Values : (IReadOnlyCollection<Item_Data>)new Item_Data[0];
+
     public Item_Data GetItemDefinition(string itemId)
     {
         if (itemDatabase != null && itemDatabase.TryGetValue(itemId, out var def))

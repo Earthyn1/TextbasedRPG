@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,56 +9,53 @@ public class PlayerStats : MonoBehaviour
     public static PlayerStats Instance { get; private set; }
 
     // ---- FORMULA KNOBS ----
-    [Header("Derived formulas")]
-    [SerializeField] private int baseHP = 20;
+    [Header("Base Stats")]
+    [SerializeField] private int baseHP   = 15;
+    [SerializeField] private int baseArmor = 1;
     [SerializeField] private int baseMana = 0;
     [SerializeField] private float baseAttackSpeed = 2f;
 
     [Header("Tuning - per level scaling")]
-    [SerializeField] private int hpPerEndurance = 10;           
-    [SerializeField] private int manaPerAether = 5;              
-    [SerializeField] private float strengthDamagePerLevel = 1f;     
-    [SerializeField] private float armorPerDefLevel = 1f;          
-    [SerializeField] private float hitChancePerPrecision = 0.02f;   //  (+2% per Precision)
-    [SerializeField] private float critPerPrecisionStep = 0.01f;    //  (+1% per 5 Prec)
+    [SerializeField] private int    manaPerAether          = 5;
+    [SerializeField] private float  strengthDamagePerLevel = 1f;
 
-    public int Armor { get; private set; }
-    public int WeaponDamage { get; private set; }
-    public float StrengthBonusDamage { get; private set; }
-    public float HitChanceBonus { get; private set; }
-    public float CritChanceFinal { get; private set; }
+    // ---- Core trainable skill levels ----
+    public int strength;
+    public int speed;
+    public int perception;
+    public int aether;
 
-
-    [SerializeField] private float attackFromStrength = 1f;
-    [SerializeField] private float attackFromPower = 1f;
-    [SerializeField] private float defenceFromDef = 1f;
-    [SerializeField] private float defenceFromBlock = 0.5f;
-
-    // ---- Primary stats (final after equip/skills) ----
-    public int strength, defence, fortitude, precision, aether;
-    public int attackPower, blockPower, elementalAether;
-    public float attackSpeed;
-    public float critChance;      // expressed as decimal (0.1f = 10%)
-    public float critMultiplier;  // multiplier on crit (e.g., 1.5f = 150%)
-    public float GearDodgeChance { get; private set; }
-
+    // ---- Gear-driven combat stats ----
+    public int    attackPower;
+    public int    blockPower;
+    public int    elementalAether;
+    public float  attackSpeed;
+    public float  critChance;
+    public float  critMultiplier;
+    public float  GearDodgeChance { get; private set; }
 
     // ---- Derived (read-only) ----
-    public int MaxHP { get; private set; }
-    public int MaxMana { get; private set; }
+    public int   Armor               { get; private set; }
+    public int   WeaponDamage        { get; private set; }
+    public float StrengthBonusDamage { get; private set; }
+    public int   MaxHP               { get; private set; }
+    public int   MaxMana             { get; private set; }
 
-    // ---- Vitals (runtime, save/restore) ----
-    public int CurrentHP { get; private set; }
+    // Gear-only for now — Perception will feed into these later
+    public float HitChanceBonus => 0f;
+    public float CritChanceFinal => critChance;
+
+    // ---- Vitals (runtime) ----
+    public int CurrentHP   { get; private set; }
     public int CurrentMana { get; private set; }
 
     // ---- Events ----
-    public event Action OnStatsChanged;   // structure changed (max values, ratings, etc.)
-    public event Action OnVitalsChanged;  // current HP/Mana changed
-    public event Action OnDeath;       // fired once per death (transition >0 -> 0)
-    public event Action OnOutOfMana;   // fired on failed spend OR when mana reaches 0 from >0
-    public event System.Action OnPlayerDied;
+    public event Action OnStatsChanged;
+    public event Action OnVitalsChanged;
+    public event Action OnDeath;
+    public event Action OnOutOfMana;
+    public event Action OnPlayerDied;
 
-    // Internal guard so OnDeath doesn't spam
     private bool _isDead = false;
 
     private void Awake()
@@ -76,11 +73,10 @@ public class PlayerStats : MonoBehaviour
 
     private void Start()
     {
-        // Initial compute at scene start
         RecalculateFromEquipment(EquipmentManager.Instance != null
             ? EquipmentManager.Instance.GetAllEquipped()
             : Array.Empty<Item_Data>());
-        // If first time, start full
+
         if (CurrentHP <= 0 || CurrentHP > MaxHP) SetHPToMax();
         if (CurrentMana < 0 || CurrentMana > MaxMana) SetManaToMax();
     }
@@ -96,7 +92,7 @@ public class PlayerStats : MonoBehaviour
 
     private void RecalcNow()
     {
-        var equipped = (EquipmentManager.Instance != null)
+        var equipped = EquipmentManager.Instance != null
             ? EquipmentManager.Instance.GetAllEquipped()
             : Array.Empty<Item_Data>();
         RecalculateFromEquipment(equipped);
@@ -105,170 +101,129 @@ public class PlayerStats : MonoBehaviour
     [ContextMenu("Log Naked Stats")]
     public void LogNakedStats()
     {
-        Debug.Log($"Strength: {strength}, Defence: {defence}, Endurance: {fortitude}, Precision: {precision}, Aether: {aether}");
-        Debug.Log($"MaxHP: {MaxHP}, MaxMana: {MaxMana}");
-        Debug.Log($"BlockPower: {blockPower}, AttackPower: {attackPower}, AttackSpeed: {attackSpeed}, ElementalAether: {elementalAether}");
-        Debug.Log($"CritChance: {critChance}, CritMultiplier: {critMultiplier}");
+        Debug.Log($"Strength: {strength}  Speed: {speed}  Perception: {perception}  Aethur: {aether}");
+        Debug.Log($"MaxHP: {MaxHP}  MaxMana: {MaxMana}  Armor: {Armor}");
+        Debug.Log($"WeaponDamage: {WeaponDamage}  AttackSpeed: {attackSpeed}");
+        Debug.Log($"CritChance: {critChance}  CritMultiplier: {critMultiplier}");
     }
 
-    // === Public ===
+    // === Master recalculation ===
     public void RecalculateFromEquipment(IEnumerable<Item_Data> equippedItems)
     {
-        // Cache percentages so we don't instantly heal/hurt the player when max changes
-        float hpPct = MaxHP > 0 ? (float)CurrentHP / MaxHP : 1f;
+        // Cache vitals % so HP/Mana stay proportional when max changes
+        float hpPct = MaxHP  > 0 ? (float)CurrentHP   / MaxHP   : 1f;
         float mpPct = MaxMana > 0 ? (float)CurrentMana / MaxMana : 1f;
 
-        // 1) BASE from skills (skills are your "naked stats")
-        var psSkills = PlayerSkills.Instance;
-        if (psSkills != null)
+        // 1) Pull core skill levels
+        var skills = PlayerSkills.Instance;
+        if (skills != null)
         {
-            int lvl(Enum_Skills s) => psSkills.GetSkill(s)?.level ?? 1;
-            strength = lvl(Enum_Skills.Strength);
-            defence = lvl(Enum_Skills.Defence);
-            fortitude = lvl(Enum_Skills.Fortitude);
-            precision = lvl(Enum_Skills.Precision);
-            aether = lvl(Enum_Skills.Aethur);
+            int lvl(Enum_Skills s) => skills.GetSkill(s)?.level ?? 1;
+            strength  = lvl(Enum_Skills.Strength);
+            speed     = lvl(Enum_Skills.Speed);
+            perception = lvl(Enum_Skills.Perception);
+            aether    = lvl(Enum_Skills.Aethur);
         }
         else
         {
-            strength = defence = fortitude = precision = aether = 1;
+            strength = speed = perception = aether = 1;
         }
 
-        // Reset gear-driven stats
-        attackPower = 0;
-        attackSpeed = baseAttackSpeed;
-        blockPower = 0;
+        // 2) Reset gear-driven stats
+        attackPower    = 0;
+        attackSpeed    = baseAttackSpeed;
+        blockPower     = 0;
         elementalAether = 0;
-        critChance = 0f;
+        critChance     = 0f;
         critMultiplier = 0f;
         GearDodgeChance = 0f;
+        WeaponDamage   = 0;
 
-        // 2) Apply equipment modifiers
+        // 3) Apply equipment
         foreach (var it in equippedItems)
         {
             if (it == null) continue;
             if (!EquipmentManager.Instance.TryGetEquipRow(it.itemID, out var row)) continue;
 
-            // --- Core stats ---
-            strength += row.strength;
-            defence += row.defence;
-            fortitude += row.fortitude;
-            precision += row.precision;
-            aether += row.aether;
+            if (row.damage > 0)      WeaponDamage = row.damage;
+            if (row.attackSpeed > 0f) attackSpeed = row.attackSpeed;
 
-            // --- Combat impact ---
-            if (row.damage > 0) WeaponDamage = row.damage;
-            if (row.attackSpeed > 0f) attackSpeed = row.attackSpeed;   // ✅ replace, not add
-            blockPower += row.block;
+            blockPower      += row.block;
             elementalAether += row.elementalAether;
-
-            critChance += row.critChance;
-            critMultiplier = Mathf.Max(critMultiplier, row.critMultiplier);
+            critChance      += row.critChance;
+            critMultiplier  = Mathf.Max(critMultiplier, row.critMultiplier);
             GearDodgeChance += row.dodgeChance;
+
+            // Equipment defence field contributes directly to armour
+            blockPower += row.defence;
         }
 
-        // 3) Derived stats
-        MaxHP = baseHP + (fortitude * hpPerEndurance);
+        // 4) Derive final stats
+        MaxHP  = baseHP;                            // HP is flat — gear adds defence
         MaxMana = baseMana + (aether * manaPerAether);
 
         StrengthBonusDamage = strength * strengthDamagePerLevel;
-        Armor = Mathf.RoundToInt(defence * armorPerDefLevel) + blockPower;
+        Armor = baseArmor + blockPower;             // base 1 + gear
 
-        HitChanceBonus = precision * hitChancePerPrecision;
-        float bonusCritFromPrecision = Mathf.Floor(precision / 5f) * critPerPrecisionStep;
-        CritChanceFinal = critChance + bonusCritFromPrecision;
-
-        // 4) Preserve vitals %
-        SetHP(Mathf.Clamp(Mathf.RoundToInt(hpPct * MaxHP), 0, MaxHP), silent: true);
+        // 5) Restore vitals proportionally
+        SetHP  (Mathf.Clamp(Mathf.RoundToInt(hpPct * MaxHP),   0, MaxHP),   silent: true);
         SetMana(Mathf.Clamp(Mathf.RoundToInt(mpPct * MaxMana), 0, MaxMana), silent: true);
 
-        // 5) Fire events
+        // 6) Notify
         OnStatsChanged?.Invoke();
         OnVitalsChanged?.Invoke();
     }
 
-
-
-
     // === Vitals API ===
-    public void SetHPToMax(bool silent = false) => SetHP(MaxHP, silent);
+    public void SetHPToMax(bool silent = false)   => SetHP(MaxHP, silent);
     public void SetManaToMax(bool silent = false) => SetMana(MaxMana, silent);
 
     public void ApplyDamage(int amount)
     {
         if (amount <= 0) return;
         SetHP(Mathf.Max(0, CurrentHP - amount));
-
-        if (CurrentHP <= 0)
-            Die();
+        if (CurrentHP <= 0) Die();
     }
 
-    public void RestoreHalfVitals()
-    {
-        // round up so you don't respawn at 0 if MaxHP is 1, etc.
-        int halfHP = Mathf.CeilToInt(MaxHP * 0.5f);
-        int halfMP = Mathf.CeilToInt(MaxMana * 0.5f);
-
-        CurrentHP = Mathf.Clamp(halfHP, 1, MaxHP);
-        CurrentMana = Mathf.Clamp(halfMP, 0, MaxMana);
-
-        OnVitalsChanged?.Invoke();
-    }
-
-
-    private void Die()
-    {
-        Debug.Log("💀 Player has fallen...");
-        OnPlayerDied?.Invoke();
-
-        // Optional: fade screen, pause combat, etc.
-        CombatManager.Instance?.HandlePlayerDeath();
-    }
-
-    public void RestoreFullVitals()
-    {
-        CurrentHP = MaxHP;
-        CurrentMana = MaxMana;
-        OnVitalsChanged?.Invoke();
-    }
     public int ApplyHealing(int amount)
     {
         if (amount <= 0) return 0;
-
         int prev = CurrentHP;
         CurrentHP = Mathf.Min(MaxHP, CurrentHP + amount);
         int healed = CurrentHP - prev;
-
-        OnVitalsChanged?.Invoke();  // 🔥 instant HP bar update
-
+        OnVitalsChanged?.Invoke();
         return healed;
     }
 
     public int ApplyMana(int manaAmount)
     {
         if (manaAmount <= 0) return 0;
-
         int before = CurrentMana;
         CurrentMana = Mathf.Min(MaxMana, CurrentMana + manaAmount);
         int restored = CurrentMana - before;
-
-        OnVitalsChanged?.Invoke();  // 🔥 instant MP bar update
-
+        OnVitalsChanged?.Invoke();
         return restored;
     }
 
+    public void RestoreHalfVitals()
+    {
+        CurrentHP   = Mathf.Clamp(Mathf.CeilToInt(MaxHP   * 0.5f), 1, MaxHP);
+        CurrentMana = Mathf.Clamp(Mathf.CeilToInt(MaxMana * 0.5f), 0, MaxMana);
+        OnVitalsChanged?.Invoke();
+    }
 
+    public void RestoreFullVitals()
+    {
+        CurrentHP   = MaxHP;
+        CurrentMana = MaxMana;
+        OnVitalsChanged?.Invoke();
+    }
 
     public bool CanSpendMana(int amount) => amount <= CurrentMana;
     public bool SpendMana(int amount)
     {
         if (amount <= 0) return true;
-        if (CurrentMana < amount)
-        {
-            // Not enough mana: signal OOM
-            OnOutOfMana?.Invoke();
-            return false;
-        }
+        if (CurrentMana < amount) { OnOutOfMana?.Invoke(); return false; }
         SetMana(CurrentMana - amount);
         return true;
     }
@@ -279,14 +234,12 @@ public class PlayerStats : MonoBehaviour
         SetMana(Mathf.Min(MaxMana, CurrentMana + amount));
     }
 
-    // Smooth regen tick example (optional: call from a coroutine / Update)
     public void RegenTick(int hpPerTick, int manaPerTick)
     {
-        if (hpPerTick != 0) SetHP(Mathf.Min(MaxHP, CurrentHP + hpPerTick));
+        if (hpPerTick   != 0) SetHP  (Mathf.Min(MaxHP,   CurrentHP   + hpPerTick));
         if (manaPerTick != 0) SetMana(Mathf.Min(MaxMana, CurrentMana + manaPerTick));
     }
 
-    /// <summary>Revive the player with a given HP (defaults to full). Resets death guard.</summary>
     public void Revive(int hp = -1)
     {
         _isDead = false;
@@ -294,8 +247,14 @@ public class PlayerStats : MonoBehaviour
         SetHP(Mathf.Clamp(hp, 1, MaxHP));
     }
 
+    private void Die()
+    {
+        Debug.Log("💀 Player has fallen...");
+        OnPlayerDied?.Invoke();
+        CombatManager.Instance?.HandlePlayerDeath();
+    }
 
-    // === Private setters (fire events once) ===
+    // === Private setters ===
     private void SetHP(int newHP, bool silent = false)
     {
         newHP = Mathf.Clamp(newHP, 0, MaxHP);
@@ -306,13 +265,11 @@ public class PlayerStats : MonoBehaviour
 
         if (!silent) OnVitalsChanged?.Invoke();
 
-        // Fire OnDeath once when crossing to 0
         if (prev > 0 && CurrentHP == 0 && !_isDead)
         {
             _isDead = true;
             OnDeath?.Invoke();
         }
-        // If you want to clear dead state when leaving 0 (e.g., heal from 0):
         if (prev == 0 && CurrentHP > 0) _isDead = false;
     }
 
@@ -326,11 +283,7 @@ public class PlayerStats : MonoBehaviour
 
         if (!silent) OnVitalsChanged?.Invoke();
 
-        // Fire when crossing to exactly 0 from >0 (natural depletion)
         if (prev > 0 && CurrentMana == 0)
-        {
             OnOutOfMana?.Invoke();
-        }
     }
-   
 }

@@ -86,6 +86,7 @@ public class InteractionUI : MonoBehaviour, IWorldInteractionUI
 
     public void OpenZoneTravel(ZoneData zone)
     {
-        Debug.Log("Open zone travel UI here");
+        GameManager.Instance.GoToZone(zone.id);
+        GameLog_Manager.Instance.AddEntry("You head to the " + zone.displayName);
     }
 }

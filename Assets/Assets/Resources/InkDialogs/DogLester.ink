@@ -7,19 +7,30 @@ EXTERNAL hasItem(itemId, count)
 
 
 === Intro ===
-        Lester eyes you warily, tail twitching, a low growl rumbling in his throat.
+{ hasFlag("lester.boneGiven"):
+    Lester’s tail wags the moment he sees you. He remembers.
 
-        * [Pet Dog]
-            -> Bite
-        
-        * { hasItem("bone", 1) } [Easy now, boy... look what I’ve got.]
-            -> GiveBone
+    * [Pet Lester]
+        -> PetLester
 
-        * { not hasItem("bone", 1) } [<alpha=\#99>Easy now, boy... look what I’ve got. (<i>Bone</i>)]
-            -> NeedBone
-            
-        * [Back away from the dog]
-            -> Goodbye
+    * [Good boy.]
+        -> Goodbye
+
+- else:
+    Lester eyes you warily, tail twitching, a low growl rumbling in his throat.
+
+    * [Pet Dog]
+        -> Bite
+
+    * { hasItem("dog_bone", 1) } [<i><color=\#228B22>Easy now, boy... look what I’ve got.</color> (Bone)</i>]
+        -> GiveBone
+
+    * { not hasItem("dog_bone", 1) } [<alpha=\#99>Easy now, boy... look what I’ve got. (<i>Bone</i>)]
+        -> NeedBone
+
+    * [Back away from the dog]
+        -> Goodbye
+}
     
 
 
@@ -46,7 +57,8 @@ You pat your pockets. Nothing. Lester growls louder.
 
 
 === GiveBone ===
-~ giveItem("bone", -1)
+~ giveItem("dog_bone", -1)
+~ setFlag("lester.boneGiven")
 
       You toss Lester the bone. His tail thumps the dirt, growl fading into eager crunching.
 

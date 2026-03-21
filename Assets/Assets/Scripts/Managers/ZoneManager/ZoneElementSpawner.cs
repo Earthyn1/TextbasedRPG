@@ -48,7 +48,7 @@ public class ZoneElementSpawner : MonoBehaviour
             // --- Timed one-and-done guard (skip spawning entirely) ---
             if (a.type == ActionType.Timed)
             {
-                string timedId = a.zone; // your schema: TimedActionDef.id lives in ActionData.zone
+                string timedId = a.target; // your schema: TimedActionDef.id lives in ActionData.target
                 if (a.hideOnSuccess && GameManager.Instance.IsTimedActionDone(timedId))
                     continue;
             }
@@ -63,7 +63,7 @@ public class ZoneElementSpawner : MonoBehaviour
             timer?.ConfigureSoftGate(a.enableWhen, a.lockedMessage);
 
             // --- "already done" UX for repeatables (not hidden after done) ---
-            if (a.type == ActionType.Timed && !a.hideOnSuccess && GameManager.Instance.IsTimedActionDone(a.zone))
+            if (a.type == ActionType.Timed && !a.hideOnSuccess && GameManager.Instance.IsTimedActionDone(a.target))
             {
                 // prevent starting again and show subtle label
                 timer?.ClearActionId();
@@ -79,7 +79,7 @@ public class ZoneElementSpawner : MonoBehaviour
             if (a == null) return false;
 
             // hide if one-and-done and already completed
-            if (a.type == ActionType.Timed && a.hideOnSuccess && WorldState.GetFlag($"ACT_DONE_{a.zone}"))
+            if (a.type == ActionType.Timed && a.hideOnSuccess && WorldState.GetFlag($"ACT_DONE_{a.target}"))
                 return false;
 
             if (a.visibleWhen != null)
@@ -97,16 +97,15 @@ public class ZoneElementSpawner : MonoBehaviour
             Debug.LogWarning("[ZoneElementSpawner] Missing npcParent or npcButtonPrefab");
             return;
         }
-        if (zone.npcInteractables == null) return;
+        if (zone.npcs == null) return;
 
-        foreach (var i in zone.npcInteractables)
+        foreach (var i in zone.npcs)
         {
             if (!IsVisible("VISIBLE_" + i.id)) continue;
 
             var go = Instantiate(npcButtonPrefab, npcParent);
             var btn = go.GetComponent<Interactables_Button>();
-            var npcZone = GameManager.Instance.GetZoneByID(i.id);
-            btn.NPCSetupButton(i, npcZone);
+            btn.NPCSetupButton(i);
         }
     }
 
@@ -117,18 +116,15 @@ public class ZoneElementSpawner : MonoBehaviour
             Debug.LogWarning("[ZoneElementSpawner] Missing worldParent or worldButtonPrefab");
             return;
         }
-        if (zone.worldInteractables == null) return;
+        if (zone.worldObjects == null) return;
 
-        foreach (var i in zone.worldInteractables)
+        foreach (var i in zone.worldObjects)
         {
             if (!IsVisible("VISIBLE_" + i.id)) continue;
 
             var go = Instantiate(worldButtonPrefab, worldParent);
             var btn = go.GetComponent<Interactables_Button>();
             btn.WorldSetupButton(i);
-
-            var interZone = GameManager.Instance.GetZoneByID(i.id);
-            btn.text.text = interZone != null ? interZone.displayName : i.id;
         }
     }
 

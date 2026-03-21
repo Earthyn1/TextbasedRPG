@@ -17,7 +17,7 @@ public class Debug_Manager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            PlayerSkills.Instance.AddXP(Enum_Skills.Fortitude, 100);
+            PlayerSkills.Instance.AddXP(Enum_Skills.Aethur, 100);
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha3))

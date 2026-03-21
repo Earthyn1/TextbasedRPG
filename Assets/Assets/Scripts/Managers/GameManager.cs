@@ -149,25 +149,25 @@ public class GameManager : MonoBehaviour
         var ui = zoneUIManager;
 
         // 1) Clear + header only (no buttons yet)
-        ui.PrepareZoneTransition();
-        ui.DisplayZoneHeaderOnly(startingZone);
+        //ui.PrepareZoneTransition();
+      //  ui.DisplayZoneHeaderOnly(startingZone);
         OnZoneWillChange?.Invoke(startingZone);
 
         // 2) Fire events BEFORE marking visited
-        EventBus.Fire("OnEnterZone", startingZone.id);
+      //  EventBus.Fire("OnEnterZone", startingZone.id);
 
         // 3) Arm first-click latch for this zone
-        ui.ArmFirstClickTrigger(startingZone.id);
+       // ui.ArmFirstClickTrigger(startingZone.id);
 
         // 4) Now mark visited
-        WorldState.MarkVisited(startingZone.id);
+       // WorldState.MarkVisited(startingZone.id);
 
         // ⚠️ NEW: Let events tick a frame so they can flag a takeover
-        yield return null; // (you can make this 2–3 frames if you prefer)
+      //  yield return null; // (you can make this 2–3 frames if you prefer)
 
         // 5) If nothing took over, render full zone (buttons/actions)
-        if (!ui.HasPendingTakeover && !ui.IsBlockingNarration)
-            ui.DisplayZone(startingZone);
+       // if (!ui.HasPendingTakeover && !ui.IsBlockingNarration)
+       //     ui.DisplayZone(startingZone);
     }
 
     private void HandleZoneWillChangeForHitmask(ZoneData zone)
@@ -210,19 +210,19 @@ public class GameManager : MonoBehaviour
                 map[key] = id;
         }
 
-        if (zone.npcInteractables != null)
-            foreach (var n in zone.npcInteractables)
+        if (zone.npcs != null)
+            foreach (var n in zone.npcs)
                 Add(n.id, n.hitColor);
 
-        if (zone.worldInteractables != null)
-            foreach (var w in zone.worldInteractables)
+        if (zone.worldObjects != null)
+            foreach (var w in zone.worldObjects)
                 Add(w.id, w.hitColor);
 
         // Only navigation actions for now (optional but safer)
         if (zone.actions != null)
             foreach (var action in zone.actions)
-                if (!string.IsNullOrWhiteSpace(action.zone) && action.type == ActionType.Zone)
-                    Add(action.zone, action.hitColor);
+                if (!string.IsNullOrWhiteSpace(action.target) && action.type == ActionType.Zone)
+                    Add(action.target, action.hitColor);
 
        
 
@@ -273,72 +273,88 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log($"[HitmaskClick] interactableId='{interactableId}'  hitId={hitId}");
 
-        var place = GetZoneByID(interactableId);
-        if (place == null)
+        // 1. Check NPCs embedded in current zone
+        if (_currentZone?.npcs != null)
         {
-            Debug.LogWarning($"[HitmaskClick] No ZoneData found for '{interactableId}'");
-            return;
-        }
-
-        // NPC
-        if (!string.IsNullOrEmpty(place.type) &&
-          place.type.Equals("NPC", System.StringComparison.OrdinalIgnoreCase))
-        {
-            QueueNpcInfo(place, true);
-
-            Debug.Log($"[NPC Click] id='{place.id}' autoDialog='{place.autoDialog}'");
-
-            if (string.IsNullOrEmpty(place.autoDialog))
+            var npc = _currentZone.npcs.Find(n => n.id == interactableId);
+            if (npc != null)
             {
-                Debug.LogError($"[NPC Click] NPC '{place.id}' has NO autoDialog knot set!");
+                Debug.Log($"[NPC Click] id='{npc.id}' autoDialog='{npc.autoDialog}'");
+
+                // Synthesise a minimal ZoneData so downstream (NpcInfo panel, OpenNpcDialog) keep working unchanged
+                var synthZone = new ZoneData
+                {
+                    id          = npc.id,
+                    displayName = npc.displayName,
+                    portrait    = npc.portrait,
+                    autoDialog  = npc.autoDialog,
+                    bgImage     = _currentZone.bgImage,
+                };
+
+                QueueNpcInfo(synthZone, true);
+
+                if (string.IsNullOrEmpty(npc.autoDialog))
+                {
+                    Debug.LogWarning($"[NPC Click] NPC '{npc.id}' has no autoDialog set.");
+                    return;
+                }
+
+                if (interactionUI != null)
+                    interactionUI.OpenNpcDialog(synthZone, npc.autoDialog.Trim());
+                else
+                    Debug.LogError("[NPC Click] interactionUI is NULL!");
+
                 return;
             }
+        }
 
+        // 2. Check world objects embedded in current zone
+        if (_currentZone?.worldObjects != null)
+        {
+            var world = _currentZone.worldObjects.Find(w => w.id == interactableId);
+            if (world != null)
+            {
+                Debug.Log($"[World Click] id='{world.id}' autoDialog='{world.autoDialog}'");
+
+                if (interactionUI == null)
+                {
+                    Debug.LogError("[World Click] interactionUI is NULL!");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(world.autoDialog))
+                {
+                    Debug.LogWarning($"[World Click] World '{world.id}' has no autoDialog set.");
+                    return;
+                }
+
+                var synthZone = new ZoneData
+                {
+                    id          = world.id,
+                    displayName = world.displayName,
+                    portrait    = world.portrait,
+                    autoDialog  = world.autoDialog,
+                    bgImage     = _currentZone.bgImage,
+                };
+
+                interactionUI.OpenWorldObject(synthZone, world.autoDialog.Trim());
+                return;
+            }
+        }
+
+        // 3. Zone navigation
+        var zone = GetZoneByID(interactableId);
+        if (zone != null)
+        {
             if (interactionUI != null)
-            {
-                interactionUI.OpenNpcDialog(place, place.autoDialog.Trim());
-            }
-            else
-            {
-                Debug.LogError("[NPC Click] interactionUI is NULL!");
-            }
-
-            return;
-        }
-
-        // World object
-        if (!string.IsNullOrEmpty(place.type) &&
-            place.type.Equals("World", System.StringComparison.OrdinalIgnoreCase))
-        {
-            if (interactionUI == null)
-            {
-                Debug.LogError("[World Click] interactionUI is NULL! (not wired in inspector?)");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(place.autoDialog))
-            {
-                Debug.LogError($"[World Click] World '{place.id}' has NO autoDialog set!");
-                return;
-            }
-
-            interactionUI.OpenWorldObject(place, place.autoDialog.Trim());
-            return;
-        }
-
-        // Zone
-        if (!string.IsNullOrEmpty(place.type) &&
-            place.type.Equals("Zone", System.StringComparison.OrdinalIgnoreCase))
-        {
-            if (interactionUI != null)
-                interactionUI.OpenZoneTravel(place);
+                interactionUI.OpenZoneTravel(zone);
             else
                 Debug.Log("Open Zone!! (no interactionUI wired)");
 
             return;
         }
 
-        Debug.LogWarning($"[HitmaskClick] Unhandled type '{place.type}' for '{place.id}'");
+        Debug.LogWarning($"[HitmaskClick] No NPC, world object, or zone found for '{interactableId}' in zone '{_currentZone?.id}'");
     }
 
     private void OnDestroy()

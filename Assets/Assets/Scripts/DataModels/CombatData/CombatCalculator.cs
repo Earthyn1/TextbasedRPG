@@ -115,9 +115,9 @@ public static class CombatCalculator
 
     public static float GetPlayerEvasionBonusFromFortitude(PlayerStats ps)
     {
-        // Each point of Fortitude reduces enemy hit chance by 0.5%
-        // Fortitude 10 -> 0.05f (5%)
-        return ps.fortitude * 0.005f;
+        // Each point of Speed reduces enemy hit chance by 0.5%
+        // Speed 10 -> 0.05f (5%)
+        return ps.speed * 0.005f;
     }
 
     // Combined effective armor based on stance

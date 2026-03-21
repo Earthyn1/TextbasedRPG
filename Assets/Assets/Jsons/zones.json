@@ -1,69 +1,83 @@
 [
   {
     "id": "adventurersStable",
-    "type": "Zone",
     "displayName": "Stables",
     "description": "The straw is damp, the air reeks of horses, but there’s a strange comfort to it.",
     "portrait": "narrator",
     "bgImage": "TownStables",
     "actions": [
       {
-        "name": "To Stable Entrance",
+        "name": "To Tack Room",
         "type": "Zone",
-        "target": "stableFront"
+        "target": "tackRoom",
+        "hitColor": "100"
       },
       {
         "name": "Leave the Stables",
         "type": "Zone",
         "target": "stableDirtRoad"
-      },
-      {
-        "name": "To Horse Stalls",
-        "type": "Zone",
-        "target": "stableHorseStalls"
       }
     ],
-    "npcInteractables": [
+    "npcs": [
       {
-        "id": "stableMaster",
-        "type": "Friendly"
+        "id": "stableBoy",
+        "displayName": "Stable Boy",
+        "portrait": "stableBoy",
+        "autoDialog": "stableBoy",
+        "disposition": "Friendly",
+        "hitColor": "220"
       },
       {
         "id": "HorseMaple",
-        "type": "Friendly",
-        "hitColor": "250"
-      },
-      {
-        "id": "HorseSmoke",
-        "type": "Friendly",
+        "displayName": "Maple",
+        "portrait": "horseMaple",
+        "autoDialog": "horseMaple",
+        "disposition": "Friendly",
         "hitColor": "200"
       },
       {
-        "id": "DogLester",
-        "type": "Friendly",
-        "hitColor": "230"
+        "id": "HorseSmoke",
+        "displayName": "Smoke",
+        "portrait": "horseSmoke",
+        "autoDialog": "horseSmoke",
+        "disposition": "Friendly",
+        "hitColor": "250"
       },
       {
-        "id": "stableBoy",
-        "type": "Friendly",
-        "hitColor": "220"
+        "id": "DogLester",
+        "displayName": "Lester",
+        "portrait": "dogLester",
+        "autoDialog": "DogLester",
+        "disposition": "Friendly",
+        "hitColor": "230"
       }
     ],
-    "worldInteractables": [
+    "worldObjects": [
       {
-        "id": "yourBag"
+        "id": "yourBag",
+        "displayName": "Your Bag",
+        "portrait": "satchel"
       },
       {
         "id": "barrel",
+        "displayName": "Old Barrel",
+        "portrait": "satchel",
+        "autoDialog": "Barrel1",
         "hitColor": "240"
       },
       {
-        "id": "haystack",
-        "hitColor": "210"
+        "id": "brush",
+        "displayName": "Horse Brush",
+        "portrait": "satchel",
+        "autoDialog": "brush",
+        "hitColor": "160"
       },
       {
-        "id": "brush",
-        "hitColor": "160"
+        "id": "haystack",
+        "displayName": "Haystack",
+        "portrait": "hayStack",
+        "autoDialog": "adventurersStableHaystack",
+        "hitColor": "210"
       }
     ],
     "sceneProps": [
@@ -79,7 +93,7 @@
           33
         ],
         "hideWhenFlag": "adventurersStable.brush.taken",
-        "spawnHidden": "true",
+        "spawnHidden": true,
         "hitId": 160,
         "states": [
           {
@@ -96,48 +110,55 @@
   },
   {
     "id": "stableFront",
-    "type": "Zone",
     "displayName": "Stable Entrance",
     "description": "Sunlight cuts through the open doors, tracing muddy prints in and out — comings and goings never cease here.",
     "portrait": "narrator",
-    "bgImage": "TownStables",
-    "actions": [
-      {
-        "name": "To Stable Block",
-        "type": "Zone",
-        "target": "adventurersStable"
-      }
-    ],
-    "worldInteractables": [
-      {
-        "id": "stableCupboard"
-      }
-    ]
+    "bgImage": "TownStables"
   },
   {
-    "id": "stableHorseStalls",
-    "type": "Zone",
-    "displayName": "Horse Stalls",
+    "id": "tackRoom",
+    "displayName": "Tack Room",
     "description": "Horses shift in their stalls, leather tack swaying gently with each heavy breath.",
     "hitColor": "100",
     "portrait": "narrator",
-    "bgImage": "TownStables",
+    "bgImage": "TackRoom",
     "actions": [
       {
         "name": "To Stable Block",
         "type": "Zone",
-        "target": "adventurersStable"
+        "target": "adventurersStable",
+        "hitColor": "220"
       }
     ],
-    "worldInteractables": [
+    "npcs": [
       {
-        "id": "ladder"
+        "id": "stableMaster",
+        "displayName": "Stable Master",
+        "portrait": "stableMaster",
+        "autoDialog": "stableMaster",
+        "disposition": "Neutral",
+        "hitColor": "250"
+      }
+    ],
+    "worldObjects": [
+      {
+        "id": "ladder",
+        "displayName": "Ladder",
+        "portrait": "ladder",
+        "autoDialog": "tackRoomLadder",
+        "hitColor": "240"
+      },
+      {
+        "id": "haystack",
+        "displayName": "Haystack",
+        "portrait": "hayStack",
+        "autoDialog": "tackRoomHaystack",
+        "hitColor": "230"
       }
     ]
   },
   {
     "id": "stableHayLoft",
-    "type": "Zone",
     "displayName": "Hay Loft",
     "description": "A precarious ladder leads up to the hayloft above.",
     "portrait": "narrator",
@@ -151,97 +172,14 @@
     ]
   },
   {
-    "id": "stableBoy",
-    "type": "NPC",
-    "displayName": "Stable Boy",
+    "id": "stableFront",
+    "displayName": "Stable Entrance",
     "hitColor": "220",
-    "portrait": "stableBoy",
-    "autoDialog": "stableBoy",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "stableMaster",
-    "type": "NPC",
-    "displayName": "Stable Master",
-    "portrait": "stableMaster",
-    "autoDialog": "StableMaster_Intro",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "yourBag",
-    "type": "World",
-    "displayName": "Your Bag",
-    "portrait": "satchel",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "barrel",
-    "type": "World",
-    "displayName": "Old Barrel",
-    "hitColor": "240",
-    "portrait": "satchel",
-    "autoDialog": "Barrel1",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "brush",
-    "type": "World",
-    "displayName": "Horse Brush",
-    "hitColor": "160",
-    "portrait": "satchel",
-    "autoDialog": "brush",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "haystack",
-    "type": "World",
-    "displayName": "Haystack",
-    "hitColor": "210",
-    "portrait": "hayStack",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "ladder",
-    "type": "World",
-    "displayName": "Ladder",
-    "portrait": "ladder",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "HorseMaple",
-    "type": "NPC",
-    "displayName": "Maple",
-    "hitColor": "250",
-    "portrait": "horseMaple",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "HorseSmoke",
-    "type": "NPC",
-    "displayName": "Smoke",
-    "hitColor": "200",
-    "portrait": "horseSmoke",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "DogLester",
-    "type": "NPC",
-    "displayName": "Lester",
-    "hitColor": "230",
-    "portrait": "dogLester",
-    "autoDialog": "DogLester",
-    "bgImage": "TownStables"
-  },
-  {
-    "id": "stableCupboard",
-    "type": "World",
-    "displayName": "Cupboard",
-    "portrait": "cupboard",
-    "bgImage": "TownStables"
+    "portrait": "narrator",
+    "bgImage": "TackRoom"
   },
   {
     "id": "stableDirtRoad",
-    "type": "Zone",
     "displayName": "Dirt Road",
     "description": "Open fields surround the dirt road",
     "hitColor": "150",
@@ -263,25 +201,10 @@
         "type": "Zone",
         "target": "stableFront"
       }
-    ],
-    "npcInteractables": [
-      {
-        "id": "farmerJack",
-        "type": "Friendly"
-      }
     ]
   },
   {
-    "id": "farmerJack",
-    "type": "NPC",
-    "displayName": "Farmer Jack",
-    "portrait": "farmerJack",
-    "autoDialog": "FarmerJack_Intro",
-    "bgImage": "DirtRoad"
-  },
-  {
     "id": "jacksFarm",
-    "type": "Zone",
     "displayName": "Jacks Farm",
     "description": "The farm is eerily quiet...",
     "portrait": "narrator",
@@ -302,17 +225,10 @@
         "type": "Zone",
         "target": "stableDirtRoad"
       }
-    ],
-    "npcInteractables": [
-      {
-        "id": "angryChicken",
-        "type": "Aggressive"
-      }
     ]
   },
   {
     "id": "barn",
-    "type": "Zone",
     "displayName": "Old Barn",
     "description": "Light seeps in through the rotted wooden roof, hay stacks surround you",
     "portrait": "narrator",
@@ -323,70 +239,17 @@
         "type": "Zone",
         "target": "jacksFarm"
       }
-    ],
-    "npcInteractables": [
-      {
-        "id": "friendlyCow",
-        "type": "Friendly"
-      }
-    ],
-    "worldInteractables": [
-      {
-        "id": "barnLadder"
-      },
-      {
-        "id": "keyHolder"
-      }
     ]
   },
   {
-    "id": "barnLadder",
-    "type": "World",
-    "displayName": "Ladder",
-    "description": "A rickety wooden ladder leading to the loft.",
-    "portrait": "ladder",
-    "bgImage": "JacksBarn"
-  },
-  {
-    "id": "keyHolder",
-    "type": "World",
-    "displayName": "Wall Key Rack",
-    "description": "An old wall key rack, looks to hold many keys.",
-    "portrait": "keyHolder",
-    "bgImage": "JacksBarn"
-  },
-  {
-    "id": "friendlyCow",
-    "type": "NPC",
-    "displayName": "Friendly Cow",
-    "description": "The cow moos happily at you, enjoying her freedom of the barn.",
-    "portrait": "friendlyCow",
-    "bgImage": "JacksBarn"
-  },
-  {
     "id": "barnLoft",
-    "type": "Zone",
     "displayName": "Barn Loft",
     "description": "The barn Loft",
     "portrait": "barn_oldChest",
     "bgImage": "JackBarnLoft"
   },
   {
-    "id": "barn_oldChest",
-    "type": "World",
-    "displayName": "Old Chest",
-    "portrait": "barn_oldBoxes",
-    "bgImage": "JackBarnLoft"
-  },
-  {
-    "id": "barn_oldBoxes",
-    "type": "World",
-    "displayName": "Wooden Crates",
-    "bgImage": "JackBarnLoft"
-  },
-  {
     "id": "chickenCoop",
-    "type": "Zone",
     "displayName": "Chicken Coop",
     "description": "A very spacious coop.",
     "portrait": "narrator",
@@ -397,25 +260,10 @@
         "type": "Zone",
         "target": "jacksFarm"
       }
-    ],
-    "npcInteractables": [
-      {
-        "id": "angryChicken",
-        "type": "Aggressive"
-      }
     ]
   },
   {
-    "id": "angryChicken",
-    "type": "NPC",
-    "displayName": "Chicken",
-    "description": "A very angry looking chicken",
-    "portrait": "angryChicken",
-    "bgImage": "JacksCoop"
-  },
-  {
     "id": "townsquare",
-    "type": "Zone",
     "displayName": "Town Square",
     "description": "The Town Square opens wide before you — stone, noise, motion. Merchants cry, wheels clatter, and life spills in every direction.",
     "portrait": "narrator",
@@ -441,22 +289,10 @@
         "type": "Zone",
         "target": "stableDirtRoad"
       }
-    ],
-    "npcInteractables": [
-      {
-        "id": "townGuard",
-        "type": "Friendly"
-      }
-    ],
-    "worldInteractables": [
-      {
-        "id": "fountain"
-      }
     ]
   },
   {
     "id": "marketStalls",
-    "type": "Zone",
     "displayName": "Market Stalls",
     "description": "A colorful line of canvas-covered stalls buzzes with activity. Merchants hawk fruit, fabrics, and trinkets.",
     "portrait": "narrator",
@@ -470,56 +306,7 @@
     ]
   },
   {
-    "id": "fountain",
-    "type": "World",
-    "displayName": "Town Fountain",
-    "description": "A broad stone fountain stands at the center, water trickling from a weathered statue.",
-    "portrait": "fountain",
-    "bgImage": "TownSquare"
-  },
-  {
-    "id": "noticeBoard",
-    "type": "World",
-    "displayName": "Notice Board",
-    "description": "A wooden board plastered with tattered parchment.",
-    "portrait": "noticeBoard",
-    "bgImage": "TownSquare"
-  },
-  {
-    "id": "townGuard",
-    "type": "NPC",
-    "displayName": "Town Guard",
-    "description": "A uniformed guard stands watch at the fountain’s edge.",
-    "portrait": "guardCaptain",
-    "bgImage": "TownSquare"
-  },
-  {
-    "id": "streetPerformer",
-    "type": "NPC",
-    "displayName": "Street Performer",
-    "description": "A lively juggler entertains children with colorful balls.",
-    "portrait": "performer",
-    "bgImage": "TownSquare"
-  },
-  {
-    "id": "beggar",
-    "type": "NPC",
-    "displayName": "Beggar",
-    "description": "An old man sits on the cobbles with a wooden bowl.",
-    "portrait": "beggar",
-    "bgImage": "TownSquare"
-  },
-  {
-    "id": "merchantCaravan",
-    "type": "World",
-    "displayName": "Merchant Caravan",
-    "description": "A pair of oxen are hitched to a heavy wagon laden with crates.",
-    "portrait": "caravan",
-    "bgImage": "TownSquare"
-  },
-  {
     "id": "tavernFront",
-    "type": "Zone",
     "displayName": "Tavern Front",
     "description": "A wide double-door entry spills light and laughter into the square.",
     "portrait": "narrator",
@@ -533,24 +320,7 @@
     ]
   },
   {
-    "id": "herbalistStall",
-    "type": "NPC",
-    "displayName": "Herbalist",
-    "description": "A middle-aged woman in layered shawls arranges dried herbs.",
-    "portrait": "herbalist",
-    "bgImage": "TownSquare"
-  },
-  {
-    "id": "streetDog",
-    "type": "NPC",
-    "displayName": "Stray Dog",
-    "description": "A skinny dog darts between legs, tail tucked low.",
-    "portrait": "dogStray",
-    "bgImage": "TownSquare"
-  },
-  {
     "id": "lanternRow",
-    "type": "Zone",
     "displayName": "Lantern Row",
     "bgImage": "TownSquare",
     "actions": [
@@ -573,7 +343,6 @@
   },
   {
     "id": "craftsmanLane",
-    "type": "Zone",
     "displayName": "Craftsman Lane",
     "bgImage": "TownSquare",
     "actions": [
@@ -596,7 +365,6 @@
   },
   {
     "id": "blacksmith",
-    "type": "Zone",
     "displayName": "Blacksmith",
     "bgImage": "TownSquare",
     "actions": [
@@ -609,7 +377,6 @@
   },
   {
     "id": "draymansAlley",
-    "type": "Zone",
     "displayName": "Drayman’s Alley",
     "bgImage": "TownSquare",
     "actions": [
@@ -627,13 +394,11 @@
   },
   {
     "id": "fixersPlace",
-    "type": "Zone",
     "displayName": "Fixer's Place",
     "bgImage": "TownSquare"
   },
   {
     "id": "cemeteryEntrance",
-    "type": "Zone",
     "displayName": "Cemetery Entrance",
     "bgImage": "TownSquare",
     "actions": [
@@ -651,7 +416,6 @@
   },
   {
     "id": "cobbleLane",
-    "type": "Zone",
     "displayName": "Cobble Lane",
     "actions": [
       {

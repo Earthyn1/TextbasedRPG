@@ -17,15 +17,16 @@ public class Interactables_Button : MonoBehaviour
     [SerializeField] private Sprite defaultPortrait; // drag Portraits/default here if you have it
 
 
-    public void NPCSetupButton(NPCInteractableData NPCData, ZoneData zoneData)
+    public void NPCSetupButton(NPCInteractableData NPCData)
     {
         isNPC = true;
-        text.text = zoneData.displayName;
-        FriendlyName = zoneData.displayName;
+        text.text = NPCData.displayName;
+        FriendlyName = NPCData.displayName;
         InteractableName = NPCData.id;
+        autoDialogID = NPCData.autoDialog;
 
         // === SAFE PORTRAIT LOAD ===
-        string portraitPath = $"Portraits/{zoneData.portrait}";
+        string portraitPath = $"Portraits/{NPCData.portrait}";
         Sprite loadedPortrait = Resources.Load<Sprite>(portraitPath);
 
         if (loadedPortrait != null)
@@ -38,10 +39,8 @@ public class Interactables_Button : MonoBehaviour
             NPCImage.sprite = Resources.Load<Sprite>("Portraits/default");
         }
 
-        autoDialogID = zoneData.autoDialog;
-
-        // === AGGRESSIVE TYPE HANDLING ===
-        if (NPCData.type == NPCType.Aggressive)
+        // === AGGRESSIVE DISPOSITION HANDLING ===
+        if (NPCData.disposition == NPCDisposition.Aggressive)
         {
             BGImage.color = new Color32(215, 64, 64, 255);
             IconType.gameObject.SetActive(true);
@@ -57,7 +56,7 @@ public class Interactables_Button : MonoBehaviour
             else
             {
                 Debug.LogWarning($"[NPCSetupButton] Missing AttackIcon at: {attackIconPath}. Hiding icon.");
-                IconType.gameObject.SetActive(false); // Or set a default combat icon
+                IconType.gameObject.SetActive(false);
             }
         }
         else
@@ -69,7 +68,6 @@ public class Interactables_Button : MonoBehaviour
 
     public void WorldSetupButton(InteractableData WorldInteractable)
     {
-        // 0) Validate inputs and refs early
         if (WorldInteractable == null)
         {
             Debug.LogError("[WorldSetupButton] WorldInteractable is NULL.");
@@ -79,51 +77,31 @@ public class Interactables_Button : MonoBehaviour
         if (NPCImage == null)
         {
             Debug.LogError("[WorldSetupButton] NPCImage ref is NULL on Interactables_Button.");
-            return; // can't do anything safely without a target image
+            return;
         }
 
         isNPC = false;
         InteractableName = WorldInteractable.id ?? "<null-id>";
+        FriendlyName     = WorldInteractable.displayName ?? WorldInteractable.id;
+        autoDialogID     = WorldInteractable.autoDialog;
 
-        // 1) GameManager presence
-        var gm = GameManager.Instance;
-        if (gm == null)
+        if (text != null)
+            text.text = FriendlyName;
+
+        if (string.IsNullOrWhiteSpace(WorldInteractable.portrait))
         {
-            Debug.LogError("[WorldSetupButton] GameManager.Instance is NULL.");
             SetDefaultPortrait();
             return;
         }
 
-        // 2) Look up ZoneData
-        ZoneData zoneData = gm.GetZoneByID(WorldInteractable.id);
-        if (zoneData == null)
-        {
-            Debug.LogError($"[WorldSetupButton] GetZoneByID('{WorldInteractable.id}') returned NULL.");
-            SetDefaultPortrait();
-            return;
-        }
-
-        // 3) Portrait name sanity
-        if (string.IsNullOrWhiteSpace(zoneData.portrait))
-        {
-            Debug.LogWarning($"[WorldSetupButton] zoneData.portrait is NULL/empty for zone '{zoneData.id}'.");
-            SetDefaultPortrait();
-            return;
-        }
-
-        // 4) Load sprite safely
-        string portraitPath = $"Portraits/{zoneData.portrait}";
+        string portraitPath = $"Portraits/{WorldInteractable.portrait}";
         Sprite loadedSprite = Resources.Load<Sprite>(portraitPath);
 
-        FriendlyName = zoneData.displayName;
-
         if (loadedSprite != null)
-        {
             NPCImage.sprite = loadedSprite;
-        }
         else
         {
-            Debug.LogWarning($"[WorldSetupButton] Portrait not found at path: {portraitPath}. Using default portrait.");
+            Debug.LogWarning($"[WorldSetupButton] Portrait not found at: {portraitPath}. Using default.");
             SetDefaultPortrait();
         }
     }

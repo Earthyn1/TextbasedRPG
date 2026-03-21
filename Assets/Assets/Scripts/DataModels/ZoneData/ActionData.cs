@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class ActionData
 {
     [JsonProperty("name")] public string name;
-    [JsonProperty("zone")] public string zone;
+    [JsonProperty("target")] public string target;
     [JsonProperty("type")] public ActionType type;
     [JsonProperty("icon")] public string icon;
     [JsonProperty("hitColor")] public string hitColor;

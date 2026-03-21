@@ -11,9 +11,9 @@ public class ZoneData
 
     public List<ActionData> actions;
 
-    // Zone membership (only meaningful when type == "Zone")
-    public List<NPCInteractableData> npcInteractables;
-    public List<InteractableData> worldInteractables;
+    // Zone membership
+    public List<NPCInteractableData> npcs;
+    public List<InteractableData> worldObjects;
 
     // NEW: visual props placed in the scene (only meaningful when type == "Zone")
     public List<ScenePropData> sceneProps;
@@ -29,8 +29,8 @@ public class ZoneData
     public void EnsureDefaults()
     {
         actions ??= new List<ActionData>();
-        npcInteractables ??= new List<NPCInteractableData>();
-        worldInteractables ??= new List<InteractableData>();
+        npcs ??= new List<NPCInteractableData>();
+        worldObjects ??= new List<InteractableData>();
         sceneProps ??= new List<ScenePropData>();
     }
 }

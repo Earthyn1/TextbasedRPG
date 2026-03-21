@@ -14,7 +14,7 @@
           "log": "Dust plumes off the mane with each stroke.",
           "xp": [
             {
-              "skill": "Precision",
+              "skill": "Perception",
               "amount": 8
             }
           ]
@@ -28,7 +28,7 @@
         "log": "StableMaster shouts \"Come on now you can do better than that!\""
       },
       "skillCheck": {
-        "skill": "Precision",
+        "skill": "Perception",
         "chance": {
           "base": 0,
           "perLevel": 0.8,
@@ -50,7 +50,7 @@
           "log": "Must be something in here.",
           "xp": [
             {
-              "skill": "Precision",
+              "skill": "Perception",
               "amount": 6
             }
           ]
@@ -72,7 +72,7 @@
         "log": "You come up empty. Maybe try again, more carefully."
       },
       "skillCheck": {
-        "skill": "Precision",
+        "skill": "Perception",
         "chance": {
           "base": 0,
           "perLevel": 0.8,
@@ -94,7 +94,7 @@
           "log": "Got to make sure I am thorough.",
           "xp": [
             {
-              "skill": "Precision",
+              "skill": "Perception",
               "amount": 7
             }
           ]
@@ -113,7 +113,7 @@
         "log": "You come up empty. Maybe try again, more carefully."
       },
       "skillCheck": {
-        "skill": "Precision",
+        "skill": "Perception",
         "chance": {
           "base": 0,
           "perLevel": 0.8,
@@ -136,7 +136,7 @@
         "log": "You come up empty. Maybe try again, more carefully."
       },
       "skillCheck": {
-        "skill": "Precision",
+        "skill": "Perception",
         "chance": {
           "base": 0,
           "perLevel": 0.8,
@@ -165,7 +165,7 @@
         "log": "You come up empty. Maybe try again, more carefully."
       },
       "skillCheck": {
-        "skill": "Precision",
+        "skill": "Perception",
         "chance": {
           "base": 0,
           "perLevel": 0.8,
@@ -187,7 +187,7 @@
           "log": "So many keys...",
           "xp": [
             {
-              "skill": "Precision",
+              "skill": "Perception",
               "amount": 5
             }
           ]
@@ -210,7 +210,7 @@
         "log": "Ah no luck, it must be here!"
       },
       "skillCheck": {
-        "skill": "Precision",
+        "skill": "Perception",
         "chance": {
           "base": -0.1,
           "perLevel": 0.12,
@@ -248,7 +248,7 @@
         "damage": 2
       },
       "skillCheck": {
-        "skill": "Precision",
+        "skill": "Perception",
         "chance": {
           "base": -0.25,
           "perLevel": 0.15,

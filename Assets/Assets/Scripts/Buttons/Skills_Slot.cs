@@ -29,23 +29,15 @@ public class Skills_Slot : MonoBehaviour
             case Enum_Skills.Strength:
                 skillName.text = "Strength";
                 break;
-            case Enum_Skills.Defence:
-                skillName.text = "Defence";
-                break;
-            case Enum_Skills.Fortitude:
-                skillName.text = "Fortitude";
-                 break;
-            case Enum_Skills.Precision:
-                skillName.text = "Precision";
-                break;
-          
-            case Enum_Skills.Aethur:
-                skillName.text = "Aethur";
-                break;
             case Enum_Skills.Speed:
                 skillName.text = "Speed";
                 break;
-
+            case Enum_Skills.Perception:
+                skillName.text = "Perception";
+                break;
+            case Enum_Skills.Aethur:
+                skillName.text = "Aethur";
+                break;
             default:
                 skillName.text = "Unknown Skill";
                 break;
@@ -54,17 +46,13 @@ public class Skills_Slot : MonoBehaviour
 
     public void UpdateSkillDisplay(SkillData data)
     {
-        skillName.text = data.skillType.ToString();
+        if (data == null) return;
+        if (skillName == null || skillLevel == null) return;
+
         skillLevel.text = $"{data.level}";
 
-        SkillData sd = PlayerSkills.Instance.GetSkill(skill_type);
-        float percent = PlayerSkills.Instance.GetLevelProgress01(skill_type);
-
-        // directly set fill
-        progressBar.fillAmount = percent;
-
-
-
+        if (progressBar != null)
+            progressBar.fillAmount = PlayerSkills.Instance.GetLevelProgress01(skill_type);
     }
 
     public void OnClicked()

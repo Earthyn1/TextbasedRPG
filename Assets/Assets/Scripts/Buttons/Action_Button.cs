@@ -34,7 +34,7 @@ public class Action_Button : MonoBehaviour
     [SerializeField] private Button _btn;
 
     public bool HideOnSuccess { get; private set; }   // authored from ActionData.hideWhenDone
-    public string TimedId { get; private set; }    // the TimedActionDef id (your ActionData.zone)
+    public string TimedId { get; private set; }    // the TimedActionDef id (your ActionData.target)
 
     // Add fields to cache gating for this button instance
     private List<string> _enableWhenCached;
@@ -61,7 +61,7 @@ public class Action_Button : MonoBehaviour
         // label/fields
         text.text = action.name;
         actionType = action.type;
-        nextAction = action.zone;
+        nextAction = action.target;
         actionName = action.name;
         buttonImage.sprite = normalButton;
 
@@ -97,7 +97,7 @@ public class Action_Button : MonoBehaviour
 
        
         HideOnSuccess = action.hideOnSuccess;
-        TimedId = (action.type == ActionType.Timed) ? action.zone : null;
+        TimedId = (action.type == ActionType.Timed) ? action.target : null;
 
         // 1) visibleWhen → hide entirely if false
         if (!RequirementEvaluator.EvaluateAll(action.visibleWhen))
@@ -115,7 +115,7 @@ public class Action_Button : MonoBehaviour
         if (action.type == ActionType.Timed)
         {
             // Timed: let ActionTimerUI own the click; soft-gate evaluated on each click
-            timerUI?.SetActionId(action.zone);
+            timerUI?.SetActionId(action.target);
             timerUI?.ConfigureSoftGate(action.enableWhen, action.lockedMessage);
 
             // rebind because we just cleared listeners

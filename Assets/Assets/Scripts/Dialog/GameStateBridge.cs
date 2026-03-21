@@ -95,6 +95,18 @@ public static class GameStateBridge
                 if (QuestManager.Instance != null)
                     QuestManager.Instance.RemoveQuest(questId);
             });
+
+        // ----- MINIGAME -----
+        // Call from Ink: ~ startMinigame("haystackSearch")
+        // Pauses WorldInteractableManager, fires the timing bar, then resumes with result.
+        story.BindExternalFunction("startMinigame", (string minigameId) =>
+        {
+            // Tell WorldInteractableManager to go dormant until result arrives
+            var wim = UnityEngine.Object.FindFirstObjectByType<WorldInteractableManager>();
+            if (wim != null) wim.PauseForMinigame();
+
+            EventBus.Fire("StartMinigame", minigameId);
+        });
     }
 
     private static string NamespaceKey(string npcId, string key)

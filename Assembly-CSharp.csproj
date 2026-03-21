@@ -64,11 +64,15 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\EnemyData\NPCData.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\WorldEvents\GameEventDef.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Equippable_Data.cs" />
+    <Compile Include="Assets\Assets\Scripts\DataModels\Items\ItemPickupToastSpawner.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\HitSplatUISpawner.cs" />
     <Compile Include="Assets\Assets\Scripts\Inventory\InventoryRowUI.cs" />
+    <Compile Include="Assets\Assets\Scripts\Minigame\TimingBarUI.cs" />
     <Compile Include="Assets\Assets\Scripts\ImageHitMask\HitmaskPicker.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\HitSplatUI.cs" />
+    <Compile Include="Assets\Assets\Scripts\Minigame\MemorySlot.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Skills_Slot.cs" />
+    <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\ZoneUILeanManager.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\RightPanelTabs.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\InteractionUI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\Attributes_UI.cs" />
@@ -118,6 +122,7 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\XPFormula.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\EquippableLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\ZoneScenePropSpawner.cs" />
+    <Compile Include="Assets\Assets\Scripts\Minigame\AetherNode.cs" />
     <Compile Include="Assets\Assets\Scripts\Dialog\DialogManager.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Interactables_Button.cs" />
     <Compile Include="Assets\Ink\Demos\Basic Demo\Scripts\QuitGameOnKeypress.cs" />
@@ -128,17 +133,23 @@
     <Compile Include="Assets\Assets\Scripts\Loaders\DialogLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\CombatCalculator.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\BookProgress.cs" />
+    <Compile Include="Assets\Assets\Scripts\Minigame\AetherGridUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Action_Button.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\FocusModeUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Inventory\Inventory_Manager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\BookData.cs" />
+    <Compile Include="Assets\Assets\Scripts\Minigame\MemoryGameUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\TimedActionLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Dialog\GameStateBridge.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\LootBox_UI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Item_Data.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\RequirementEvaluator.cs" />
+    <Compile Include="Assets\Assets\Scripts\Minigame\MinigameManager.cs" />
+    <Compile Include="Assets\Assets\Scripts\Managers\Journal.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\BookLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\LootDropDef.cs" />
+    <Compile Include="Assets\Assets\Scripts\Managers\JournalSkills.cs" />
+    <Compile Include="Assets\Assets\Scripts\Dialog\DialogChoiceButton.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Enum_ItemType.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\WordData.cs" />
     <Compile Include="Assets\Ink\Demos\Basic Demo\Scripts\BasicInkExample.cs" />
@@ -146,11 +157,13 @@
     <Compile Include="Assets\Assets\Scripts\Loaders\NPCDataLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\NPCDataManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\CombatSnapshot.cs" />
+    <Compile Include="Assets\Assets\Scripts\Minigame\MashGameUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Dialog\WorldInteractableManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\FoodUseSystem.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\Enum_Skills.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Inventory_Slot_RightClickAction.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\PlayerSkills.cs" />
+    <Compile Include="Assets\Assets\Scripts\DataModels\Items\ItemPickupToast.cs" />
     <Compile Include="Assets\Assets\Scripts\Inventory\InventoryUI.cs" />
     <Compile Include="Assets\Assets\Scripts\ImageHitMask\ZoneHitmaskInteractor.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\CombatManager.cs" />
@@ -1217,12 +1230,16 @@
       <HintPath>Library\ScriptAssemblies\Unity.2D.IK.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.2D.IK.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.2D.IK.Runtime.dll</HintPath>
+    <Reference Include="glTFast.dots">
+      <HintPath>Library\ScriptAssemblies\glTFast.dots.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.2D.SpriteShape.Runtime">
       <HintPath>Library\ScriptAssemblies\Unity.2D.SpriteShape.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.2D.IK.Runtime">
+      <HintPath>Library\ScriptAssemblies\Unity.2D.IK.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Runtime.Shared">
@@ -1241,12 +1258,16 @@
       <HintPath>Library\ScriptAssemblies\Unity.Timeline.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Editor.Shared">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.Shared.dll</HintPath>
+    <Reference Include="glTFast">
+      <HintPath>Library\ScriptAssemblies\glTFast.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Editor.Shared">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.Shared.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Core.ShaderLibrary">
@@ -1327,6 +1348,10 @@
     </Reference>
     <Reference Include="Unity.Collections.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Collections.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="glTFast.Animation">
+      <HintPath>Library\ScriptAssemblies\glTFast.Animation.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.2D.Tilemap.Extras.Editor">
@@ -1423,6 +1448,10 @@
     </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Runtime">
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="glTFast.Editor">
+      <HintPath>Library\ScriptAssemblies\glTFast.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.VisualScripting.Flow">
