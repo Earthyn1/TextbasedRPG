@@ -17,9 +17,16 @@ public class Quest_Slot : MonoBehaviour
     public void OnSetup(QuestData questData)
     {
         QuestData = questData;
-        title.text = questData.questName;
-        description.text = questData.description;
-      
+        if (title != null) title.text = questData.questName;
+        if (description != null) description.text = questData.description;
+
+        // Wire up click automatically
+        var btn = GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(OnClicked);
+        }
 
         UpdateProgress();
     }
@@ -29,26 +36,25 @@ public class Quest_Slot : MonoBehaviour
     {
         if (QuestData.requiredActions != null && QuestData.requiredActions.Count > 0)
         {
-            QuestObjective.text = QuestData.requiredActions[0].name;
-            // Show all actions in the format: ActionID: current/required
-            Qty.text = string.Join("\n", QuestData.requiredActions
+            if (QuestObjective != null) QuestObjective.text = QuestData.requiredActions[0].name;
+            if (Qty != null) Qty.text = string.Join("\n", QuestData.requiredActions
                 .Select(a => $"{a.currentQty}/{a.requiredQty}"));
         }
         else
         {
-            Qty.text = "";
+            if (Qty != null) Qty.text = "";
         }
 
         // Change color if quest is completed
         if (QuestData.isCompleted)
         {
-            title.color = Color.green;
-            if (background != null) background.color = new Color(0.8f, 1f, 0.8f); // light green
+            if (title != null) title.color = Color.green;
+            if (background != null) background.color = new Color(0.8f, 1f, 0.8f);
         }
     }
 
     public void OnClicked()
     {
-        // optional: show quest details in a panel
+        QuestDetailPanel.Instance?.Show(QuestData);
     }
 }

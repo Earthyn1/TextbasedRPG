@@ -28,6 +28,8 @@ public class WorldInteractableManager : MonoBehaviour
     /// </summary>
     public void Open(TextAsset inkJSON, string startKnot, string contextId)
     {
+        LockedMessageToast.Instance?.Hide();
+
         inkJson = inkJSON;
 
         if (inkJSON == null)
@@ -113,7 +115,7 @@ public class WorldInteractableManager : MonoBehaviour
             if (!string.IsNullOrEmpty(line))
             {
                 if (sb.Length > 0) sb.AppendLine();
-                sb.Append(line);
+                sb.Append(FormatDialogLine(line));
             }
         }
 
@@ -169,9 +171,10 @@ public class WorldInteractableManager : MonoBehaviour
         var    choiceButton = btnObj.GetComponent<DialogChoiceButton>();
         var    button       = btnObj.GetComponent<UnityEngine.UI.Button>();
 
-        // Strip both tags from display text
+        // Strip both tags from display text, then strip surrounding quotes
         string displayText = _mgTagRegex.Replace(raw, "");
         displayText        = _reqTagRegex.Replace(displayText, "").Trim();
+        displayText        = StripQuotes(displayText);
 
         // ── No minigame tag — plain choice ────────────────────────────────────
         if (!mgMatch.Success)
@@ -241,5 +244,19 @@ public class WorldInteractableManager : MonoBehaviour
         {
             Destroy(buttonLayoutGroup.GetChild(i).gameObject);
         }
+    }
+
+    private static string FormatDialogLine(string line)
+    {
+        return StripQuotes(line);
+    }
+
+    private static string StripQuotes(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        text = text.Trim();
+        if (text.StartsWith("\"") && text.EndsWith("\"") && text.Length > 2)
+            return text.Substring(1, text.Length - 2);
+        return text;
     }
 }

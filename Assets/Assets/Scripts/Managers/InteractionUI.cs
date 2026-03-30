@@ -62,7 +62,7 @@ public class InteractionUI : MonoBehaviour, IWorldInteractionUI
             return;
         }
 
-        dialogManager.StartDialog(inkJSON, startKnot, npc.id);
+        dialogManager.StartDialog(inkJSON, startKnot, npc.id, npc.displayName);
     }
 
     public void OpenWorldObject(ZoneData worldObj, string startKnot)

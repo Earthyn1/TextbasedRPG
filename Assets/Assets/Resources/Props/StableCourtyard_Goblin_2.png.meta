@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c96afc2d62e00ba489a6af1f6f4ab019
+guid: 075613c8b651a2d46a1d095fb2db280f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8332249710896121607
-    second: TownStables_Brush_0
+      213: 1376933574010305545
+    second: StableCourtyard_Goblin_2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -47,13 +47,13 @@ TextureImporter:
   lightmap: 0
   compressionQuality: 50
   spriteMode: 1
-  spriteExtrude: 8
+  spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 0
+  spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: TownStables_Brush_0
+      name: StableCourtyard_Goblin_2_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 1214
         y: 0
-        width: 66
-        height: 33
+        width: 706
+        height: 497
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 70780d547f812a370800000000000000
-      internalID: 8332249710896121607
+      spriteID: 90c713e4ac9db1310800000000000000
+      internalID: 1376933574010305545
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      TownStables_Brush_0: 8332249710896121607
+      StableCourtyard_Goblin_2_0: 1376933574010305545
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

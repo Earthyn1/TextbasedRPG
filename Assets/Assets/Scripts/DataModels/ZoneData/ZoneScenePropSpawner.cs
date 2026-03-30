@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ZoneScenePropSpawner : MonoBehaviour
@@ -9,6 +10,7 @@ public class ZoneScenePropSpawner : MonoBehaviour
     public RectTransform backgroundRect;   // RectTransform of your BG Image
     public RectTransform propsContainer;   // empty overlay rect (same size as bg)
     public GameObject propPrefab;          // prefab with Image component
+    public ZoneHitmaskInteractor hitmaskInteractor; // for prop-based hover + click
 
     [Header("Positioning")]
     public bool posIsNormalized01 = true;  // if true: pos is 0..1 across bg
@@ -36,20 +38,6 @@ public class ZoneScenePropSpawner : MonoBehaviour
         if (propsContainer == null) { Debug.LogError("[Props] propsContainer is NULL"); return; }
         if (propPrefab == null) { Debug.LogError("[Props] propPrefab is NULL"); return; }
 
-        // Initialize spawnHidden flags once per prop per zone (AFTER null checks, AFTER Clear)
-        foreach (var p in _zone.sceneProps)
-        {
-            if (p == null) continue;
-            if (!p.spawnHidden) continue;
-
-            var key = (p.hideWhenFlag ?? "").Trim();
-            if (string.IsNullOrEmpty(key)) continue;
-
-            // Only set if it isn't already set (so once revealed, it stays revealed)
-            if (WorldStateManager.Instance != null && !WorldStateManager.Instance.HasFlag(key))
-                WorldStateManager.Instance.SetFlag(key);
-        }
-
         foreach (var p in _zone.sceneProps)
         {
             if (p == null || string.IsNullOrEmpty(p.id)) continue;
@@ -71,6 +59,16 @@ public class ZoneScenePropSpawner : MonoBehaviour
                 continue;
             }
 
+            // Stretch both child images to fill the root rect so sizeDelta drives their size
+            foreach (var img in new[] { pv.imageA, pv.imageB })
+            {
+                var irt = (RectTransform)img.transform;
+                irt.anchorMin        = Vector2.zero;
+                irt.anchorMax        = Vector2.one;
+                irt.offsetMin        = Vector2.zero;
+                irt.offsetMax        = Vector2.zero;
+            }
+
             // Set initial sprite
             var spriteKey = ResolveSpriteKey(p);
             var sprite = LoadSprite(spriteKey);
@@ -78,6 +76,29 @@ public class ZoneScenePropSpawner : MonoBehaviour
             pv.InactiveImage.gameObject.SetActive(false);
 
             _spawned[p.id] = go;
+
+            // Prop-based hit detection — replaces background hitmask for dynamic props
+            if (p.hitId > 0 && hitmaskInteractor != null)
+            {
+                byte hitIdByte = (byte)p.hitId;
+
+                // Click: fires the same OnInteractableClicked as the background hitmask
+                var btn = go.GetComponent<Button>() ?? go.AddComponent<Button>();
+                btn.transition = Selectable.Transition.None;
+                btn.onClick.AddListener(() => hitmaskInteractor.TriggerPropClick(hitIdByte));
+
+                // Hover: brightness overlay + outline shader
+                var highlight = go.AddComponent<PropHoverHighlight>();
+                var trigger   = go.GetComponent<EventTrigger>() ?? go.AddComponent<EventTrigger>();
+
+                var enterEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
+                enterEntry.callback.AddListener(_ => { hitmaskInteractor.SetPropHovered(hitIdByte); highlight.SetHovered(true); });
+                trigger.triggers.Add(enterEntry);
+
+                var exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
+                exitEntry.callback.AddListener(_ => { hitmaskInteractor.ClearHover(); highlight.SetHovered(false); });
+                trigger.triggers.Add(exitEntry);
+            }
 
             bool shouldBeVisible = ShouldBeVisible(p);
 
@@ -273,12 +294,22 @@ public class ZoneScenePropSpawner : MonoBehaviour
     {
         if (p == null) return false;
 
-        var hideKey = (p.hideWhenFlag ?? "").Trim();
-        if (string.IsNullOrEmpty(hideKey))
-            return true;
+        var wsm = WorldStateManager.Instance;
 
-        // hide when the flag exists
-        return !WorldStateManager.Instance.HasFlag(hideKey);
+        // hideWhenFlag: flag being set forces the prop hidden, regardless of anything else
+        var hideKey = (p.hideWhenFlag ?? "").Trim();
+        if (!string.IsNullOrEmpty(hideKey) && wsm.HasFlag(hideKey))
+            return false;
+
+        // showWhenFlag: prop is ONLY visible once this flag is set
+        // This replaces the old spawnHidden + hideWhenFlag hack — no game-state flags are
+        // pre-polluted at spawn time; the prop simply stays hidden until the flag is earned
+        // (e.g. goblins appear when the cinematic sets stableCourtyard.goblins.spawned)
+        var showKey = (p.showWhenFlag ?? "").Trim();
+        if (!string.IsNullOrEmpty(showKey))
+            return wsm.HasFlag(showKey);
+
+        return true;
     }
 
     private Sprite LoadSprite(string key)

@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using TMPro;
-using TMPro.EditorUtilities;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class QuestManager : MonoBehaviour
 {
@@ -16,10 +13,6 @@ public class QuestManager : MonoBehaviour
 
     public RectTransform questsPanel;
     public Quest_Slot slotPrefab;
-
-    public Animator animator;
-    public TMP_Text questOption;
-    public TMP_Text questName;
 
     public bool IsActive(string questId) => activeQuests.ContainsKey(questId);
     public bool IsCompleted(string questId) => completedQuests.ContainsKey(questId);
@@ -85,9 +78,7 @@ public class QuestManager : MonoBehaviour
             Debug.Log($"Quest started: {quest.questName}");
             GameLog_Manager.Instance.AddEntry($"Quest added: {quest.questName}");
 
-            questOption.text = "NEW QUEST:";
-            questName.text = quest.questName;
-            animator.SetTrigger("PlayAnim");
+            QuestToast.Instance?.ShowAccepted(quest.questName);
         }
         else
         {
@@ -114,6 +105,8 @@ public class QuestManager : MonoBehaviour
                 GameLog_Manager.Instance.AddEntry(
                     $"Quest updated: {quest.questName} — {action.actionID} {previousQty} → {action.currentQty}"
                 );
+
+                QuestToast.Instance?.ShowUpdate(action.name, action.currentQty, action.requiredQty);
 
                 // Check if quest is complete (hand-in will grant rewards later)
                 if (quest.requiredActions.TrueForAll(a => a.currentQty >= a.requiredQty))
@@ -158,9 +151,7 @@ public class QuestManager : MonoBehaviour
 
         if (completedQuests.TryGetValue(questId, out QuestData questData))
         {
-            questOption.text = "QUEST COMPLETED:";
-            questName.text = questData.questName;
-            animator.SetTrigger("PlayAnim");
+            QuestToast.Instance?.ShowCompleted(questData.questName);
         }
         else
         {

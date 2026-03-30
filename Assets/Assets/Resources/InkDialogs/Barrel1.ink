@@ -18,9 +18,9 @@ EXTERNAL startMinigame(id)
 
             -> FishingFail
 
-        * [Inspect the liquid<mg:barrelAether,35,Aether><req:Aethur,3>]
+        * [Inspect the liquid<mg:barrelAether,2,Aether><req:Aethur,1>]
             You peer into the dark liquid, tracing the strange patterns swirling within...
-            ~ startMinigame("barrelAether,35,Aether")
+            ~ startMinigame("barrelAether,2,Aether")
             -> DONE
 
         * [Return]

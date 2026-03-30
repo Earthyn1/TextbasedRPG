@@ -48,6 +48,7 @@ public class ScenePropData
     public float[] size;  // length 2
 
     public string hideWhenFlag;
+    public string showWhenFlag;
     public int hitId;
     public bool spawnHidden;
 

@@ -131,11 +131,11 @@ public class Action_Button : MonoBehaviour
             {
                 if (!RequirementEvaluator.EvaluateAll(action.enableWhen))
                 {
-                    GameLog_Manager.Instance.AddEntry(_lockedMessageCached ?? "You can’t do that yet.");
-                    Debug.Log($"[DEBUG] Locked Attempt Fired: '{("LockedAttempt_" + actionName)}' (len={("LockedAttempt_" + actionName).Length})");
+                    var lockedMsg = _lockedMessageCached ?? "You can’t do that yet.";
+                    GameLog_Manager.Instance.AddEntry(lockedMsg);
+                    LockedMessageToast.Instance?.Show(lockedMsg);
+                    Debug.Log($"[DEBUG] Locked Attempt Fired: ‘{("LockedAttempt_" + actionName)}’ (len={("LockedAttempt_" + actionName).Length})");
                     EventBus.Fire($"LockedAttempt_{actionName.Trim()}");
-
-
                     return;
                 }
 

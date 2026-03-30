@@ -23,9 +23,9 @@ EXTERNAL startMinigame(id)
     - else:
         A tall pile of hay stuffed into the corner of the stall. Someone's bedded down here recently — there's a worn blanket half-buried in it.
 
-        * [Rummage through it<mg:haystackMemory,3,Memory,dog_bone><req:Perception,2>]
+        * [Rummage through it<mg:haystackMemory,1,Memory,dog_bone><req:Perception,1>]
 
-            ~ startMinigame("haystackMemory,3,Memory,dog_bone")
+            ~ startMinigame("haystackMemory,1,Memory,dog_bone")
             -> DONE
 
         * [Leave]

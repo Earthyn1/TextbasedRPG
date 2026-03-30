@@ -30,7 +30,7 @@ public class Debug_Manager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             // Grab the quest from your GameManager by ID
-            QuestData goblinQuest = GameManager.Instance.GetQuestById("chicken_egg_delivery");
+            QuestData goblinQuest = GameManager.Instance.GetQuestById("BanditEscort");
 
             if (goblinQuest != null)
             {
@@ -38,7 +38,7 @@ public class Debug_Manager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("Goblin Slayer quest not found!");
+                Debug.LogWarning("BanditEscort quest not found!");
             }
         }
 

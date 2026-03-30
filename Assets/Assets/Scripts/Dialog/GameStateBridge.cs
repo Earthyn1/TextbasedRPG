@@ -88,6 +88,25 @@ public static class GameStateBridge
                     InventoryManager.Instance.TakeClamped(itemId, count);
             });
 
+        // Report a quest action from Ink: ~ reportAction("Action_Stable_GroomMaple")
+        story.BindExternalFunction("reportAction",
+            (string actionId) =>
+            {
+                Debug.Log($"[Bridge] reportAction: '{actionId}'");
+                QuestManager.Instance?.ReportAction(actionId);
+            });
+
+        // Give a quest to the player from Ink: ~ giveQuest("GroomMaple")
+        story.BindExternalFunction("giveQuest",
+            (string questId) =>
+            {
+                if (QuestManager.Instance == null) return;
+                var quest = GameManager.Instance?.GetQuestById(questId);
+                if (quest == null) { Debug.LogWarning($"[Bridge] giveQuest: quest '{questId}' not found."); return; }
+                Debug.Log($"[Bridge] giveQuest: giving '{questId}' to player.");
+                QuestManager.Instance.AddQuest(quest);
+            });
+
         // Hand-in a quest (your RemoveQuest does rewards + removes)
         story.BindExternalFunction("handInQuest",
             (string questId) =>
@@ -101,9 +120,18 @@ public static class GameStateBridge
         // Pauses WorldInteractableManager, fires the timing bar, then resumes with result.
         story.BindExternalFunction("startMinigame", (string minigameId) =>
         {
-            // Tell WorldInteractableManager to go dormant until result arrives
+            // Pause whichever dialog manager is currently active
             var wim = UnityEngine.Object.FindFirstObjectByType<WorldInteractableManager>();
-            if (wim != null) wim.PauseForMinigame();
+            if (wim != null && wim.gameObject.activeInHierarchy)
+            {
+                wim.PauseForMinigame();
+            }
+            else
+            {
+                var dm = UnityEngine.Object.FindFirstObjectByType<DialogManager>();
+                if (dm != null && dm.gameObject.activeInHierarchy)
+                    dm.PauseForMinigame();
+            }
 
             EventBus.Fire("StartMinigame", minigameId);
         });

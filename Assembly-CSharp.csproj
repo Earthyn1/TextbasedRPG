@@ -72,6 +72,7 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\HitSplatUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Minigame\MemorySlot.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Skills_Slot.cs" />
+    <Compile Include="Assets\Assets\Scripts\Cinematic\CinematicManager.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\ZoneUILeanManager.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\RightPanelTabs.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\InteractionUI.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="Assets\Assets\Scripts\Buttons\Btn_PanelChange.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ItemTooltipManager.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Book_Button_Slot.cs" />
+    <Compile Include="Assets\Assets\Scripts\UI\QuestToast.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\ZoneDataList.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\ActionData.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\Debug_Manager.cs" />
@@ -115,6 +117,8 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\XPToastSpawner.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\ItemLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\EventsDataLoader.cs" />
+    <Compile Include="Assets\Assets\Scripts\Managers\QuestDetailPanel.cs" />
+    <Compile Include="Assets\Assets\Scripts\Cinematic\SceneFader.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\BookManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\PlayerStats.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\NpcInfo_Data.cs" />
@@ -145,6 +149,7 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Item_Data.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\RequirementEvaluator.cs" />
     <Compile Include="Assets\Assets\Scripts\Minigame\MinigameManager.cs" />
+    <Compile Include="Assets\Assets\Scripts\Cinematic\CinematicPanel.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\Journal.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\BookLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\LootDropDef.cs" />
@@ -157,11 +162,13 @@
     <Compile Include="Assets\Assets\Scripts\Loaders\NPCDataLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\NPCDataManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\CombatSnapshot.cs" />
+    <Compile Include="Assets\Assets\Scripts\UI\LockedMessageToast.cs" />
     <Compile Include="Assets\Assets\Scripts\Minigame\MashGameUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Dialog\WorldInteractableManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\FoodUseSystem.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\Enum_Skills.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Inventory_Slot_RightClickAction.cs" />
+    <Compile Include="Assets\Assets\Scripts\Cinematic\GameStartCinematic.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\PlayerSkills.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\ItemPickupToast.cs" />
     <Compile Include="Assets\Assets\Scripts\Inventory\InventoryUI.cs" />
@@ -173,6 +180,7 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\LootRoller.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Inventory_Slot.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\EquipmentManager.cs" />
+    <Compile Include="Assets\Assets\Scripts\UI\PropHoverHighlight.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\GameManager.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,76 +1,13 @@
 [
   {
-    "questId": "Q001",
-    "questName": "Missing Amulet",
-    "description": "Find the missing amulet in the mines.",
-    "questType": "Fetch",
-    "requiredActions": [
-      {
-        "actionID": "Action_Mines_Search",
-        "name": "Search",
-        "requiredQty": 1,
-        "currentQty": 0
-      }
-    ],
-    "reward": {
-      "rewardGold": 50,
-      "rewardItem": null
-    },
-    "isCompleted": false
-  },
-  {
-    "questId": "Q002",
-    "questName": "Deliver Amulet",
-    "description": "Bring the amulet to Gregory in Town Hall.",
-    "questType": "Delivery",
-    "requiredActions": [
-      {
-        "actionID": "Action_TownHall_GiveAmulet",
-        "name": "Give Amulet",
-        "requiredQty": 1,
-        "currentQty": 0
-      }
-    ],
-    "reward": {
-      "rewardGold": 0,
-      "rewardItem": {
-        "itemID": "item_amulet",
-        "quantity": 4
-      }
-    },
-    "isCompleted": false
-  },
-  {
-    "questId": "Q003",
-    "questName": "Rare Trout",
-    "description": "Catch 5 Goldenback Trout from the lake.",
-    "questType": "Collection",
-    "requiredActions": [
-      {
-        "actionID": "Action_Fishing_Lake_5Goldenback",
-        "name": "5goldenback",
-        "requiredQty": 1,
-        "currentQty": 0
-      }
-    ],
-    "reward": {
-      "rewardGold": 33,
-      "rewardItem": {
-        "itemID": "item_fishingRod",
-        "quantity": 1
-      }
-    },
-    "isCompleted": false
-  },
-  {
     "questId": "GoblinSlayer",
     "questName": "Goblin Slayer",
-    "description": "Defeat 5 Goblins roaming around the outer walls of the city",
+    "description": "Defeat 5 Goblins roaming around the outer walls of the city.",
     "questType": "Kill",
     "requiredActions": [
       {
         "actionID": "Action_Kill_Goblins",
-        "name": "Goblins",
+        "name": "Kill Goblins",
         "requiredQty": 5,
         "currentQty": 0
       }
@@ -87,18 +24,43 @@
   {
     "questId": "GroomMaple",
     "questName": "Groom Maple",
-    "description": "Groom Maple in the stables for the Stable Master.",
+    "description": "Groom Maple in the stables for the Stable Master. Find the brush first.",
     "questType": "Task",
     "requiredActions": [
       {
+        "actionID": "Action_Find_Brush",
+        "name": "Find the brush",
+        "requiredQty": 1,
+        "currentQty": 0
+      },
+      {
         "actionID": "Action_Stable_GroomMaple",
-        "name": "Groom Maple",
+        "name": "Brush Maple",
         "requiredQty": 1,
         "currentQty": 0
       }
     ],
     "reward": {
       "rewardGold": 0,
+      "rewardItem": null
+    },
+    "isCompleted": false
+  },
+  {
+    "questId": "MoveHaystacks",
+    "questName": "Move the Hay Bales",
+    "description": "Move the hay bales from the courtyard to the stables for the Stable Master.",
+    "questType": "Task",
+    "requiredActions": [
+      {
+        "actionID": "Action_MoveHaystack",
+        "name": "Move Hay Bale",
+        "requiredQty": 3,
+        "currentQty": 0
+      }
+    ],
+    "reward": {
+      "rewardGold": 10,
       "rewardItem": null
     },
     "isCompleted": false
@@ -111,7 +73,7 @@
     "requiredActions": [
       {
         "actionID": "Action_ItemGain_chicken_egg",
-        "name": "Egg",
+        "name": "Collect Eggs",
         "requiredQty": 5,
         "currentQty": 0
       }
@@ -119,6 +81,68 @@
     "reward": {
       "rewardGold": 15,
       "rewardItem": null
+    },
+    "isCompleted": false
+  },
+  {
+    "questId": "BanditEscort",
+    "questName": "Bandit Escort",
+    "description": "A merchant needs protection on the road to Dunhaven. Clear the bandits and report back to him.",
+    "questType": "Kill",
+    "requiredActions": [
+      {
+        "actionID": "Action_Kill_Bandits",
+        "name": "Kill Bandits",
+        "requiredQty": 5,
+        "currentQty": 0
+      },
+      {
+        "actionID": "Action_Talk_Merchant",
+        "name": "Report to the Merchant",
+        "requiredQty": 1,
+        "currentQty": 0
+      }
+    ],
+    "reward": {
+      "rewardGold": 30,
+      "rewardItem": {
+        "itemID": "gold_coin",
+        "quantity": 5
+      }
+    },
+    "isCompleted": false
+  },
+  {
+    "questId": "TheOldWell",
+    "questName": "The Old Well",
+    "description": "Something foul is coming from the old well outside town. Investigate and deal with whatever is down there.",
+    "questType": "Fetch",
+    "requiredActions": [
+      {
+        "actionID": "Action_Inspect_Well",
+        "name": "Inspect the well",
+        "requiredQty": 1,
+        "currentQty": 0
+      },
+      {
+        "actionID": "Action_Kill_WellCreature",
+        "name": "Slay the creature",
+        "requiredQty": 1,
+        "currentQty": 0
+      },
+      {
+        "actionID": "Action_Talk_Mayor",
+        "name": "Report to the Mayor",
+        "requiredQty": 1,
+        "currentQty": 0
+      }
+    ],
+    "reward": {
+      "rewardGold": 40,
+      "rewardItem": {
+        "itemID": "item_wellKey",
+        "quantity": 1
+      }
     },
     "isCompleted": false
   }

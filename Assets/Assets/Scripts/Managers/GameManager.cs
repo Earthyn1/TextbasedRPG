@@ -484,6 +484,21 @@ public class GameManager : MonoBehaviour
             yield break;
         }
 
+        // Check current zone’s action requirements before allowing travel
+        if (_currentZone?.actions != null)
+        {
+            var gatingAction = _currentZone.actions.Find(a => a.type == ActionType.Zone && a.target == zoneId);
+            if (gatingAction != null && !RequirementEvaluator.EvaluateAll(gatingAction.enableWhen))
+            {
+                var msg = string.IsNullOrWhiteSpace(gatingAction.lockedMessage)
+                    ? "You can’t do that yet."
+                    : gatingAction.lockedMessage;
+                GameLog_Manager.Instance?.AddEntry(msg);
+                LockedMessageToast.Instance?.Show(msg);
+                yield break;
+            }
+        }
+
         var ui = ZoneUIManager.Instance;
         var zone = GetZoneByID(zoneId);
         if (zone == null)

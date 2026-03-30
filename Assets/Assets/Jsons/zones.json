@@ -15,7 +15,8 @@
       {
         "name": "Leave the Stables",
         "type": "Zone",
-        "target": "stableDirtRoad"
+        "target": "stableCourtyard",
+        "hitColor": "150"
       }
     ],
     "npcs": [
@@ -59,13 +60,6 @@
         "portrait": "satchel"
       },
       {
-        "id": "barrel",
-        "displayName": "Old Barrel",
-        "portrait": "satchel",
-        "autoDialog": "Barrel1",
-        "hitColor": "240"
-      },
-      {
         "id": "brush",
         "displayName": "Horse Brush",
         "portrait": "satchel",
@@ -93,18 +87,8 @@
           33
         ],
         "hideWhenFlag": "adventurersStable.brush.taken",
-        "spawnHidden": true,
-        "hitId": 160,
-        "states": [
-          {
-            "whenFlag": "adventurersStable.brush.used",
-            "sprite": "brush_used"
-          },
-          {
-            "whenFlag": "adventurersStable.brush.broken",
-            "sprite": "brush_broken"
-          }
-        ]
+        "showWhenFlag": "",
+        "hitId": 160
       }
     ]
   },
@@ -116,10 +100,113 @@
     "bgImage": "TownStables"
   },
   {
+    "id": "stableCourtyard",
+    "displayName": "Stable Courtyard",
+    "hitColor": "220",
+    "portrait": "narrator",
+    "bgImage": "StableCourtyard",
+    "actions": [
+      {
+        "name": "To Stable Block",
+        "type": "Zone",
+        "target": "adventurersStable",
+        "hitColor": "220"
+      }
+    ],
+    "sceneProps": [
+      {
+        "id": "StableCourtyard_HayStack",
+        "sprite": "StableCourtyard_HayStack",
+        "pos": [
+          0,
+          0
+        ],
+        "size": [
+          1600,
+          900
+        ],
+        "hideWhenFlag": "StableCourtyard.hayBale.taken",
+        "showWhenFlag": ""
+      },
+      {
+        "id": "StableCourtyard_Adventurers",
+        "sprite": "StableCourtyard_Adventurers",
+        "pos": [
+          0,
+          0
+        ],
+        "size": [
+          1600,
+          900
+        ],
+        "showWhenFlag": ""
+      },
+      {
+        "id": "StableCourtyard_Goblin_1",
+        "sprite": "StableCourtyard_Goblin_1",
+        "pos": [
+          0,
+          0
+        ],
+        "size": [
+          1600,
+          900
+        ],
+        "hideWhenFlag": "stableCourtyard.goblin1.killed",
+        "showWhenFlag": "stableCourtyard.goblins.spawned",
+        "spawnHidden": true
+      },
+      {
+        "id": "StableCourtyard_Goblin_1_Dead",
+        "sprite": "StableCourtyard_Goblin_1_Dead",
+        "pos": [
+          0,
+          0
+        ],
+        "size": [
+          1600,
+          900
+        ],
+        "hideWhenFlag": "stableCourtyard.goblin1.defeated",
+        "showWhenFlag": "stableCourtyard.goblin1.killed",
+        "spawnHidden": true
+      },
+      {
+        "id": "StableCourtyard_Goblin_2",
+        "sprite": "StableCourtyard_Goblin_2",
+        "pos": [
+          0,
+          0
+        ],
+        "size": [
+          1600,
+          900
+        ],
+        "hideWhenFlag": "stableCourtyard.goblin2.killed",
+        "showWhenFlag": "stableCourtyard.goblins.spawned",
+        "spawnHidden": true
+      },
+      {
+        "id": "StableCourtyard_Goblin_2_Dead",
+        "sprite": "StableCourtyard_Goblin_2_Dead",
+        "pos": [
+          0,
+          0
+        ],
+        "size": [
+          1600,
+          900
+        ],
+        "hideWhenFlag": "stableCourtyard.goblin2.defeated",
+        "showWhenFlag": "stableCourtyard.goblin2.killed",
+        "spawnHidden": true
+      }
+    ]
+  },
+  {
     "id": "tackRoom",
     "displayName": "Tack Room",
     "description": "Horses shift in their stalls, leather tack swaying gently with each heavy breath.",
-    "hitColor": "100",
     "portrait": "narrator",
     "bgImage": "TackRoom",
     "actions": [
@@ -127,7 +214,11 @@
         "name": "To Stable Block",
         "type": "Zone",
         "target": "adventurersStable",
-        "hitColor": "220"
+        "hitColor": "220",
+        "enableWhen": [
+          "Flag(stablemaster.hasSpoken)"
+        ],
+        "lockedMessage": "You should check in with the stablemaster first."
       }
     ],
     "npcs": [

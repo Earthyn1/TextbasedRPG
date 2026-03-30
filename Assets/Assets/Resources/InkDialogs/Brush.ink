@@ -2,50 +2,28 @@ EXTERNAL hasFlag(key)
 EXTERNAL setWorldFlag(key)
 EXTERNAL giveItem(itemId, count)
 EXTERNAL hasItem(itemId, count)
-EXTERNAL clearWorldFlag(key)
+EXTERNAL reportAction(actionId)
+EXTERNAL questActive(questId)
 
 -> Intro
 
 === Intro ===
-        An old horse brush, its seen better days.
+{ hasItem("brush", 1):
+    -> AlreadyHave
+}
+An old horse brush. Well-worn but still good.
+* [Take the brush.]
+    ~ giveItem("brush", 1)
+    ~ setWorldFlag("adventurersStable.brush.taken")
+    { questActive("GroomMaple"):
+        ~ reportAction("Action_Find_Brush")
+    }
+    You pocket the brush.
+    -> END
+* [Leave it.]
+    -> END
 
-        * [Take the brush.]
-            ~ giveItem("brush", 1)
-            ~ setWorldFlag("adventurersStable.brush.used")
-            You pocket the brush.
-            -> Test2
-            
-        * [Return]
-            -> END
-            
-            
-=== Test2 ===
-         An old horse brush, its seen better days.
-         
-         *  [Take the brush.]
-            ~ giveItem("brush", 1)
-            ~ setWorldFlag("adventurersStable.brush.broken")
-            You pocket the brush.
-            -> Test3
-            
-=== Test3 ===
-        An old horse brush, its seen better days.
-        
-        *  [Take the brush.]
-        ~ giveItem("brush", 1)
-        ~ setWorldFlag("adventurersStable.brush.taken")
-
-        You pocket the brush.
-        -> Test4
-
-
-=== Test4 ===
-        An old horse brush, its seen better days.
-        
-        *  [Take the brush.]
-        ~ giveItem("brush", 1)
-        ~ clearWorldFlag("adventurersStable.brush.taken")
-        You pocket the brush.
-        -> END
-
-    
+=== AlreadyHave ===
+You already have the brush.
+* [Right.]
+    -> END

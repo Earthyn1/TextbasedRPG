@@ -36,9 +36,9 @@ public class ZoneHitmaskInteractor : MonoBehaviour
 
     void Update()
     {
-        if (interactionUI != null && interactionUI.IsBusy)
+        if (interactionUI != null && interactionUI.IsBusy || CinematicManager.IsPlaying)
         {
-            // Optional: ensure hover visuals are cleared while UI is open
+            // Suppress all interaction while UI is busy or a cinematic is playing
             ClearHover();
             return;
         }
@@ -102,5 +102,30 @@ public class ZoneHitmaskInteractor : MonoBehaviour
             hoverMaterial.SetFloat("_HoveredId", 0f);
             hoverMaterial.SetFloat("_Reveal", 0f);
         }
+    }
+
+    /// <summary>
+    /// Called by a prop's PointerEnter event to drive the hover shader,
+    /// bypassing the texture-sample path entirely.
+    /// </summary>
+    public void SetPropHovered(byte id)
+    {
+        pendingId = id;
+        lastNonZeroTime = Time.unscaledTime;
+    }
+
+    /// <summary>
+    /// Called by a prop's Button click — fires the same OnInteractableClicked
+    /// event as the background hitmask so GameManager doesn't need to care.
+    /// </summary>
+    public void TriggerPropClick(byte hitId)
+    {
+        if (Time.unscaledTime - lastClickTime < clickCooldown) return;
+        lastClickTime = Time.unscaledTime;
+
+        if (hitIdToInteractable != null && hitIdToInteractable.TryGetValue(hitId, out var interactableId))
+            OnInteractableClicked?.Invoke(interactableId, hitId);
+        else
+            Debug.Log($"[PropClick] hitId={hitId} has no mapping. mapCount={(hitIdToInteractable?.Count ?? -1)}");
     }
 }

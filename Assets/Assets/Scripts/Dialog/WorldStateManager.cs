@@ -30,15 +30,18 @@ public class WorldStateManager : MonoBehaviour
 
     public void SetFlag(string key)
     {
+        flags.Add(key);              // ✅ store in WorldStateManager
+        WorldState.SetFlag(key, true); // ✅ keep WorldState in sync (used by RequirementEvaluator)
 
-        flags.Add(key);   // ✅ store first
-
-        OnFlagChanged?.Invoke(key);   // ✅ invoke after storage
+        OnFlagChanged?.Invoke(key);
     }
 
     public void ClearFlag(string key)
     {
         if (flags.Remove(key))
+        {
+            WorldState.SetFlag(key, false);
             OnFlagChanged?.Invoke(key);
+        }
     }
 }
