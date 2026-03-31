@@ -27,6 +27,7 @@ public class ZoneUIManager : MonoBehaviour
     [SerializeField] Sprite defaultNarratorPortrait;
     public CanvasGroup descriptionGroup;
     [SerializeField] CanvasGroup actionsGroup;
+    [SerializeField] CanvasGroup sceneCanvasGroup;  // covers BG image + props — fades on zone transition
     [SerializeField] float fadeDuration = 0.25f;
 
     [Header("Delegates")]
@@ -382,7 +383,12 @@ public class ZoneUIManager : MonoBehaviour
 
     private IEnumerator DisplayZoneCo(ZoneData zone, int versionToken, bool suppressHeader)
     {
+        // Fade UI and scene (background + props) out simultaneously
+        var fadeScene = sceneCanvasGroup != null
+            ? StartCoroutine(FadeGroupsOut(sceneCanvasGroup, null, fadeDuration))
+            : null;
         yield return FadeGroupsOut(descriptionGroup, actionsGroup, fadeDuration, 0.05f);
+        if (fadeScene != null) yield return fadeScene;
 
         elementSpawner?.ClearAll();
 
@@ -393,7 +399,6 @@ public class ZoneUIManager : MonoBehaviour
         if (!suppressHeader) interactablesHolders.gameObject.SetActive(true);
         if (!suppressHeader) interactablesTitle.text = "Interactables";
 
-
         if (zone == null)
         {
             SetPortraitToNarrator();
@@ -403,19 +408,22 @@ public class ZoneUIManager : MonoBehaviour
         else
         {
             if (zone.type == "Zone")
-            {
                 LastZoneEntered = zone;
-            }
 
             SetPortraitToNarrator();
             if (!suppressHeader && zoneNameText) zoneNameText.text = zone.displayName;
             if (zoneDescriptionText) zoneDescriptionText.text = $"<b>Narrator:</b> <i>{zone.description}</i>";
 
-            // Delegate all spawning (actions + NPC + world) to the spawner
+            // Background + props swap while everything is faded out
             elementSpawner?.BuildForZone(zone);
         }
 
+        // Fade UI and scene back in simultaneously
+        var fadeSceneIn = sceneCanvasGroup != null
+            ? StartCoroutine(FadeGroupsIn(sceneCanvasGroup, null, fadeDuration))
+            : null;
         yield return FadeGroupsIn(descriptionGroup, actionsGroup, fadeDuration, 0.05f);
+        if (fadeSceneIn != null) yield return fadeSceneIn;
 
         if (!string.IsNullOrEmpty(_pendingNarration) && zoneDescriptionText)
             zoneDescriptionText.text = _pendingNarration;

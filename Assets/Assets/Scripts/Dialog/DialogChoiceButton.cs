@@ -13,22 +13,16 @@ using TMPro;
 /// </summary>
 public class DialogChoiceButton : MonoBehaviour
 {
-    [SerializeField] private Image          skillIcon;
-    [SerializeField] private Image          difficultyOverlay;
-    [SerializeField] private TMP_Text       reqText;
-    [SerializeField] private RectTransform  buttonLabelRect;
-    [SerializeField] private CanvasGroup    canvasGroup;
+    [SerializeField] private Image       skillIcon;
+    [SerializeField] private Image       difficultyOverlay;
+    [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private TMP_Text    skillNumberText;
 
-    private float _defaultLabelY;
+    [SerializeField] private float lockedAlpha = 0.4f;
+    [SerializeField] private Color metColor    = new Color(0.27f, 0.85f, 0.27f); // green
+    [SerializeField] private Color notMetColor = new Color(0.90f, 0.25f, 0.25f); // red
 
-    private void Awake()
-    {
-        // Cache the label's default Y so we can restore it later
-        if (buttonLabelRect != null)
-            _defaultLabelY = buttonLabelRect.anchoredPosition.y;
-
-        HideMinigameInfo();
-    }
+    private void Awake() => HideMinigameInfo();
 
     /// <summary>Show skill icon and overlay for a minigame choice.</summary>
     public void SetMinigameInfo(Sprite skillSprite)
@@ -43,41 +37,35 @@ public class DialogChoiceButton : MonoBehaviour
             difficultyOverlay.gameObject.SetActive(true);
     }
 
-    /// <summary>
-    /// Show the requirement label and shift the button text down.
-    /// Call when the player does NOT meet the skill requirement.
-    /// </summary>
-    public void ShowRequirement(string label)
+    /// <summary>Player does NOT meet the requirement — dim button, show playerLevel/reqLevel in red.</summary>
+    public void ShowRequirementNotMet(int playerLevel, int reqLevel)
     {
-        if (reqText != null)
+        if (canvasGroup != null)    canvasGroup.alpha = lockedAlpha;
+        if (skillNumberText != null)
         {
-            reqText.text = label;
-            reqText.gameObject.SetActive(true);
+            skillNumberText.text  = $"{playerLevel}/{reqLevel}";
+            skillNumberText.color = notMetColor;
+            skillNumberText.gameObject.SetActive(true);
         }
-
-        if (buttonLabelRect != null)
-        {
-            var pos = buttonLabelRect.anchoredPosition;
-            buttonLabelRect.anchoredPosition = new Vector2(pos.x, -21.2f);
-        }
-
-        if (difficultyOverlay != null) difficultyOverlay.gameObject.SetActive(false);
-        if (canvasGroup != null) canvasGroup.alpha = 0.6f;
     }
 
-    /// <summary>Hide the requirement label and restore the button text to its default position.</summary>
+    /// <summary>Player meets the requirement — full opacity, show reqLevel in green.</summary>
+    public void ShowRequirementMet(int reqLevel)
+    {
+        if (canvasGroup != null)    canvasGroup.alpha = 1f;
+        if (skillNumberText != null)
+        {
+            skillNumberText.text  = $"{reqLevel}";
+            skillNumberText.color = metColor;
+            skillNumberText.gameObject.SetActive(true);
+        }
+    }
+
+    /// <summary>No skill requirement — full opacity, hide number text.</summary>
     public void HideRequirement()
     {
-        if (reqText != null)
-            reqText.gameObject.SetActive(false);
-
-        if (buttonLabelRect != null)
-        {
-            var pos = buttonLabelRect.anchoredPosition;
-            buttonLabelRect.anchoredPosition = new Vector2(pos.x, _defaultLabelY);
-        }
-
-        if (canvasGroup != null) canvasGroup.alpha = 1f;
+        if (canvasGroup != null)     canvasGroup.alpha = 1f;
+        if (skillNumberText != null) skillNumberText.gameObject.SetActive(false);
     }
 
     /// <summary>Hide all minigame UI — used for non-minigame choices.</summary>

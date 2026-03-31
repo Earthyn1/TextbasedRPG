@@ -74,6 +74,7 @@
     <Compile Include="Assets\Assets\Scripts\Buttons\Skills_Slot.cs" />
     <Compile Include="Assets\Assets\Scripts\Cinematic\CinematicManager.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\ZoneUILeanManager.cs" />
+    <Compile Include="Assets\Assets\Scripts\UI\SceneTransitionFader.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\RightPanelTabs.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\InteractionUI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\SkillData\Attributes_UI.cs" />
@@ -158,6 +159,7 @@
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Enum_ItemType.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\WordData.cs" />
     <Compile Include="Assets\Ink\Demos\Basic Demo\Scripts\BasicInkExample.cs" />
+    <Compile Include="Assets\Assets\Scripts\Dialog\DialogChoiceBuilder.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\QuestData\QuestRequiredActions.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\NPCDataLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\NPCDataManager.cs" />

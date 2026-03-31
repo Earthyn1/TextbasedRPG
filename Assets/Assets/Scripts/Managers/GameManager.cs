@@ -509,6 +509,10 @@ public class GameManager : MonoBehaviour
 
         WorldState.CurrentZoneId = zoneId;
 
+        // Fade to black before swapping anything
+        if (SceneTransitionFader.Instance != null)
+            yield return SceneTransitionFader.Instance.FadeToBlack();
+
         // ✅ Clear UI & show header first (NO buttons)
         ui?.PrepareZoneTransition();
         ui?.DisplayZoneHeaderOnly(zone);
@@ -524,6 +528,10 @@ public class GameManager : MonoBehaviour
 
         // ✅ Now mark visited
         WorldState.MarkVisited(zoneId);
+
+        // Fade back in now that the new zone is loaded
+        if (SceneTransitionFader.Instance != null)
+            yield return SceneTransitionFader.Instance.FadeFromBlack();
 
         // ✅ If no takeover, build the full zone body now
         if (!ui.HasPendingTakeover)

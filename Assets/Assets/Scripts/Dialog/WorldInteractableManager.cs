@@ -1,5 +1,6 @@
-﻿using System.Text;
-using System.Text.RegularExpressions;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
 using Ink.Runtime;
 using TMPro;
 using UnityEngine;
@@ -8,110 +9,158 @@ using UnityEngine.UI;
 public class WorldInteractableManager : MonoBehaviour
 {
     [Header("UI Refs")]
-    [SerializeField] private GameObject worldInteractableButtonPrefab; // prefab: Button + TMP label
-    [SerializeField] private Transform buttonLayoutGroup;              // parent for buttons
+    [SerializeField] private GameObject      worldInteractableButtonPrefab;
+    [SerializeField] private Transform       buttonLayoutGroup;
     [SerializeField] private TextMeshProUGUI descriptionText;
 
+    [Header("Animation")]
+    [SerializeField] private CanvasGroup dialogCanvasGroup;  // root panel — fades on open/close
+    [SerializeField] private CanvasGroup textCanvasGroup;    // description text area — fades per choice
+    [SerializeField] private float panelFadeDuration  = 0.25f;
+    [SerializeField] private float textFadeDuration   = 0.18f;
+    [SerializeField] private float buttonFadeDuration = 0.15f;
+    [SerializeField] private float buttonStagger      = 0.08f;
+
     [Header("Behavior")]
-    [SerializeField] private int maxChoicesShown = 3;
+    [SerializeField] private int  maxChoicesShown  = 3;
     [SerializeField] private bool autoCloseWhenDone = true;
 
     [Header("Ink")]
-    public TextAsset inkJson;              // compiled .json from Inky
+    public TextAsset inkJson;
 
-    private Story _story;
-    private string _contextId; // npcId / interactableId, used by GameStateBridge
-    private bool _waitingForMinigame;
+    private Story     _story;
+    private string    _contextId;
+    private bool      _waitingForMinigame;
+    private Coroutine _animCoroutine;
 
-    /// <summary>
-    /// Opens an interactable Ink story at a knot/stitch.
-    /// </summary>
-    public void Open(TextAsset inkJSON, string startKnot, string contextId)
-    {
-        LockedMessageToast.Instance?.Hide();
+    // ── EventBus ───────────────────────────────────────────────────────────────
 
-        inkJson = inkJSON;
-
-        if (inkJSON == null)
-        {
-            Debug.LogError("[WorldInteractableManager] inkJSON is null.");
-            return;
-        }
-
-        _contextId = contextId;
-
-        _story = new Story(inkJSON.text);
-
-        // Bind game state functions (inventory, flags, etc) for this interactable context
-        GameStateBridge.Bind(_story, _contextId);
-
-        gameObject.SetActive(true);
-        _waitingForMinigame = false;
-
-        RefreshUI();
-    }
-
-    /// <summary>Called by GameStateBridge when Ink fires startMinigame().</summary>
-    public void PauseForMinigame()
-    {
-        _waitingForMinigame = true;
-        MinigameManager.Instance?.SetSpawnParent(buttonLayoutGroup);
-    }
-
-    private void OnEnable()
-    {
-        EventBus.OnTrigger += OnBusEvent;
-    }
-
-    private void OnDisable()
-    {
-        EventBus.OnTrigger -= OnBusEvent;
-    }
+    private void OnEnable()  { EventBus.OnTrigger += OnBusEvent; }
+    private void OnDisable() { EventBus.OnTrigger -= OnBusEvent; }
 
     private void OnBusEvent(string trigger, object payload)
     {
         if (trigger == "MinigameResult" && _waitingForMinigame)
         {
             _waitingForMinigame = false;
-            bool success = payload is bool b && b;
-
-            // Jump directly to the correct knot — avoids variable timing issues
-            string knot = success ? "MinigameFound" : "MinigameMissed";
+            bool   success = payload is bool b && b;
+            string knot    = success ? "MinigameFound" : "MinigameMissed";
             try { _story?.ChoosePathString(knot); }
             catch { Debug.LogWarning($"[WorldInteractableManager] Ink knot '{knot}' not found in story."); }
 
-            RefreshUI();
+            RunAnim(RefreshAfterMinigame());
         }
+    }
+
+    // ── Public API ─────────────────────────────────────────────────────────────
+
+    public void PauseForMinigame()
+    {
+        _waitingForMinigame = true;
+        MinigameManager.Instance?.SetSpawnParent(buttonLayoutGroup);
+    }
+
+    public void Open(TextAsset inkJSON, string startKnot, string contextId)
+    {
+        LockedMessageToast.Instance?.Hide();
+
+        inkJson = inkJSON;
+        if (inkJSON == null) { Debug.LogError("[WorldInteractableManager] inkJSON is null."); return; }
+
+        _contextId = contextId;
+        _story     = new Story(inkJSON.text);
+        GameStateBridge.Bind(_story, _contextId);
+
+        _waitingForMinigame = false;
+
+        if (dialogCanvasGroup) dialogCanvasGroup.alpha = 0f;
+        if (textCanvasGroup)   textCanvasGroup.alpha   = 1f;
+
+        gameObject.SetActive(true);
+        RunAnim(OpenSequence());
     }
 
     public void Close()
     {
+        RunAnim(CloseSequence());
+    }
+
+    // ── Animation Sequences ────────────────────────────────────────────────────
+
+    private IEnumerator OpenSequence()
+    {
+        BuildDescriptionText();
+
+        if (dialogCanvasGroup)
+            yield return FadeCG(dialogCanvasGroup, 0f, 1f, panelFadeDuration);
+
+        if (_waitingForMinigame) yield break;
+
+        yield return SpawnAndFadeButtons();
+    }
+
+    private IEnumerator ChoiceTransition(int choiceIndex)
+    {
+        var fadeButtons = StartCoroutine(FadeOutButtons());
+        Coroutine fadeText = null;
+        if (textCanvasGroup)
+            fadeText = StartCoroutine(FadeCG(textCanvasGroup, 1f, 0f, textFadeDuration));
+
+        yield return fadeButtons;
+        if (fadeText != null) yield return fadeText;
+
         ClearButtons();
+        _story.ChooseChoiceIndex(choiceIndex);
+        BuildDescriptionText();
 
+        if (autoCloseWhenDone && !_story.canContinue && _story.currentChoices.Count == 0)
+        {
+            yield return CloseSequence();
+            yield break;
+        }
+
+        if (textCanvasGroup) yield return FadeCG(textCanvasGroup, 0f, 1f, textFadeDuration);
+
+        if (!_waitingForMinigame)
+            yield return SpawnAndFadeButtons();
+    }
+
+    private IEnumerator CloseSequence()
+    {
+        yield return FadeOutButtons();
+
+        if (textCanvasGroup)   yield return FadeCG(textCanvasGroup,   1f, 0f, textFadeDuration);
+        if (dialogCanvasGroup) yield return FadeCG(dialogCanvasGroup, 1f, 0f, panelFadeDuration);
+
+        ClearButtons();
         if (descriptionText) descriptionText.text = "";
-
-        _story = null;
-        _contextId = null;
+        _story              = null;
+        _contextId          = null;
         _waitingForMinigame = false;
-
         gameObject.SetActive(false);
     }
 
-    private void RefreshUI()
+    private IEnumerator RefreshAfterMinigame()
+    {
+        ClearButtons();
+        if (textCanvasGroup) yield return FadeCG(textCanvasGroup, 1f, 0f, textFadeDuration);
+        BuildDescriptionText();
+        if (textCanvasGroup) yield return FadeCG(textCanvasGroup, 0f, 1f, textFadeDuration);
+        if (!_waitingForMinigame)
+            yield return SpawnAndFadeButtons();
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
+
+    private void BuildDescriptionText()
     {
         if (_story == null) return;
 
-        ClearButtons();
-
-        // Build description text from all continued lines
         var sb = new StringBuilder();
         while (_story.canContinue)
         {
             var line = _story.Continue().Trim();
-
-            // startMinigame() fired mid-loop — stop draining, don't read ahead
             if (_waitingForMinigame) break;
-
             if (!string.IsNullOrEmpty(line))
             {
                 if (sb.Length > 0) sb.AppendLine();
@@ -120,143 +169,92 @@ public class WorldInteractableManager : MonoBehaviour
         }
 
         if (descriptionText) descriptionText.text = sb.ToString();
+    }
 
-        // Timing bar is spawned inside buttonLayoutGroup, just wait
-        if (_waitingForMinigame) return;
+    private IEnumerator SpawnAndFadeButtons()
+    {
+        if (_story == null) yield break;
 
-        // Render choices
         var choices = _story.currentChoices;
-        int shown = Mathf.Min(maxChoicesShown, choices.Count);
+        int shown   = Mathf.Min(maxChoicesShown, choices.Count);
+        var groups  = new List<CanvasGroup>(shown);
 
         for (int i = 0; i < shown; i++)
         {
-            int choiceIndex = i;
-
+            int idx    = i;
             var btnObj = Instantiate(worldInteractableButtonPrefab, buttonLayoutGroup);
 
             var label = btnObj.GetComponentInChildren<TextMeshProUGUI>(true);
-            if (label) label.text = BuildChoiceLabel(choices[i], btnObj);
+            if (label) label.text = DialogChoiceBuilder.Build(choices[i], btnObj);
 
             var button = btnObj.GetComponent<Button>();
             if (button != null)
-            {
-                button.onClick.AddListener(() => OnChoiceClicked(choiceIndex));
-            }
+                button.onClick.AddListener(() => OnChoiceClicked(idx));
+
+            var cg   = btnObj.GetComponent<CanvasGroup>() ?? btnObj.AddComponent<CanvasGroup>();
+            cg.alpha = 0f;
+            groups.Add(cg);
         }
 
-        // Auto-close if story is done and no choices remain
-        if (autoCloseWhenDone && !_story.canContinue && choices.Count == 0)
+        foreach (var cg in groups)
         {
-            Close();
+            StartCoroutine(FadeCG(cg, 0f, 1f, buttonFadeDuration));
+            yield return new WaitForSeconds(buttonStagger);
         }
+
+        if (groups.Count > 0)
+            yield return new WaitForSeconds(buttonFadeDuration);
     }
 
-    // Matches <mg:params> and <req:SkillName,level> embedded in choice text
-    private static readonly Regex _mgTagRegex  = new Regex(@"<mg:([^>]+)>",  RegexOptions.Compiled);
-    private static readonly Regex _reqTagRegex = new Regex(@"<req:([^>]+)>", RegexOptions.Compiled);
-
-    /// <summary>
-    /// Returns clean display text for the button (strips mg: and req: tags).
-    /// Drives DialogChoiceButton images and requirement label.
-    ///
-    /// Ink format:
-    ///   * [Do the thing<mg:id,level,Type>]                    — minigame, no requirement
-    ///   * [Pick the lock<mg:id,level,Type><req:Perception,3>] — minigame + skill gate
-    /// </summary>
-    private string BuildChoiceLabel(Ink.Runtime.Choice choice, GameObject btnObj)
+    private IEnumerator FadeOutButtons()
     {
-        string raw          = choice.text;
-        var    mgMatch      = _mgTagRegex.Match(raw);
-        var    reqMatch     = _reqTagRegex.Match(raw);
-        var    choiceButton = btnObj.GetComponent<DialogChoiceButton>();
-        var    button       = btnObj.GetComponent<UnityEngine.UI.Button>();
+        var coroutines = new List<Coroutine>();
 
-        // Strip both tags from display text, then strip surrounding quotes
-        string displayText = _mgTagRegex.Replace(raw, "");
-        displayText        = _reqTagRegex.Replace(displayText, "").Trim();
-        displayText        = StripQuotes(displayText);
-
-        // ── No minigame tag — plain choice ────────────────────────────────────
-        if (!mgMatch.Success)
+        foreach (Transform child in buttonLayoutGroup)
         {
-            choiceButton?.HideMinigameInfo();
-            return displayText;
+            var cg = child.GetComponent<CanvasGroup>();
+            if (cg != null)
+                coroutines.Add(StartCoroutine(FadeCG(cg, cg.alpha, 0f, textFadeDuration)));
         }
 
-        // ── Minigame choice ───────────────────────────────────────────────────
-        string mgId = mgMatch.Groups[1].Value.Trim();
-
-        if (choiceButton != null && MinigameManager.Instance != null)
-        {
-            Sprite skillSprite = MinigameManager.Instance.GetSkillSprite(mgId);
-            choiceButton.SetMinigameInfo(skillSprite);
-        }
-
-        // ── Skill requirement check ───────────────────────────────────────────
-        if (reqMatch.Success)
-        {
-            var    parts    = reqMatch.Groups[1].Value.Split(',');
-            string skillStr = parts.Length >= 1 ? parts[0].Trim() : "";
-            int    reqLevel = parts.Length >= 2 && int.TryParse(parts[1].Trim(), out int lvl) ? lvl : 1;
-
-            bool reqMet = false;
-            if (PlayerSkills.Instance != null &&
-                System.Enum.TryParse(skillStr, true, out Enum_Skills skill))
-            {
-                int playerLevel = PlayerSkills.Instance.GetSkill(skill)?.level ?? 0;
-                reqMet = playerLevel >= reqLevel;
-            }
-
-            if (!reqMet)
-            {
-                choiceButton?.ShowRequirement($"Req: {skillStr} {reqLevel}");
-                if (button != null) button.interactable = false;
-            }
-            else
-            {
-                choiceButton?.HideRequirement();
-            }
-        }
-        else
-        {
-            choiceButton?.HideRequirement();
-        }
-
-        return displayText;
+        foreach (var c in coroutines)
+            yield return c;
     }
 
     private void OnChoiceClicked(int choiceIndex)
     {
         if (_story == null) return;
-
-        var choices = _story.currentChoices;
-        if (choiceIndex < 0 || choiceIndex >= choices.Count) return;
-
-        _story.ChooseChoiceIndex(choiceIndex);
-        RefreshUI();
+        if (choiceIndex < 0 || choiceIndex >= _story.currentChoices.Count) return;
+        RunAnim(ChoiceTransition(choiceIndex));
     }
 
     private void ClearButtons()
     {
         if (buttonLayoutGroup == null) return;
-
         for (int i = buttonLayoutGroup.childCount - 1; i >= 0; i--)
-        {
             Destroy(buttonLayoutGroup.GetChild(i).gameObject);
+    }
+
+    private void RunAnim(IEnumerator sequence)
+    {
+        if (_animCoroutine != null) StopCoroutine(_animCoroutine);
+        _animCoroutine = StartCoroutine(sequence);
+    }
+
+    private IEnumerator FadeCG(CanvasGroup cg, float from, float to, float duration)
+    {
+        if (cg == null) yield break;
+        float t = 0f;
+        cg.alpha = from;
+        while (t < duration)
+        {
+            if (cg == null) yield break;
+            t       += Time.deltaTime;
+            cg.alpha = Mathf.Lerp(from, to, Mathf.Clamp01(t / duration));
+            yield return null;
         }
+        if (cg != null) cg.alpha = to;
     }
 
-    private static string FormatDialogLine(string line)
-    {
-        return StripQuotes(line);
-    }
-
-    private static string StripQuotes(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return text;
-        text = text.Trim();
-        if (text.StartsWith("\"") && text.EndsWith("\"") && text.Length > 2)
-            return text.Substring(1, text.Length - 2);
-        return text;
-    }
+    private static string FormatDialogLine(string line) => DialogChoiceBuilder.StripQuotes(line);
 }

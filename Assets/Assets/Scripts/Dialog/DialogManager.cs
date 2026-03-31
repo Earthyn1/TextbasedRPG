@@ -196,7 +196,7 @@ public class DialogManager : MonoBehaviour
             var btnObj = Instantiate(dialogButtonPrefab, buttonLayoutGroup);
 
             var label = btnObj.GetComponentInChildren<TextMeshProUGUI>(true);
-            if (label) label.text = StripQuotes(choices[i].text);
+            if (label) label.text = DialogChoiceBuilder.Build(choices[i], btnObj);
 
             var button = btnObj.GetComponent<Button>();
             button.onClick.AddListener(() => OnChoiceClicked(idx));
@@ -261,21 +261,13 @@ public class DialogManager : MonoBehaviour
         cg.alpha = from;
         while (t < duration)
         {
+            if (cg == null) yield break;
             t       += Time.deltaTime;
             cg.alpha = Mathf.Lerp(from, to, Mathf.Clamp01(t / duration));
             yield return null;
         }
-        cg.alpha = to;
+        if (cg != null) cg.alpha = to;
     }
 
-    private static string FormatDialogLine(string line) => StripQuotes(line);
-
-    private static string StripQuotes(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return text;
-        text = text.Trim();
-        if (text.StartsWith("\"") && text.EndsWith("\"") && text.Length > 2)
-            return text.Substring(1, text.Length - 2);
-        return text;
-    }
+    private static string FormatDialogLine(string line) => DialogChoiceBuilder.StripQuotes(line);
 }

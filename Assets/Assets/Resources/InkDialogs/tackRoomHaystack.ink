@@ -9,7 +9,7 @@ EXTERNAL startMinigame(id)
 === Intro ===
 A pile of dry hay stacked against the wall. It smells faintly of dust and horses.
 
-    * [Rummage through it<mg:haystackSearch,2,TimingBar><req:Speed,1>]
+    * [Rummage through it<mg:haystackSearch,2,TimingBar><req:Speed,3>]
         You plunge your hands into the hay...
         ~ startMinigame("haystackSearch,2,TimingBar")
         -> DONE
