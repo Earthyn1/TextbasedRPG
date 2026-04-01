@@ -48,6 +48,7 @@ public class DialogManager : MonoBehaviour
 
             RunAnim(RefreshAfterMinigame());
         }
+
     }
 
     // ── Public API ─────────────────────────────────────────────────────────────
@@ -119,8 +120,9 @@ public class DialogManager : MonoBehaviour
         _story.ChooseChoiceIndex(choiceIndex);
         BuildDescriptionText();
 
-        // If story is over, show final line then close
-        if (!_story.canContinue && _story.currentChoices.Count == 0)
+        // If story is over, show final line then close.
+        // Don't close if a minigame or combat is running — panel must stay up.
+        if (!_waitingForMinigame && !_story.canContinue && _story.currentChoices.Count == 0)
         {
             if (textCanvasGroup) yield return FadeCG(textCanvasGroup, 0f, 1f, textFadeDuration);
             yield return new WaitForSeconds(1.2f);

@@ -76,10 +76,12 @@ public class ZoneHitmaskInteractor : MonoBehaviour
         if (hoveredId != 0 && Input.GetMouseButtonDown(0))
         {
             if (Time.unscaledTime - lastClickTime < clickCooldown) return;
-            lastClickTime = Time.unscaledTime;
 
             if (hitIdToInteractable != null && hitIdToInteractable.TryGetValue(hoveredId, out var interactableId))
             {
+                // Only stamp cooldown on a successful mapped hit so an unmapped
+                // background pixel never blocks a prop button firing the same frame.
+                lastClickTime = Time.unscaledTime;
                 OnInteractableClicked?.Invoke(interactableId, hoveredId);
             }
             else
@@ -110,6 +112,7 @@ public class ZoneHitmaskInteractor : MonoBehaviour
     /// </summary>
     public void SetPropHovered(byte id)
     {
+       
         pendingId = id;
         lastNonZeroTime = Time.unscaledTime;
     }
@@ -120,12 +123,23 @@ public class ZoneHitmaskInteractor : MonoBehaviour
     /// </summary>
     public void TriggerPropClick(byte hitId)
     {
+        Debug.Log($"[TriggerPropClick] ENTERED hitId={hitId} cooldownLeft={clickCooldown - (Time.unscaledTime - lastClickTime):F2}s mapCount={hitIdToInteractable?.Count ?? -1}");
+
         if (Time.unscaledTime - lastClickTime < clickCooldown) return;
         lastClickTime = Time.unscaledTime;
 
         if (hitIdToInteractable != null && hitIdToInteractable.TryGetValue(hitId, out var interactableId))
+        {
+            Debug.Log($"[TriggerPropClick] Firing OnInteractableClicked id='{interactableId}' hitId={hitId}");
             OnInteractableClicked?.Invoke(interactableId, hitId);
+        }
         else
-            Debug.Log($"[PropClick] hitId={hitId} has no mapping. mapCount={(hitIdToInteractable?.Count ?? -1)}");
+        {
+            var keys = hitIdToInteractable != null
+                ? string.Join(", ", hitIdToInteractable.Keys)
+                : "null";
+
+            Debug.Log($"[TriggerPropClick] hitId={hitId} has no mapping. map=[{keys}]");
+        }
     }
 }

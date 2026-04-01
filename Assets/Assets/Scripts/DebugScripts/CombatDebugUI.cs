@@ -18,13 +18,16 @@ public class CombatDebugUI : MonoBehaviour
     /// </summary>
     public void ShowChances(float playerHit, float playerCrit, float enemyHit, float enemyCrit)
     {
-        debugText.text =
-            $"<b>Combat Debug</b>\n" +
-            $"Player → Enemy:\n" +
-            $"  HitChance: {(playerHit * 100f):F1}%\n" +
-            $"  CritChance: {(playerCrit * 100f):F1}%\n\n" +
-            $"Enemy → Player:\n" +
-            $"  HitChance: {(enemyHit * 100f):F1}%\n" +
-            $"  CritChance: {(enemyCrit * 100f):F1}%";
+        if (debugText != null)
+        {
+            debugText.text =
+                $"<b>Combat Debug</b>\n" +
+                $"Player → Enemy:\n" +
+                $"  HitChance: {(playerHit * 100f):F1}%\n" +
+                $"  CritChance: {(playerCrit * 100f):F1}%\n\n" +
+                $"Enemy → Player:\n" +
+                $"  HitChance: {(enemyHit * 100f):F1}%\n" +
+                $"  CritChance: {(enemyCrit * 100f):F1}%";
+        }
     }
 }

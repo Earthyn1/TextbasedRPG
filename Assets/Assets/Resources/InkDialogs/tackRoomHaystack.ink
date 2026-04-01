@@ -9,9 +9,8 @@ EXTERNAL startMinigame(id)
 === Intro ===
 A pile of dry hay stacked against the wall. It smells faintly of dust and horses.
 
-    * [Rummage through it<mg:haystackSearch,2,TimingBar><req:Speed,3>]
-        You plunge your hands into the hay...
-        ~ startMinigame("haystackSearch,2,TimingBar")
+   * [Rummage through it<mg:haystackSearch,2,TimedAction,Perception><req:Perception,1>]
+    ~ startMinigame("haystackSearch, 2, TimedAction, Perception, Searching the stall...")
         -> DONE
 
     * [Leave]
@@ -25,13 +24,4 @@ Your fingers close around something solid. Hidden beneath the hay — a small co
     * [Leave]
         -> END
 
-=== MinigameMissed ===
-Nothing but hay and dust. Whatever might have been here, you missed it.
 
-    + [Try again<mg:haystackSearch,2,TimingBar><req:Speed,1>]
-        You plunge your hands back into the hay...
-        ~ startMinigame("haystackSearch,2,TimingBar")
-        -> DONE
-
-    * [Leave]
-        -> END

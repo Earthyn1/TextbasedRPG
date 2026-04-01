@@ -370,7 +370,7 @@ public class ZoneUIManager : MonoBehaviour
         if (zoneNameText) zoneNameText.text = zone.displayName;
         if (zoneDescriptionText) zoneDescriptionText.text = $"<b>Narrator:</b> <i>{zone.description}</i>";
 
-        elementSpawner.SetBGImage(zone);
+        elementSpawner?.SetBGImage(zone);
     }
     public void DisplayZone(ZoneData zone, bool suppressHeader = false)
     {

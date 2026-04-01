@@ -224,6 +224,12 @@ public class GameManager : MonoBehaviour
                 if (!string.IsNullOrWhiteSpace(action.target) && action.type == ActionType.Zone)
                     Add(action.target, action.hitColor);
 
+        // Scene props use an int hitId rather than a string hitColor — convert and register
+        if (zone.sceneProps != null)
+            foreach (var p in zone.sceneProps)
+                if (p.hitId > 0)
+                    Add(p.id, p.hitId.ToString());
+
        
 
         // 2) Load per-zone textures based on bgImage naming convention

@@ -37,10 +37,10 @@ public class PlayerStance : MonoBehaviour
 
     private void Start()
     {
-        // Hook up button listeners
-        berserkerButton.onClick.AddListener(() => SetStance(StanceType.Berserker));
-        defensiveButton.onClick.AddListener(() => SetStance(StanceType.Defensive));
-        precisionButton.onClick.AddListener(() => SetStance(StanceType.Precision));
+        // Hook up button listeners — all optional, buttons may not exist yet
+        berserkerButton?.onClick.AddListener(() => SetStance(StanceType.Berserker));
+        defensiveButton?.onClick.AddListener(() => SetStance(StanceType.Defensive));
+        precisionButton?.onClick.AddListener(() => SetStance(StanceType.Precision));
     }
 
     public void SetStance(StanceType newStance)
@@ -64,19 +64,19 @@ public class PlayerStance : MonoBehaviour
         switch (newStance)
         {
             case StanceType.Berserker:
-                berserkerButton.image.color = selectedColor;
+                if (berserkerButton != null) berserkerButton.image.color = selectedColor;
                 GameLog_Manager.Instance.AddEntry(
                     $"Player stance changed to: {currentStance} {stanceEffects}", "#FF4444"); // red
                 break;
 
             case StanceType.Defensive:
-                defensiveButton.image.color = selectedColor;
+                if (defensiveButton != null) defensiveButton.image.color = selectedColor;
                 GameLog_Manager.Instance.AddEntry(
                     $"Player stance changed to: {currentStance} {stanceEffects}", "#3399FF"); // blue
                 break;
 
             case StanceType.Precision:
-                precisionButton.image.color = selectedColor;
+                if (precisionButton != null) precisionButton.image.color = selectedColor;
                 GameLog_Manager.Instance.AddEntry(
                     $"Player stance changed to: {currentStance} {stanceEffects}", "#FFD633"); // yellow
                 break;
@@ -109,8 +109,8 @@ public class PlayerStance : MonoBehaviour
 
     private void ResetButtonColors()
     {
-        berserkerButton.image.color = defaultColor;
-        defensiveButton.image.color = defaultColor;
-        precisionButton.image.color = defaultColor;
+      //  berserkerButton.image.color = defaultColor;
+      //  defensiveButton.image.color = defaultColor;
+      //  precisionButton.image.color = defaultColor;
     }
 }

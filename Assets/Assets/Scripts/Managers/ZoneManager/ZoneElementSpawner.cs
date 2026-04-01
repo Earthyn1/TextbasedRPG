@@ -17,8 +17,10 @@ public class ZoneElementSpawner : MonoBehaviour
 
     public void SetBGImage(ZoneData zone)
     {
+        if (BGImage == null) { Debug.LogWarning("[ZoneElementSpawner] BGImage not assigned."); return; }
         BGImage.sprite = Resources.Load<Sprite>($"BG/{zone.bgImage}");
     }
+
     public void BuildForZone(ZoneData zone)
     {
         ClearAll();
@@ -28,8 +30,8 @@ public class ZoneElementSpawner : MonoBehaviour
         BuildNpc(zone);
         BuildWorld(zone);
 
-        BGImage.sprite = Resources.Load<Sprite>($"BG/{zone.bgImage}");
-
+        if (BGImage != null)
+            BGImage.sprite = Resources.Load<Sprite>($"BG/{zone.bgImage}");
     }
 
     void BuildActions(ZoneData zone)

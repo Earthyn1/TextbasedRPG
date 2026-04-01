@@ -1,265 +1,368 @@
-﻿using System;
-using System.Collections;
+using System;
 using UnityEngine;
-using UnityEngine.UI;
 
+/// <summary>
+/// Orchestrates combat encounters started from Ink dialog via ~ startCombat("enemyId").
+///
+/// Flow:
+///   Ink fires startCombat  → EventBus "StartCombat"  → StartEncounter()
+///   Enemy dies             → SetFlag npcId.killed    → EventBus "CombatResult" true
+///   Player dies            → RespawnUI               → EventBus "CombatResult" false
+///
+/// The active DialogManager / WorldInteractableManager listens for "CombatResult" and
+/// resumes the Ink story at the CombatWon or CombatLost knot.
+/// </summary>
 public class CombatManager : MonoBehaviour
 {
     public static CombatManager Instance { get; private set; }
 
-    public GameObject enemyProgressBar;
-    public Animator endCombatUIAnimation;
+    [Header("Combat UI Panel")]
+    [Tooltip("The root GameObject containing the CombatUI — activated on combat start, deactivated on end.")]
+    [SerializeField] private GameObject combatUIParent;
+    [Tooltip("The CombatUI component used to set up bars at encounter start.")]
+    [SerializeField] private CombatUI   combatUI;
 
-    [Header("UI Buttons")]
-    [SerializeField] private Button ReturnButton;
-    [SerializeField] private Button NextFightButton;
+    [Header("Enemy Health Bar")]
+    [Tooltip("Prefab instantiated when a combat encounter starts.")]
+    [SerializeField] private GameObject enemyHealthBarPrefab;
+    [Tooltip("Where to parent the spawned health bar. Leave empty to spawn at scene root.")]
+    [SerializeField] private Transform  enemyHealthBarParent;
 
-    [SerializeField] private HitSplatUISpawner playerTextSpawner;
-    [SerializeField] private HitSplatUISpawner enemyTextSpawner;
+    [Header("XP Reward (on kill)")]
+    [Tooltip("Base XP awarded when the enemy is defeated. Scaled by enemy level.")]
+    [SerializeField] private int xpPerEnemyLevel = 20;
 
-    // Encounter runtime state
+
+    private Coroutine _enemyAttackRoutine;
+
+    // ── Encounter runtime state ───────────────────────────────────────────────
+
     private NPCData _enemyData;
-    private int _enemyHP;
-    private float _playerCd, _enemyCd;     // cooldown durations
-    private float _playerTimer, _enemyTimer; // time remaining
-    private bool _active;
-    private bool _buttonPressed;
+    private int     _enemyHP;
+    private float   _playerCd, _enemyCd;
+    private float   _playerTimer, _enemyTimer;
+    private bool    _active;
+    private bool    _killReported;
 
-    // Events UI can subscribe to
-    public event Action<float, float> OnTimersChanged; // (playerT/_playerCd, enemyT/_enemyCd) normalized 0..1
-    public event Action<int, int> OnEnemyHPChanged;    // (current, max)
-    public event Action<int> OnPlayerHit;              // dmg dealt to player
-    public event Action<int> OnEnemyHit;               // dmg dealt to enemy
-    public event Action OnWin;
-    public event Action OnLose;
+    private GameObject  _spawnedHealthBar;
+    private RectTransform _enemyAnchor;   // prop rect set just before encounter starts
 
-    [SerializeField] private Animator playerPortraitAnimator;
-    [SerializeField] private Animator enemyPortraitAnimator;
+    // ── Events (subscribed to by UI components) ───────────────────────────────
 
-    [SerializeField] private Animator playerPortraitAnimator_2;
-    [SerializeField] private Animator enemyPortraitAnimator_2;
+    public event Action<float, float> OnTimersChanged;  // (playerNorm, enemyNorm) 0..1
+    public event Action<int, int>     OnEnemyHPChanged; // (current, max)
+    public event Action<int>          OnPlayerHit;      // damage dealt to player
+    public event Action<int>          OnEnemyHit;       // damage dealt to enemy
+    public event Action               OnWin;
+    public event Action               OnLose;
 
-    // Debug cache for hit/crit chances
+    // ── Debug ─────────────────────────────────────────────────────────────────
+
     private float lastPlayerHit, lastPlayerCrit;
-    private float lastEnemyHit, lastEnemyCrit;
-    public float PlayerHitChance => lastPlayerHit;        // 0..1
-    public float PlayerCritChance => lastPlayerCrit;      // 0..1
-    public float EnemyHitChance => lastEnemyHit;          // 0..1
-    public float EnemyCritChance => lastEnemyCrit;        // 0..1
+    private float lastEnemyHit,  lastEnemyCrit;
+    public float PlayerHitChance  => lastPlayerHit;
+    public float PlayerCritChance => lastPlayerCrit;
+    public float EnemyHitChance   => lastEnemyHit;
+    public float EnemyCritChance  => lastEnemyCrit;
 
-    public LootRoller.LootResult rolledLoot;
+    public string CurrentNPC { get; private set; }
 
-    public event Action<string, int> OnEnemyDefeated; // (enemyIdOrTag, count)
-    private bool _killReported; // guard to avoid double credit
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-    public static CombatSnapshot BuildPlayerSnapshot(PlayerStats ps)
-    {
-        float critMult = ps.critMultiplier;
-        if (critMult <= 1f) critMult = 1.5f; // floor so crits feel ok
-
-        return new CombatSnapshot
-        {
-            BaseDamage = ps.WeaponDamage + ps.StrengthBonusDamage,
-            HitChanceBonus = ps.HitChanceBonus,        // e.g. +0.10f = +10% hit
-            CritChance = ps.CritChanceFinal,           // already final decimal 0..1
-            CritMultiplier = critMult,
-            Armor = ps.Armor
-        };
-    }
-    public static CombatSnapshot BuildEnemySnapshot(NPCData e)
-    {
-        float critMult = e.critMultiplier;
-        if (critMult <= 1f) critMult = 1.5f;
-
-        return new CombatSnapshot
-        {
-            BaseDamage = Mathf.Max(1, e.damage),
-            HitChanceBonus = e.hitChance * 0.02f,      // reuse your scaling
-            CritChance = e.critChance,                 // 0..1 from data
-            CritMultiplier = critMult,
-            Armor = Mathf.RoundToInt(e.block)
-        };
-    }
-    private void Start()
-    {
-        // Hook up button listeners
-        ReturnButton.onClick.AddListener(() => ReturnToLastzone());
-        NextFightButton.onClick.AddListener(() => NextFight());
-    }
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
-    public bool IsActive => _active;
-    private IEnumerator FadeCanvas(CanvasGroup cg, float targetAlpha, float duration)
-    {
-        float startAlpha = cg.alpha;
-        float time = 0f;
 
-        while (time < duration)
+    private void OnEnable()
+    {
+        // EventBus hookup
+        EventBus.OnTrigger += OnBusEvent;
+
+        // Hitmask interactor hookup
+        var interactor = FindFirstObjectByType<ZoneHitmaskInteractor>();
+        if (interactor != null)
         {
-            cg.alpha = Mathf.Lerp(startAlpha, targetAlpha, time / duration);
-            time += Time.deltaTime;
-            yield return null;
+            interactor.OnInteractableClicked += HandleInteractableClicked;
         }
-        cg.alpha = targetAlpha;
     }
+    private void OnDisable() => EventBus.OnTrigger -= OnBusEvent;
+
+    
+
+    private void HandleInteractableClicked(string interactableId, byte hitId)
+    {
+        Debug.Log($"[CombatManager] Clicked NPC: {interactableId}");
+
+        CurrentNPC = interactableId;
+    }
+    private void OnBusEvent(string trigger, object payload)
+    {
+        if (trigger == "StartCombat")
+            StartEncounter(payload as string ?? "");
+    }
+
+    // ── Snapshot builders (public so CombatDebugUI etc. can use them) ─────────
+
+    public static CombatSnapshot BuildPlayerSnapshot(PlayerStats ps)
+    {
+        float critMult = ps.critMultiplier > 1f ? ps.critMultiplier : 1.5f;
+        return new CombatSnapshot
+        {
+            BaseDamage      = ps.WeaponDamage + ps.StrengthBonusDamage,
+            HitChanceBonus  = ps.HitChanceBonus,
+            CritChance      = ps.CritChanceFinal,
+            CritMultiplier  = critMult,
+            Armor           = ps.Armor
+        };
+    }
+
+    public static CombatSnapshot BuildEnemySnapshot(NPCData e)
+    {
+        float critMult = e.critMultiplier > 1f ? e.critMultiplier : 1.5f;
+        return new CombatSnapshot
+        {
+            BaseDamage      = Mathf.Max(1, e.damage),
+            HitChanceBonus  = e.hitChance * 0.02f,
+            CritChance      = e.critChance,
+            CritMultiplier  = critMult,
+            Armor           = Mathf.RoundToInt(e.block)
+        };
+    }
+
+    // ── Public API ────────────────────────────────────────────────────────────
+
+    public bool IsActive => _active;
+
+    /// <summary>
+    /// Call this just before firing "StartCombat" to give the manager a reference
+    /// to the enemy prop's RectTransform so the health bar can be positioned over it.
+    /// </summary>
+    public void SetEnemyAnchor(RectTransform anchor) => _enemyAnchor = anchor;
 
     public void StartEncounter(string enemyId)
     {
-
-        ZoneUIManager.Instance.descriptionGroup.alpha = 0f;
         var enemy = NPCData_Manager.Instance.GetNPCS(enemyId);
-        if (enemy == null) { Debug.LogError($"CombatManager: enemy '{enemyId}' not found."); return; }
-
-        _enemyData = enemy;
-        _enemyHP = Mathf.Max(1, _enemyData.maxHP);
-
-        _killReported = false;
-
-        var ps = PlayerStats.Instance;
-        if (ps == null) { Debug.LogError("CombatManager: PlayerStats not found."); return; }
-
-        // cooldowns
-        _playerCd = Mathf.Max(0.1f, Mathf.Max(0.1f, ps.attackSpeed)); // your attackSpeed is aggregated in PlayerStats
-        _enemyCd = Mathf.Max(0.1f, _enemyData.attackSpeed);
-        _playerTimer = _playerCd;
-        _enemyTimer = _enemyCd;
-
-        _active = true;
-        _buttonPressed = false;
-
-        // ===== Ensure stance is set =====
-        var stanceSys = PlayerStance.Instance;
-        if (stanceSys != null && stanceSys.currentStance == StanceType.None)
+        if (enemy == null)
         {
-            stanceSys.SetStance(StanceType.Defensive); // uses your existing UI logic
-            Debug.Log("StartEncounter: Defaulted stance to Defensive.");
+            Debug.LogError($"[CombatManager] Enemy '{enemyId}' not found.");
+            return;
         }
 
-        // initial UI push
+        var ps = PlayerStats.Instance;
+        if (ps == null)
+        {
+            Debug.LogError("[CombatManager] PlayerStats not found.");
+            return;
+        }
+
+        // Show the combat UI panel — must happen before the initial event pushes
+        // so CombatUI.OnEnable subscribes before we fire the first HP/timer updates.
+        if (combatUIParent != null) combatUIParent.SetActive(true);
+        combatUI?.InitialSetup(enemyId);
+
+        _enemyData    = enemy;
+        _enemyHP      = Mathf.Max(1, _enemyData.maxHP);
+        _killReported = false;
+
+        _playerCd    = Mathf.Max(0.1f, ps.attackSpeed);
+        _enemyCd     = Mathf.Max(0.1f, _enemyData.attackSpeed);
+        _playerTimer = _playerCd;
+        _enemyTimer  = _enemyCd;
+
+        _active = true;
+
+        // Default stance if none selected
+        var stanceSys = PlayerStance.Instance;
+        if (stanceSys != null && stanceSys.currentStance == StanceType.None)
+            stanceSys.SetStance(StanceType.Defensive);
+
+        // Spawn enemy health bar
+        if (enemyHealthBarPrefab != null)
+        {
+            if (_spawnedHealthBar != null) Destroy(_spawnedHealthBar);
+            _spawnedHealthBar = Instantiate(enemyHealthBarPrefab, enemyHealthBarParent);
+
+            var prop = ZoneScenePropSpawner.Instance.GetPropData(CurrentNPC);
+
+            if (prop == null)
+            {
+                Debug.LogError($"[HealthBar] Missing prop data for '{CurrentNPC}' — cannot position health bar");
+                return;
+            }
+
+            // Position the health bar above the enemy prop
+            if (_enemyAnchor != null)
+            {
+                var barRect = _spawnedHealthBar.GetComponent<RectTransform>();
+                if (barRect != null)
+                {
+                    barRect.anchoredPosition = new Vector2(
+                        prop.PosX,
+                        prop.PosY
+                    );
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[CombatManager] enemyHealthBarPrefab is NULL — assign it in the Inspector.");
+        }
+
+        // Initial UI push
         OnEnemyHPChanged?.Invoke(_enemyHP, _enemyData.maxHP);
         PushTimerUpdate();
 
-        // snapshots
-        var playerSnap = BuildPlayerSnapshot(ps);
-        var enemySnap = BuildEnemySnapshot(_enemyData);
-
-        var stanceNow = PlayerStance.Instance
-            ? PlayerStance.Instance.currentStance
-            : StanceType.None;
-
-        // Player preview vs. enemy
-        CombatCalculator.PreviewPlayerVsEnemy(
-            playerSnap,
-            enemySnap,
-            stanceNow,
-            _enemyData.evasion,              // <--- NEW ARG
-            out float previewPlayerHit,
-            out float previewPlayerCrit
-        );
-        lastPlayerHit = previewPlayerHit;
-        lastPlayerCrit = previewPlayerCrit;
-
-        // Enemy preview vs. player
-        CombatCalculator.PreviewEnemyVsPlayer(
-            enemySnap,
-            playerSnap,
-            _enemyData.hitChance,            // enemyBaseHitChance
-            ps.HitChanceBonus,               // playerEvasionBonus
-            out float previewEnemyHit,
-            out float previewEnemyCrit
-        );
-        lastEnemyHit = previewEnemyHit;
-        lastEnemyCrit = previewEnemyCrit;
+        // Build previews for debug/stats UI
+        RefreshPreviewsForCurrentStance();
 
         Attributes_UI.Instance?.Refresh();
     }
 
-    public void EndEncounter(bool clear = true)
+    public void EndEncounter()
     {
         _active = false;
-        CanvasGroup canvasGroup = enemyProgressBar.GetComponent<CanvasGroup>();
-        StartCoroutine(FadeCanvas(canvasGroup, 0f, 0.5f));
-        endCombatUIAnimation.SetTrigger("EndCombat");
 
-        RollLootForCurrentEnemy();
+        if (_enemyAttackRoutine != null)
+        {
+            StopCoroutine(_enemyAttackRoutine);
+            _enemyAttackRoutine = null;
+        }
+
+        // ── Set the killed flag so the prop disappears from the scene ─────────
+        // Convention: <zoneId>.<npcId>.killed  e.g. "stableCourtyard.goblin1.killed"
+        if (_enemyData != null)
+        {
+            string zone = WorldState.CurrentZoneId;
+            string flag = !string.IsNullOrEmpty(zone)
+                ? $"{zone}.{_enemyData.npcID}.killed"
+                : $"{_enemyData.npcID}.killed";
+            WorldStateManager.Instance?.SetFlag(flag);
+        }
+
+        // ── Award XP based on enemy level and current stance ──────────────────
+        AwardKillXP();
+
+        // ── Clean up health bar ───────────────────────────────────────────────
+        if (_spawnedHealthBar != null)
+        {
+            Destroy(_spawnedHealthBar);
+            _spawnedHealthBar = null;
+        }
+
+        // ── Hide combat UI ────────────────────────────────────────────────────
+        if (combatUIParent != null) combatUIParent.SetActive(false);
+
+        // ── Resume the Ink story at the CombatWon knot ───────────────────────
+        EventBus.Fire("CombatResult", true);
     }
 
-    public void PlayerDiedInCombat(bool clear = true)
+    public void HandlePlayerDeath()
     {
+        Debug.Log("[CombatManager] Player defeated.");
+
+        if (_enemyAttackRoutine != null)
+        {
+            StopCoroutine(_enemyAttackRoutine);
+            _enemyAttackRoutine = null;
+        }
+
         _active = false;
-        endCombatUIAnimation.SetTrigger("PlayerDied");
-    }
+        StopAllCoroutines();
 
-    public void RollLootForCurrentEnemy()
-    {
-        if (_enemyData == null)
+        OnLose?.Invoke();
+
+        if (_spawnedHealthBar != null)
         {
-            return;
+            Destroy(_spawnedHealthBar);
+            _spawnedHealthBar = null;
         }
 
-        string lootTableID = _enemyData.lootTable;
-        LootTableDef table = NPCData_Manager.Instance.GetLootTable(lootTableID);
-        if (table == null)
-        {
-            return;
-        }
+        if (combatUIParent != null) combatUIParent.SetActive(false);
 
-        rolledLoot = LootRoller.Roll(table);
-        NPCData_Manager.Instance.combatUI.UpdateLootSlotsUI(rolledLoot.items);
+        // Resume the Ink story at the CombatLost knot BEFORE the respawn sequence
+        // so the dialog can show flavour text while the respawn screen runs.
+        EventBus.Fire("CombatResult", false);
+
+        if (RespawnUI.Instance != null)
+            RespawnUI.Instance.BeginRespawnSequence();
+        else
+            Debug.LogError("[CombatManager] RespawnUI.Instance is null.");
     }
 
-    public void NextFight()
+    public void RefreshPreviewsForCurrentStance()
     {
-        if(_buttonPressed == false)
-        {
-            endCombatUIAnimation.SetTrigger("TransitionToStart");
-            NPCData_Manager.Instance.combatUI.InitialSetup(_enemyData.npcID);
-            _buttonPressed = true;
-        }
+        if (_enemyData == null || PlayerStats.Instance == null) return;
+
+        var ps         = PlayerStats.Instance;
+        var playerSnap = BuildPlayerSnapshot(ps);
+        var enemySnap  = BuildEnemySnapshot(_enemyData);
+        var stanceNow  = PlayerStance.Instance ? PlayerStance.Instance.currentStance : StanceType.None;
+
+        CombatCalculator.PreviewPlayerVsEnemy(
+            playerSnap, enemySnap, stanceNow, _enemyData.evasion,
+            out float pH, out float pC);
+        lastPlayerHit  = pH;
+        lastPlayerCrit = pC;
+
+        CombatCalculator.PreviewEnemyVsPlayer(
+            enemySnap, playerSnap, _enemyData.hitChance, ps.HitChanceBonus,
+            out float eH, out float eC);
+        lastEnemyHit  = eH;
+        lastEnemyCrit = eC;
+
+        Attributes_UI.Instance?.Refresh();
     }
 
-    public void TriggerNextFightAuto()
-    {
-        StartEncounter(_enemyData.npcID);
-    }
+    // ── Update loop ───────────────────────────────────────────────────────────
 
-    public void ReturnToLastzone()
-    {
-        if (_buttonPressed == false)
-        {
-            Debug.Log("Return!!");
-            GameManager.Instance.zoneUIManager.DisplayZone(GameManager.Instance.zoneUIManager.LastZoneEntered);
-            _buttonPressed = true;
-        }     
-    }
     private void Update()
     {
         if (!_active || _enemyData == null) return;
 
         float dt = Time.deltaTime;
-
         _playerTimer -= dt;
-        _enemyTimer -= dt;
+        _enemyTimer  -= dt;
 
-        // Player swing
-        if (_playerTimer <= 0f)
-        {
-            ResolvePlayerAttack();
-            _playerTimer += _playerCd;
-        }
-
-        // Enemy swing
+        if (_playerTimer <= 0f) { ResolvePlayerAttack(); _playerTimer += _playerCd; }
         if (_enemyTimer <= 0f)
         {
-            ResolveEnemyAttack();
+            StartEnemyAttack();
             _enemyTimer += _enemyCd;
         }
 
         PushTimerUpdate();
+    }
+
+    // ── Attack resolution ─────────────────────────────────────────────────────
+
+
+    private void StartEnemyAttack()
+    {
+        if (!_active) return;
+
+        if (_enemyAttackRoutine != null)
+            StopCoroutine(_enemyAttackRoutine);
+
+        _enemyAttackRoutine = StartCoroutine(EnemyAttackRoutine());
+    }
+
+    private System.Collections.IEnumerator EnemyAttackRoutine()
+    {
+        if (!_active) yield break;
+
+        // Start the visual attack first
+        CombatAnimator.Instance?.PlayEnemyAttack();
+
+        // Wait until the impact point of the lunge
+        yield return new WaitForSeconds(0.20f);
+
+        // Now apply damage
+        ResolveEnemyAttack();
+
+        _enemyAttackRoutine = null;
     }
 
     private void ResolvePlayerAttack()
@@ -269,101 +372,68 @@ public class CombatManager : MonoBehaviour
         var ps = PlayerStats.Instance;
         if (ps == null) return;
 
-        // Player snapshot (attacker)
-        CombatSnapshot playerSnap = new CombatSnapshot
+        var playerSnap = new CombatSnapshot
         {
-            BaseDamage = ps.WeaponDamage + ps.StrengthBonusDamage,
-            HitChanceBonus = ps.HitChanceBonus, // player's own accuracy bonus (0.10f = +10%)
-            CritChance = ps.CritChanceFinal,
-            CritMultiplier = (ps.critMultiplier > 1f ? ps.critMultiplier : 1.5f),
-            Armor = ps.Armor
+            BaseDamage     = ps.WeaponDamage + ps.StrengthBonusDamage,
+            HitChanceBonus = ps.HitChanceBonus,
+            CritChance     = ps.CritChanceFinal,
+            CritMultiplier = ps.critMultiplier > 1f ? ps.critMultiplier : 1.5f,
+            Armor          = ps.Armor
         };
 
-        // Enemy snapshot (defender)
-        CombatSnapshot enemySnap = new CombatSnapshot
+        var enemySnap = new CombatSnapshot
         {
-            BaseDamage = _enemyData.damage, // we won't actually use defender.BaseDamage
-            HitChanceBonus = _enemyData.hitChance, // <-- NOTE: we'll reinterpret this in the calc
-            CritChance = _enemyData.critChance,
-            CritMultiplier = (_enemyData.critMultiplier > 1f ? _enemyData.critMultiplier : 1.5f),
-            Armor = _enemyData.block // flat DR the player must punch through
+            BaseDamage     = _enemyData.damage,
+            HitChanceBonus = _enemyData.hitChance,
+            CritChance     = _enemyData.critChance,
+            CritMultiplier = _enemyData.critMultiplier > 1f ? _enemyData.critMultiplier : 1.5f,
+            Armor          = _enemyData.block
         };
 
-        playerPortraitAnimator_2?.SetTrigger("Atk");
-
-        var stance = PlayerStance.Instance != null
-            ? PlayerStance.Instance.currentStance
-            : StanceType.None;
-
-        CombatResult result = CombatCalculator.ResolvePlayerVsEnemy(
-            playerSnap,
-            enemySnap,
-            stance,
-            _enemyData.evasion // 👈 NEW ARG: defender's evasion
-        );
-
-        lastPlayerHit = result.hitChanceShown;
+        var stance = PlayerStance.Instance != null ? PlayerStance.Instance.currentStance : StanceType.None;
+        var result = CombatCalculator.ResolvePlayerVsEnemy(playerSnap, enemySnap, stance, _enemyData.evasion);
+        lastPlayerHit  = result.hitChanceShown;
         lastPlayerCrit = result.critChanceShown;
 
         if (!result.hitLanded)
         {
-            GameLog_Manager.Instance.AddEntry(
-                $"You miss {_enemyData.displayName}.",
-                "#AAAAAA"
-            );
+            GameLog_Manager.Instance.AddEntry($"You miss {_enemyData.displayName}.", "#AAAAAA");
             return;
         }
 
         if (result.wasBlocked || result.finalDamage <= 0)
         {
-            enemyTextSpawner?.ShowBlock();
             GameLog_Manager.Instance.AddEntry($"{_enemyData.displayName} blocks your attack!", "#77BBFF");
             return;
         }
 
-        enemyPortraitAnimator?.SetTrigger("HitFlash");
-
-        int applied = Mathf.Min(result.finalDamage, _enemyHP);
-        if (applied < 0) applied = 0;
-
+        int applied = Mathf.Clamp(result.finalDamage, 0, _enemyHP);
         _enemyHP -= applied;
         OnEnemyHit?.Invoke(applied);
         OnEnemyHPChanged?.Invoke(_enemyHP, _enemyData.maxHP);
 
-        PlayerSkills.Instance.AwardCombatXPFromHit(applied, PlayerStance.Instance.currentStance);
-
         CombatDebugUI.Instance?.ShowChances(lastPlayerHit, lastPlayerCrit, lastEnemyHit, lastEnemyCrit);
 
         string[] verbs = { "slash", "pierce", "strike", "cleave", "smash", "stab" };
-        string verb = verbs[UnityEngine.Random.Range(0, verbs.Length)];
+        string   verb  = verbs[UnityEngine.Random.Range(0, verbs.Length)];
 
         if (result.wasCrit)
-        { 
-            enemyTextSpawner?.ShowCritHit(result.finalDamage);
-            GameLog_Manager.Instance.AddEntry(
-            $"Critical! You {verb} {_enemyData.displayName} for {result.finalDamage}!", "#FFD633");
-        }          
+            GameLog_Manager.Instance.AddEntry($"Critical! You {verb} {_enemyData.displayName} for {result.finalDamage}!", "#FFD633");
         else
-        {
-            enemyTextSpawner?.ShowNormalHit(result.finalDamage);
+            GameLog_Manager.Instance.AddEntry($"You {verb} {_enemyData.displayName} for {result.finalDamage}.", "#32CD32");
 
-            GameLog_Manager.Instance.AddEntry(
-               $"You {verb} {_enemyData.displayName} for {result.finalDamage}.",
-               "#32CD32"
-           );
-        }
         if (_enemyHP <= 0)
         {
             if (!_killReported)
             {
-                string enemyKey = _enemyData.npcID;
-                QuestManager.Instance.ReportAction($"Action_Kill_{enemyKey}", 1);
+                QuestManager.Instance?.ReportAction($"Action_Kill_{_enemyData.npcID}", 1);
                 _killReported = true;
-            } 
-            EndEncounter();
+            }
             OnWin?.Invoke();
+            EndEncounter();
         }
     }
+
     private void ResolveEnemyAttack()
     {
         if (!_active) return;
@@ -371,79 +441,45 @@ public class CombatManager : MonoBehaviour
         var ps = PlayerStats.Instance;
         if (ps == null) return;
 
-        // Enemy as attacker
-        CombatSnapshot enemySnap = new CombatSnapshot
+        var enemySnap = new CombatSnapshot
         {
-            BaseDamage = _enemyData.damage,
+            BaseDamage     = _enemyData.damage,
             HitChanceBonus = _enemyData.hitChance,
-            CritChance = _enemyData.critChance,
-            CritMultiplier = (_enemyData.critMultiplier > 1f ? _enemyData.critMultiplier : 1.5f),
-            Armor = _enemyData.block // doesn't really matter on attack
+            CritChance     = _enemyData.critChance,
+            CritMultiplier = _enemyData.critMultiplier > 1f ? _enemyData.critMultiplier : 1.5f,
+            Armor          = _enemyData.block
         };
 
-        // Player as defender
-        CombatSnapshot playerSnap = new CombatSnapshot
+        var playerSnap = new CombatSnapshot
         {
-            BaseDamage = ps.WeaponDamage + ps.StrengthBonusDamage,
-            HitChanceBonus = ps.HitChanceBonus, // we use this as your "evasion bonus"
-            CritChance = ps.CritChanceFinal,
-            CritMultiplier = (ps.critMultiplier > 1f ? ps.critMultiplier : 1.5f),
-            Armor = ps.Armor          // THIS is baseArmor we're modifying with stance
+            BaseDamage     = ps.WeaponDamage + ps.StrengthBonusDamage,
+            HitChanceBonus = ps.HitChanceBonus,
+            CritChance     = ps.CritChanceFinal,
+            CritMultiplier = ps.critMultiplier > 1f ? ps.critMultiplier : 1.5f,
+            Armor          = ps.Armor
         };
 
-        enemyPortraitAnimator_2?.SetTrigger("Atk");
+        var stance             = PlayerStance.Instance != null ? PlayerStance.Instance.currentStance : StanceType.None;
+        float evasionFromSpeed = CombatCalculator.GetPlayerEvasionBonusFromFortitude(ps);
 
-        StanceType stance = PlayerStance.Instance != null
-            ? PlayerStance.Instance.currentStance
-            : StanceType.None;
+        var result = CombatCalculator.ResolveEnemyVsPlayer(
+            enemySnap, playerSnap, _enemyData.hitChance, evasionFromSpeed, stance);
 
-        // Calculate how much the player's Fortitude lowers enemy accuracy
-        float evasionFromFortitude = CombatCalculator.GetPlayerEvasionBonusFromFortitude(ps);
-
-        // Feed that into ResolveEnemyVsPlayer instead of ps.HitChanceBonus
-        CombatResult result = CombatCalculator.ResolveEnemyVsPlayer(
-            enemySnap,
-            playerSnap,
-            _enemyData.hitChance,    // enemy base accuracy (e.g. 0.9)
-            evasionFromFortitude,    // player's avoidance from Fortitude
-            stance                   // still important for armor/block math
-        );
-
-        lastEnemyHit = result.hitChanceShown;
+        lastEnemyHit  = result.hitChanceShown;
         lastEnemyCrit = result.critChanceShown;
 
         if (!result.hitLanded)
         {
-            // Enemy failed the accuracy roll.
-            GameLog_Manager.Instance.AddEntry(
-                $"{_enemyData.displayName} misses you.",
-                "#AAAAAA"
-            );
+            GameLog_Manager.Instance.AddEntry($"{_enemyData.displayName} misses you.", "#AAAAAA");
             return;
         }
-
-        // At this point: the attack "landed" mechanically.
-        // Now check whether armor/stance fully absorbed it.
 
         if (result.wasBlocked || result.finalDamage <= 0)
         {
-            // BLOCK splat (blue-ish)
-            playerTextSpawner.ShowBlock();
-
-            // Fully blocked / absorbed the blow.
-            GameLog_Manager.Instance.AddEntry(
-                $"You block {_enemyData.displayName}'s attack!",
-                "#66CCFF" // light blue/steel color for block feedback
-            );
-
-            // No HP loss, no hit flash, no damage event.
+            GameLog_Manager.Instance.AddEntry($"You block {_enemyData.displayName}'s attack!", "#66CCFF");
             CombatDebugUI.Instance?.ShowChances(lastPlayerHit, lastPlayerCrit, lastEnemyHit, lastEnemyCrit);
             return;
         }
-
-        // Normal damaging hit (not blocked):
-
-        playerPortraitAnimator?.SetTrigger("HitFlash");
 
         PlayerStats.Instance.ApplyDamage(result.finalDamage);
         OnPlayerHit?.Invoke(result.finalDamage);
@@ -451,90 +487,50 @@ public class CombatManager : MonoBehaviour
         CombatDebugUI.Instance?.ShowChances(lastPlayerHit, lastPlayerCrit, lastEnemyHit, lastEnemyCrit);
 
         string[] verbs = { "swings at", "claws", "bites", "slashes", "smashes", "strikes" };
-        string verb = verbs[UnityEngine.Random.Range(0, verbs.Length)];
+        string   verb  = verbs[UnityEngine.Random.Range(0, verbs.Length)];
 
         if (result.wasCrit)
-        {
-            playerTextSpawner.ShowCritHit(result.finalDamage);
-
             GameLog_Manager.Instance.AddEntry(
-                $"{_enemyData.displayName} lands a critical hit and {verb} you for {result.finalDamage}!",
-                "#FFAA33"
-            );
-        }
+                $"{_enemyData.displayName} lands a critical hit and {verb} you for {result.finalDamage}!", "#FFAA33");
         else
-        {
-            playerTextSpawner.ShowNormalHit(result.finalDamage);
-
             GameLog_Manager.Instance.AddEntry(
-                $"{_enemyData.displayName} {verb} you for {result.finalDamage}.",
-                "#FF5555"
-            );
-        }
+                $"{_enemyData.displayName} {verb} you for {result.finalDamage}.", "#FF5555");
     }
-    public void RefreshPreviewsForCurrentStance()
+
+    // ── XP award on kill ──────────────────────────────────────────────────────
+
+    private void AwardKillXP()
     {
-        if (!_active || _enemyData == null || PlayerStats.Instance == null)
-            return;
+        if (PlayerSkills.Instance == null || _enemyData == null) return;
 
-        var ps = PlayerStats.Instance;
+        int xp = Mathf.Max(10, _enemyData.level * xpPerEnemyLevel);
 
-        var playerSnap = BuildPlayerSnapshot(ps);
-        var enemySnap = BuildEnemySnapshot(_enemyData);
+        var stance = PlayerStance.Instance != null ? PlayerStance.Instance.currentStance : StanceType.None;
+        Enum_Skills skill = stance switch
+        {
+            StanceType.Berserker  => Enum_Skills.Strength,
+            StanceType.Defensive  => Enum_Skills.Speed,
+            StanceType.Precision  => Enum_Skills.Perception,
+            _                     => Enum_Skills.Strength
+        };
 
-        var stanceNow = PlayerStance.Instance
-            ? PlayerStance.Instance.currentStance
-            : StanceType.None;
+        PlayerSkills.Instance.AddXP(skill, xp);
 
-        CombatCalculator.PreviewPlayerVsEnemy(
-            playerSnap,
-            enemySnap,
-            stanceNow,
-            _enemyData.evasion,
-            out float previewPlayerHit,
-            out float previewPlayerCrit
-        );
-        lastPlayerHit = previewPlayerHit;
-        lastPlayerCrit = previewPlayerCrit;
+        if (XPToastSpawner.Instance != null)
+        {
+            Sprite icon = PlayerSkills.Instance.GetIconForSkill(skill);
+            XPToastSpawner.Instance.ShowXPToast($"{xp}xp", icon);
+        }
 
-        CombatCalculator.PreviewEnemyVsPlayer(
-            enemySnap,
-            playerSnap,
-            _enemyData.hitChance,
-            ps.HitChanceBonus,
-            out float previewEnemyHit,
-            out float previewEnemyCrit
-        );
-        lastEnemyHit = previewEnemyHit;
-        lastEnemyCrit = previewEnemyCrit;
-
-        Attributes_UI.Instance?.Refresh();
+        Debug.Log($"[CombatManager] Awarded {xp} {skill} XP for killing {_enemyData.npcID}.");
     }
 
-    public void HandlePlayerDeath()
-    {
-        Debug.Log("☠️ CombatManager: Player defeated.");
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
-        PlayerDiedInCombat();
-
-        StopAllCoroutines();
-        _active = false;
-
-        OnLose?.Invoke();
-
-        if (RespawnUI.Instance != null)
-        {
-            RespawnUI.Instance.BeginRespawnSequence();
-        }
-        else
-        {
-            Debug.LogError("CombatManager: RespawnUI.Instance is null! Did you forget to put RespawnUI in the scene?");
-        }
-    }
     private void PushTimerUpdate()
     {
         float p = Mathf.Clamp01(_playerTimer / _playerCd);
-        float e = Mathf.Clamp01(_enemyTimer / _enemyCd);
+        float e = Mathf.Clamp01(_enemyTimer  / _enemyCd);
         OnTimersChanged?.Invoke(p, e);
     }
 }

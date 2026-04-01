@@ -34,9 +34,7 @@ public class NPCData_Manager : MonoBehaviour
         GameManager.Instance.clearMiddlePanels();
         CombatUIBox.gameObject.SetActive(true);
         combatUI.InitialSetup(enemy);
-        CombatManager.Instance.endCombatUIAnimation.SetTrigger("InitialFightStart");
         CombatManager.Instance.StartEncounter(enemy);
-
     }
 
 

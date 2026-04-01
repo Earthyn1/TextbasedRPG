@@ -50,6 +50,7 @@ public class WorldInteractableManager : MonoBehaviour
 
             RunAnim(RefreshAfterMinigame());
         }
+
     }
 
     // ── Public API ─────────────────────────────────────────────────────────────
@@ -113,7 +114,7 @@ public class WorldInteractableManager : MonoBehaviour
         _story.ChooseChoiceIndex(choiceIndex);
         BuildDescriptionText();
 
-        if (autoCloseWhenDone && !_story.canContinue && _story.currentChoices.Count == 0)
+        if (autoCloseWhenDone && !_waitingForMinigame && !_story.canContinue && _story.currentChoices.Count == 0)
         {
             yield return CloseSequence();
             yield break;

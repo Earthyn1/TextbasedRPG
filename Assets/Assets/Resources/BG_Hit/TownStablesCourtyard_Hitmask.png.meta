@@ -3,8 +3,8 @@ guid: 6ed6f08e5209106458ea2c5cd3dd3d01
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5954786618336939545
-    second: TownStablesCourtyard_Hitmask_0
+      213: 7578593565757442408
+    second: TownStablesCourtYard_Hitmask_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -24,7 +24,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -126,12 +126,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: TownStablesCourtyard_Hitmask_0
+      name: TownStablesCourtYard_Hitmask_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1536
+        width: 1920
         height: 1024
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 91e093b21e6a3a250800000000000000
-      internalID: 5954786618336939545
+      spriteID: 8698808e1b29c2960800000000000000
+      internalID: 7578593565757442408
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -160,7 +160,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      TownStablesCourtYard_Hitmask_0: 7578593565757442408
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

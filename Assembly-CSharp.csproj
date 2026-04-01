@@ -106,6 +106,7 @@
     <Compile Include="Assets\Assets\Scripts\Buttons\Book_Button_Slot.cs" />
     <Compile Include="Assets\Assets\Scripts\UI\QuestToast.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\ZoneDataList.cs" />
+    <Compile Include="Assets\Assets\Scripts\TimersAndTrackers\EnemyHealthBarUI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\ActionData.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\Debug_Manager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\WordProgress.cs" />
@@ -135,11 +136,13 @@
     <Compile Include="Assets\Assets\Scripts\Managers\QuestManager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\WorldEvents\WorldState.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Quest_Slot.cs" />
+    <Compile Include="Assets\Assets\Scripts\TimersAndTrackers\CombatResultUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\DialogLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\CombatCalculator.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\BookProgress.cs" />
     <Compile Include="Assets\Assets\Scripts\Minigame\AetherGridUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Buttons\Action_Button.cs" />
+    <Compile Include="Assets\Assets\Scripts\Minigame\TimedActionUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\FocusModeUI.cs" />
     <Compile Include="Assets\Assets\Scripts\Inventory\Inventory_Manager.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\BookData.cs" />
@@ -158,8 +161,10 @@
     <Compile Include="Assets\Assets\Scripts\Dialog\DialogChoiceButton.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\Enum_ItemType.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Books\WordData.cs" />
+    <Compile Include="Assets\Assets\Scripts\TimersAndTrackers\CombatAnimator.cs" />
     <Compile Include="Assets\Ink\Demos\Basic Demo\Scripts\BasicInkExample.cs" />
     <Compile Include="Assets\Assets\Scripts\Dialog\DialogChoiceBuilder.cs" />
+    <Compile Include="Assets\Assets\Scripts\DebugScripts\PropClickDebug.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\QuestData\QuestRequiredActions.cs" />
     <Compile Include="Assets\Assets\Scripts\Loaders\NPCDataLoader.cs" />
     <Compile Include="Assets\Assets\Scripts\Managers\NPCDataManager.cs" />

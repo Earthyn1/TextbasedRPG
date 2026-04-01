@@ -15,6 +15,13 @@ public class MinigameManager : MonoBehaviour
     [SerializeField] private GameObject memoryGamePrefab;
     [SerializeField] private GameObject mashGamePrefab;
     [SerializeField] private GameObject aetherGridPrefab;
+    [SerializeField] private GameObject timedActionPrefab;
+
+    [Header("Spawn Locations")]
+    [Tooltip("Assign the SpawnLoc placed over the dialog/interactable panel. " +
+             "TimedAction prefabs spawn here so they sit on top of the box. " +
+             "Other minigames use the parent passed by the dialog manager via SetSpawnParent().")]
+    [SerializeField] private Transform timedActionSpawnParent;
 
     [Header("Timing Bar — Base Difficulty (at equal levels)")]
     [SerializeField] private float baseSpeed     = 300f;
@@ -85,6 +92,15 @@ public class MinigameManager : MonoBehaviour
     [SerializeField] private float maxCorruption      = 0.60f;
     [SerializeField] private float minAetherTime      = 5f;
 
+    [Header("Timed Action — Base Duration (at equal levels)")]
+    [Tooltip("Seconds to fill the bar when player skill equals the action level")]
+    [SerializeField] private float baseTimedDuration      = 3f;
+    [Tooltip("Extra seconds added per level the action is above the player's skill")]
+    [SerializeField] private float timedDurationPerDelta  = 0.5f;
+    [Header("Timed Action — Clamps")]
+    [SerializeField] private float minTimedDuration       = 1f;
+    [SerializeField] private float maxTimedDuration       = 12f;
+
     private Transform _spawnParent;
 
     // Tracks the active minigame so OnMinigameComplete can award XP
@@ -116,8 +132,8 @@ public class MinigameManager : MonoBehaviour
     {
         var entry = ParseEntry(rawParams);
 
-        // Each minigame type is gated by a different skill
-        Enum_Skills relevantSkill = SkillForType(entry.type);
+        // Each minigame type is gated by a different skill (TimedAction skill is caller-specified)
+        Enum_Skills relevantSkill = GetSkillForEntry(entry);
         int playerLevel = GetPlayerSkillLevel(relevantSkill);
         int delta       = entry.level - playerLevel;
 
@@ -127,11 +143,12 @@ public class MinigameManager : MonoBehaviour
 
         switch (entry.type)
         {
-            case MinigameType.Memory:   LaunchMemory(entry, delta);              break;
-            case MinigameType.Mash:     LaunchMash(entry.minigameId, delta);     break;
-            case MinigameType.Aether:   LaunchAether(entry.minigameId, delta);   break;
+            case MinigameType.Memory:      LaunchMemory(entry, delta);              break;
+            case MinigameType.Mash:        LaunchMash(entry.minigameId, delta);     break;
+            case MinigameType.Aether:      LaunchAether(entry.minigameId, delta);   break;
+            case MinigameType.TimedAction: LaunchTimedAction(entry, delta);         break;
             case MinigameType.TimingBar:
-            default:                    LaunchTimingBar(entry.minigameId, delta); break;
+            default:                       LaunchTimingBar(entry.minigameId, delta); break;
         }
     }
 
@@ -142,9 +159,22 @@ public class MinigameManager : MonoBehaviour
             case MinigameType.Memory:   return Enum_Skills.Perception;
             case MinigameType.Mash:     return Enum_Skills.Strength;
             case MinigameType.Aether:   return Enum_Skills.Aethur;
+            // TimedAction uses a caller-specified skill; Speed is the safe fallback
+            case MinigameType.TimedAction:
             case MinigameType.TimingBar:
             default:                    return Enum_Skills.Speed;
         }
+    }
+
+    /// <summary>
+    /// Like <see cref="SkillForType"/> but honours the per-entry skill override
+    /// used by <see cref="MinigameType.TimedAction"/>.
+    /// </summary>
+    private static Enum_Skills GetSkillForEntry(MinigameDifficultyEntry entry)
+    {
+        if (entry.type == MinigameType.TimedAction && entry.timedActionSkill.HasValue)
+            return entry.timedActionSkill.Value;
+        return SkillForType(entry.type);
     }
 
     private void LaunchTimingBar(string minigameId, int delta)
@@ -236,6 +266,37 @@ public class MinigameManager : MonoBehaviour
         ui.Play(entry.memoryConfig, showDuration, itemCount, OnMinigameComplete, OnMinigameInstantResult);
     }
 
+    private void LaunchTimedAction(MinigameDifficultyEntry entry, int delta)
+    {
+        if (timedActionPrefab == null)
+        {
+            Debug.LogError("[MinigameManager] timedActionPrefab is not assigned!");
+            EventBus.Fire("MinigameResult", false);
+            return;
+        }
+
+        float duration = Mathf.Clamp(
+            baseTimedDuration + delta * timedDurationPerDelta,
+            minTimedDuration, maxTimedDuration);
+
+        string label = !string.IsNullOrWhiteSpace(entry.displayLabel)
+            ? entry.displayLabel
+            : entry.minigameId;
+
+        Debug.Log($"[MinigameManager] TimedAction '{entry.minigameId}' delta={delta} duration={duration:F1}s label='{label}'");
+
+        // Use the dedicated SpawnLoc if one is assigned, otherwise fall back to whatever
+        // the dialog manager passed via SetSpawnParent (e.g. the button layout group).
+        timedActionSpawnParent.gameObject.SetActive(true);
+        Transform parent = timedActionSpawnParent != null ? timedActionSpawnParent : _spawnParent;
+
+        var go = Instantiate(timedActionPrefab, parent);
+        var ui = go.GetComponent<TimedActionUI>();
+        if (ui == null) { Destroy(go); EventBus.Fire("MinigameResult", false); return; }
+
+        ui.Play(label, duration, OnMinigameComplete, OnMinigameInstantResult);
+    }
+
     private void OnMinigameInstantResult(bool success)
     {
         // Fires the frame the player clicks — before any result animations
@@ -247,6 +308,9 @@ public class MinigameManager : MonoBehaviour
     {
         _activeEntry = null;
         EventBus.Fire("MinigameResult", success);
+        timedActionSpawnParent.gameObject.SetActive(false);
+
+
     }
 
     /// <summary>
@@ -258,7 +322,7 @@ public class MinigameManager : MonoBehaviour
     {
         if (PlayerSkills.Instance == null) return;
 
-        Enum_Skills skill = SkillForType(entry.type);
+        Enum_Skills skill = GetSkillForEntry(entry);
 
         // Base XP scales with minigame level; harder challenges give a bonus
         int baseXP  = entry.level * 10;
@@ -285,9 +349,9 @@ public class MinigameManager : MonoBehaviour
     /// </summary>
     public (string label, string hexColor, string skillName) GetDifficultyInfo(string minigameId)
     {
-        var entry       = ParseEntry(minigameId);
-        Enum_Skills skill = SkillForType(entry.type);
-        int playerLevel = GetPlayerSkillLevel(skill);
+        var entry         = ParseEntry(minigameId);
+        Enum_Skills skill = GetSkillForEntry(entry);
+        int playerLevel   = GetPlayerSkillLevel(skill);
         int delta       = entry.level - playerLevel;
 
         string skillName = skill.ToString(); // "Speed", "Perception", etc.
@@ -310,9 +374,9 @@ public class MinigameManager : MonoBehaviour
     /// </summary>
     public Color GetDifficultyColor(string minigameId)
     {
-        var entry       = ParseEntry(minigameId);
-        Enum_Skills skill = SkillForType(entry.type);
-        int playerLevel = GetPlayerSkillLevel(skill);
+        var entry         = ParseEntry(minigameId);
+        Enum_Skills skill = GetSkillForEntry(entry);
+        int playerLevel   = GetPlayerSkillLevel(skill);
         int delta       = entry.level - playerLevel;
 
         Color green  = new Color(0.35f, 0.85f, 0.35f);
@@ -329,8 +393,8 @@ public class MinigameManager : MonoBehaviour
     /// <summary>Returns the skill icon sprite for this minigame's linked skill.</summary>
     public Sprite GetSkillSprite(string minigameId)
     {
-        var entry = ParseEntry(minigameId);
-        Enum_Skills skill = SkillForType(entry.type);
+        var entry         = ParseEntry(minigameId);
+        Enum_Skills skill = GetSkillForEntry(entry);
         return PlayerSkills.Instance != null ? PlayerSkills.Instance.GetIconForSkill(skill) : null;
     }
 
@@ -338,9 +402,18 @@ public class MinigameManager : MonoBehaviour
 
     /// <summary>
     /// Parses an inline minigame param string from Ink.
-    /// Format: "id, level, type[, targetItemId]"
-    /// e.g. "haystackSearch, 5, TimingBar"
-    ///      "haystackMemory, 3, Memory, dog_bone"
+    ///
+    /// Formats:
+    ///   "id, level, TimingBar"
+    ///   "id, level, Memory, targetItemId"
+    ///   "id, level, TimedAction, SkillName"
+    ///   "id, level, TimedAction, SkillName, Display Label"
+    ///
+    /// Examples:
+    ///   "haystackSearch, 5, TimingBar"
+    ///   "haystackMemory, 3, Memory, dog_bone"
+    ///   "searchArea, 2, TimedAction, Perception"
+    ///   "lockpickDoor, 4, TimedAction, Speed, Picking the lock..."
     /// </summary>
     private static MinigameDifficultyEntry ParseEntry(string raw)
     {
@@ -362,8 +435,24 @@ public class MinigameManager : MonoBehaviour
                 entry.type = t;
         }
 
-        if (parts.Length >= 4 && entry.type == MinigameType.Memory)
-            entry.memoryConfig = new MemoryGameConfig { targetItemId = parts[3] };
+        if (parts.Length >= 4)
+        {
+            if (entry.type == MinigameType.Memory)
+            {
+                entry.memoryConfig = new MemoryGameConfig { targetItemId = parts[3] };
+            }
+            else if (entry.type == MinigameType.TimedAction)
+            {
+                if (System.Enum.TryParse(parts[3], true, out Enum_Skills skill))
+                    entry.timedActionSkill = skill;
+                else
+                    Debug.LogWarning($"[MinigameManager] Unknown skill '{parts[3]}' for TimedAction '{entry.minigameId}' — falling back to Speed.");
+            }
+        }
+
+        // Parts[4] = optional display label for TimedAction
+        if (parts.Length >= 5 && entry.type == MinigameType.TimedAction)
+            entry.displayLabel = parts[4];
 
         return entry;
     }
@@ -378,7 +467,7 @@ public class MinigameManager : MonoBehaviour
 
 // ── Data types ────────────────────────────────────────────────────────────────
 
-public enum MinigameType { TimingBar, Memory, Mash, Aether }
+public enum MinigameType { TimingBar, Memory, Mash, Aether, TimedAction }
 
 [Serializable]
 public class MinigameDifficultyEntry
@@ -389,6 +478,12 @@ public class MinigameDifficultyEntry
 
     [Tooltip("Only used when type = Memory")]
     public MemoryGameConfig memoryConfig;
+
+    [Tooltip("Only used when type = TimedAction — the skill that scales duration and awards XP")]
+    public Enum_Skills? timedActionSkill;
+
+    [Tooltip("Only used when type = TimedAction — text shown on the bar label (optional, falls back to minigameId)")]
+    public string displayLabel;
 }
 
 [Serializable]

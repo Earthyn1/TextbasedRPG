@@ -6,6 +6,52 @@ using UnityEngine.UI;
 
 public class ZoneScenePropSpawner : MonoBehaviour
 {
+    public static ZoneScenePropSpawner Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    /// <summary>Returns the RectTransform of a spawned prop by its prop id, or null if not found.</summary>
+    public RectTransform GetPropRect(string propId)
+    {
+        Debug.Log($"[GetPropRect] Requested propId: {propId}");
+
+        if (_spawned == null)
+        {
+            Debug.LogWarning("[GetPropRect] _spawned dictionary is NULL!");
+            return null;
+        }
+
+        if (!_spawned.ContainsKey(propId))
+        {
+            var keys = string.Join(", ", _spawned.Keys);
+            Debug.LogWarning($"[GetPropRect] propId '{propId}' NOT FOUND. Available keys: [{keys}]");
+            return null;
+        }
+
+        var go = _spawned[propId];
+
+        if (go == null)
+        {
+            Debug.LogWarning($"[GetPropRect] GameObject for '{propId}' is NULL!");
+            return null;
+        }
+
+        var rect = go.GetComponent<RectTransform>();
+
+        if (rect == null)
+        {
+            Debug.LogWarning($"[GetPropRect] '{propId}' has NO RectTransform component!");
+            return null;
+        }
+
+        Debug.Log($"[GetPropRect] SUCCESS for '{propId}' → {go.name}");
+
+        return rect;
+    }
+
     [Header("Required refs")]
     public RectTransform backgroundRect;   // RectTransform of your BG Image
     public RectTransform propsContainer;   // empty overlay rect (same size as bg)
@@ -16,14 +62,19 @@ public class ZoneScenePropSpawner : MonoBehaviour
     public bool posIsNormalized01 = true;  // if true: pos is 0..1 across bg
     public bool yIsTopDown = true;         // if true: pos[1]=0 is top, 1 is bottom
 
-    private readonly Dictionary<string, GameObject> _spawned = new();
+    private readonly Dictionary<string, GameObject> _spawned       = new();
+    /// <summary>Shadows are siblings of their prop, keyed by the same prop id.</summary>
+    private readonly Dictionary<string, GameObject> _spawnedShadows = new();
+
+    private readonly Dictionary<string, ScenePropData> _propsById = new();
+
     private ZoneData _zone;
 
     public float fadeDuration = 0.20f;
 
-    private readonly System.Collections.Generic.Dictionary<string, Coroutine> _running = new();
+    private readonly Dictionary<string, Coroutine> _running = new();
 
-
+    // ── Build ─────────────────────────────────────────────────────────────────
 
     public void Build(ZoneData zone)
     {
@@ -36,19 +87,54 @@ public class ZoneScenePropSpawner : MonoBehaviour
 
         if (backgroundRect == null) { Debug.LogError("[Props] backgroundRect is NULL"); return; }
         if (propsContainer == null) { Debug.LogError("[Props] propsContainer is NULL"); return; }
-        if (propPrefab == null) { Debug.LogError("[Props] propPrefab is NULL"); return; }
+        if (propPrefab == null)     { Debug.LogError("[Props] propPrefab is NULL"); return; }
 
         foreach (var p in _zone.sceneProps)
         {
             if (p == null || string.IsNullOrEmpty(p.id)) continue;
 
-            var go = Instantiate(propPrefab, propsContainer);
-            go.name = $"Prop_{p.id}";
+            _propsById[p.id] = p;
 
-            var rt = (RectTransform)go.transform;
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(p.SizeX, p.SizeY);
-            rt.anchoredPosition = new Vector2(p.PosX, p.PosY);
+            var spriteKey     = ResolveSpriteKey(p);
+            bool shouldBeVisible = ShouldBeVisible(p);
+
+            // ── Shadow (sibling, spawned first so it renders behind the prop) ──
+            //
+            // Looks for "<baseSpriteId>_Shadow" in the same Props/ folder.
+            // Not every prop needs a shadow — if the asset doesn't exist we just skip.
+            var shadowSprite = LoadSprite(p.sprite + "_Shadow");
+            if (shadowSprite != null)
+            {
+                var shadowGo = new GameObject($"PropShadow_{p.id}");
+                shadowGo.transform.SetParent(propsContainer, worldPositionStays: false);
+
+                var shadowRt             = shadowGo.AddComponent<RectTransform>();
+                shadowRt.pivot           = new Vector2(0.5f, 0.5f);
+                shadowRt.sizeDelta       = new Vector2(p.SizeX, p.SizeY);
+                shadowRt.anchoredPosition = new Vector2(0, 0);
+
+                var shadowImg            = shadowGo.AddComponent<Image>();
+                shadowImg.sprite         = shadowSprite;
+                shadowImg.raycastTarget  = false; // shadows never receive pointer events
+                shadowImg.preserveAspect = false; // match the prop's rect exactly
+
+                shadowGo.AddComponent<CanvasGroup>(); // used for fade in/out
+
+                _spawnedShadows[p.id] = shadowGo;
+
+                if (!shouldBeVisible)
+                    shadowGo.SetActive(false);
+            }
+
+            // ── Main prop (spawned after shadow → higher sibling index → draws on top) ──
+
+            var go   = Instantiate(propPrefab, propsContainer);
+            go.name  = $"Prop_{p.id}";
+
+            var rt             = (RectTransform)go.transform;
+            rt.pivot           = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta       = new Vector2(p.SizeX, p.SizeY);
+            rt.anchoredPosition = new Vector2(0, 0);
 
             var pv = go.GetComponent<PropVisual>();
             if (pv == null) { Debug.LogError($"[Props] Prop prefab missing PropVisual (prop '{p.id}')"); continue; }
@@ -59,60 +145,81 @@ public class ZoneScenePropSpawner : MonoBehaviour
                 continue;
             }
 
-            // Stretch both child images to fill the root rect so sizeDelta drives their size
+            // Stretch both child images to fill the root rect so sizeDelta drives their size.
+            // Also enable alpha-based hit testing so transparent pixels never receive clicks.
+            // NOTE: each prop sprite must have Read/Write Enabled in its Texture Import Settings.
             foreach (var img in new[] { pv.imageA, pv.imageB })
             {
-                var irt = (RectTransform)img.transform;
-                irt.anchorMin        = Vector2.zero;
-                irt.anchorMax        = Vector2.one;
-                irt.offsetMin        = Vector2.zero;
-                irt.offsetMax        = Vector2.zero;
+                var irt      = (RectTransform)img.transform;
+                irt.anchorMin = Vector2.zero;
+                irt.anchorMax = Vector2.one;
+                irt.offsetMin = Vector2.zero;
+                irt.offsetMax = Vector2.zero;
+
+                img.alphaHitTestMinimumThreshold = 0.1f;
             }
 
             // Set initial sprite
-            var spriteKey = ResolveSpriteKey(p);
             var sprite = LoadSprite(spriteKey);
             pv.ActiveImage.sprite = sprite;
             pv.InactiveImage.gameObject.SetActive(false);
 
             _spawned[p.id] = go;
 
-            // Prop-based hit detection — replaces background hitmask for dynamic props
+            // ── Hit detection ──────────────────────────────────────────────────
+
             if (p.hitId > 0 && hitmaskInteractor != null)
             {
                 byte hitIdByte = (byte)p.hitId;
 
-                // Click: fires the same OnInteractableClicked as the background hitmask
+                // ── DEBUG: confirm setup ──────────────────────────────────────
+                var rootImage  = go.GetComponent<Image>();
+                var childImages = go.GetComponentsInChildren<Image>(includeInactive: true);
+              
+               
+                // ─────────────────────────────────────────────────────────────
+
                 var btn = go.GetComponent<Button>() ?? go.AddComponent<Button>();
                 btn.transition = Selectable.Transition.None;
-                btn.onClick.AddListener(() => hitmaskInteractor.TriggerPropClick(hitIdByte));
+                btn.onClick.AddListener(() =>
+                {
+                    
+                    hitmaskInteractor.TriggerPropClick(hitIdByte);
+                });
 
-                // Hover: brightness overlay + outline shader
-                var highlight = go.AddComponent<PropHoverHighlight>();
-                var trigger   = go.GetComponent<EventTrigger>() ?? go.AddComponent<EventTrigger>();
+                var highlight  = go.AddComponent<PropHoverHighlight>();
+                var trigger    = go.GetComponent<EventTrigger>() ?? go.AddComponent<EventTrigger>();
 
                 var enterEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
-                enterEntry.callback.AddListener(_ => { hitmaskInteractor.SetPropHovered(hitIdByte); highlight.SetHovered(true); });
+                enterEntry.callback.AddListener(_ =>
+                {
+                   
+                    hitmaskInteractor.SetPropHovered(hitIdByte);
+                    highlight.SetHovered(true);
+                });
                 trigger.triggers.Add(enterEntry);
 
                 var exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
                 exitEntry.callback.AddListener(_ => { hitmaskInteractor.ClearHover(); highlight.SetHovered(false); });
                 trigger.triggers.Add(exitEntry);
             }
-
-            bool shouldBeVisible = ShouldBeVisible(p);
+            else
+            {
+               
+            }
 
             // prevent 1-frame flash: if it starts hidden, spawn inactive immediately
             if (!shouldBeVisible)
                 go.SetActive(false);
 
-            // Run the *tracked* routine (so Clear() can stop it)
             if (_running.TryGetValue(p.id, out var existing) && existing != null)
                 StopCoroutine(existing);
 
             _running[p.id] = StartCoroutine(ApplyPropStateRoutine(p.id, go, spriteKey, shouldBeVisible));
         }
     }
+
+    // ── Refresh ───────────────────────────────────────────────────────────────
 
     public void RefreshVisibility()
     {
@@ -123,14 +230,12 @@ public class ZoneScenePropSpawner : MonoBehaviour
             if (p == null || string.IsNullOrEmpty(p.id)) continue;
             if (!_spawned.TryGetValue(p.id, out var go) || go == null) continue;
 
-            string spriteKey = ResolveSpriteKey(p);
+            string spriteKey     = ResolveSpriteKey(p);
             bool shouldBeVisible = ShouldBeVisible(p);
 
-            // If state resolves to empty sprite, force hidden
             if (string.IsNullOrEmpty(spriteKey))
                 shouldBeVisible = false;
 
-            // Run one combined routine per prop so we don't fight ourselves
             if (_running.TryGetValue(p.id, out var existing) && existing != null)
                 StopCoroutine(existing);
 
@@ -138,97 +243,125 @@ public class ZoneScenePropSpawner : MonoBehaviour
         }
     }
 
+    // ── State routine ─────────────────────────────────────────────────────────
+
     private IEnumerator ApplyPropStateRoutine(string propId, GameObject go, string spriteKey, bool shouldBeVisible)
     {
         var pv = go.GetComponent<PropVisual>();
         if (pv == null)
         {
-            // Fallback: if someone forgot PropVisual on prefab, do simple enable/disable
             go.SetActive(shouldBeVisible);
+            SetShadowActive(propId, shouldBeVisible);
             yield break;
         }
 
-        // Ensure we have canvas groups
-        var activeImg = pv.ActiveImage;
+        var activeImg   = pv.ActiveImage;
         var inactiveImg = pv.InactiveImage;
 
         if (activeImg == null || inactiveImg == null)
             yield break;
 
-        var activeCG = activeImg.GetComponent<CanvasGroup>() ?? activeImg.gameObject.AddComponent<CanvasGroup>();
+        var activeCG   = activeImg.GetComponent<CanvasGroup>()   ?? activeImg.gameObject.AddComponent<CanvasGroup>();
         var inactiveCG = inactiveImg.GetComponent<CanvasGroup>() ?? inactiveImg.gameObject.AddComponent<CanvasGroup>();
 
-        // If we should be hidden, fade the *active* image out then disable root
+        // Grab shadow CanvasGroup once up front (null if no shadow for this prop)
+        _spawnedShadows.TryGetValue(propId, out var shadowGo);
+        var shadowCG = shadowGo != null ? shadowGo.GetComponent<CanvasGroup>() : null;
+
+        // ── Hiding ────────────────────────────────────────────────────────────
         if (!shouldBeVisible)
         {
             if (!go.activeSelf)
                 yield break;
 
-            // Make sure active is actually visible before fading
             activeImg.gameObject.SetActive(true);
             inactiveImg.gameObject.SetActive(false);
             inactiveCG.alpha = 0f;
-            activeCG.alpha = Mathf.Clamp01(activeCG.alpha <= 0f ? 1f : activeCG.alpha);
+            activeCG.alpha   = Mathf.Clamp01(activeCG.alpha <= 0f ? 1f : activeCG.alpha);
+
+            // Fade prop and shadow out in parallel (same duration, start together)
+            if (shadowGo != null && shadowGo.activeSelf && shadowCG != null)
+                StartCoroutine(FadeCanvasGroup(shadowCG, shadowCG.alpha, 0f, fadeDuration));
 
             yield return FadeCanvasGroup(activeCG, activeCG.alpha, 0f, fadeDuration);
+
             go.SetActive(false);
+            if (shadowGo != null) shadowGo.SetActive(false);
             yield break;
         }
 
-        // Should be visible
+        // ── Showing ───────────────────────────────────────────────────────────
         if (!go.activeSelf)
         {
             go.SetActive(true);
-
-            // Bring active back up cleanly
             activeImg.gameObject.SetActive(true);
             inactiveImg.gameObject.SetActive(false);
             inactiveCG.alpha = 0f;
-            activeCG.alpha = 0f;
+            activeCG.alpha   = 0f;
+
+            // Bring shadow up in parallel
+            if (shadowGo != null && shadowCG != null)
+            {
+                shadowGo.SetActive(true);
+                shadowCG.alpha = 0f;
+                StartCoroutine(FadeCanvasGroup(shadowCG, 0f, 1f, fadeDuration));
+            }
 
             yield return FadeCanvasGroup(activeCG, 0f, 1f, fadeDuration);
         }
 
-        // Resolve sprite
+        // ── Sprite change ─────────────────────────────────────────────────────
         Sprite newSprite = LoadSprite(spriteKey);
         if (newSprite == null)
-        {
-            // If sprite can't load, fail safe: keep it visible but don't change sprite
             yield break;
-        }
 
-        // If sprite changed, crossfade
         if (pv.ActiveImage.sprite != newSprite)
-        {
             yield return CrossfadeSprite(pv, newSprite, fadeDuration);
-        }
         else
         {
-            // Ensure alphas are sane
             pv.ActiveImage.gameObject.SetActive(true);
             pv.InactiveImage.gameObject.SetActive(false);
-            activeCG.alpha = 1f;
+            activeCG.alpha   = 1f;
             inactiveCG.alpha = 0f;
         }
 
-        // cleanup
         _running[propId] = null;
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+
+    public ScenePropData GetPropData(string propId)
+    {
+        if (_propsById.TryGetValue(propId, out var prop))
+        {
+            Debug.Log($"[Props] Found data for '{propId}' Size=({prop.SizeX}, {prop.SizeY})");
+            return prop;
+        }
+
+        Debug.LogWarning($"[Props] No data found for '{propId}'");
+        return null;
+    }
+
+    /// <summary>Instantly shows or hides a prop's shadow without fading.</summary>
+    private void SetShadowActive(string propId, bool visible)
+    {
+        if (_spawnedShadows.TryGetValue(propId, out var shadowGo) && shadowGo != null)
+            shadowGo.SetActive(visible);
     }
 
     private IEnumerator CrossfadeSprite(PropVisual pv, Sprite newSprite, float duration)
     {
         var fromImg = pv.ActiveImage;
-        var toImg = pv.InactiveImage;
+        var toImg   = pv.InactiveImage;
 
         var fromCG = fromImg.GetComponent<CanvasGroup>() ?? fromImg.gameObject.AddComponent<CanvasGroup>();
-        var toCG = toImg.GetComponent<CanvasGroup>() ?? toImg.gameObject.AddComponent<CanvasGroup>();
+        var toCG   = toImg.GetComponent<CanvasGroup>()   ?? toImg.gameObject.AddComponent<CanvasGroup>();
 
-        // Prep "to"
         toImg.sprite = newSprite;
         toImg.gameObject.SetActive(true);
         toCG.alpha = 0f;
 
-        // Ensure "from" is visible
         fromImg.gameObject.SetActive(true);
         fromCG.alpha = 1f;
 
@@ -237,34 +370,30 @@ public class ZoneScenePropSpawner : MonoBehaviour
         {
             t += Time.deltaTime;
             float lerp = Mathf.Clamp01(t / duration);
-
             fromCG.alpha = Mathf.Lerp(1f, 0f, lerp);
-            toCG.alpha = Mathf.Lerp(0f, 1f, lerp);
-
+            toCG.alpha   = Mathf.Lerp(0f, 1f, lerp);
             yield return null;
         }
 
         fromCG.alpha = 0f;
-        toCG.alpha = 1f;
+        toCG.alpha   = 1f;
 
         fromImg.gameObject.SetActive(false);
-        pv.Swap(); // now the "to" becomes active
+        pv.Swap();
     }
 
     private IEnumerator FadeCanvasGroup(CanvasGroup cg, float from, float to, float duration)
     {
         if (cg == null) yield break;
 
-        float t = 0f;
+        float t  = 0f;
         cg.alpha = from;
 
         while (t < duration)
         {
             if (cg == null) yield break;
-
-            t += Time.deltaTime;
-            float lerp = Mathf.Clamp01(t / duration);
-            cg.alpha = Mathf.Lerp(from, to, lerp);
+            t       += Time.deltaTime;
+            cg.alpha = Mathf.Lerp(from, to, Mathf.Clamp01(t / duration));
             yield return null;
         }
 
@@ -279,15 +408,17 @@ public class ZoneScenePropSpawner : MonoBehaviour
 
     public void Clear()
     {
-        // Stop any running prop coroutines first
         foreach (var kv in _running)
             if (kv.Value != null) StopCoroutine(kv.Value);
         _running.Clear();
 
-        // Destroy spawned GOs
         foreach (var kv in _spawned)
             if (kv.Value) Destroy(kv.Value);
         _spawned.Clear();
+
+        foreach (var kv in _spawnedShadows)
+            if (kv.Value) Destroy(kv.Value);
+        _spawnedShadows.Clear();
     }
 
     private bool ShouldBeVisible(ScenePropData p)
@@ -296,15 +427,10 @@ public class ZoneScenePropSpawner : MonoBehaviour
 
         var wsm = WorldStateManager.Instance;
 
-        // hideWhenFlag: flag being set forces the prop hidden, regardless of anything else
         var hideKey = (p.hideWhenFlag ?? "").Trim();
         if (!string.IsNullOrEmpty(hideKey) && wsm.HasFlag(hideKey))
             return false;
 
-        // showWhenFlag: prop is ONLY visible once this flag is set
-        // This replaces the old spawnHidden + hideWhenFlag hack — no game-state flags are
-        // pre-polluted at spawn time; the prop simply stays hidden until the flag is earned
-        // (e.g. goblins appear when the cinematic sets stableCourtyard.goblins.spawned)
         var showKey = (p.showWhenFlag ?? "").Trim();
         if (!string.IsNullOrEmpty(showKey))
             return wsm.HasFlag(showKey);
@@ -317,17 +443,14 @@ public class ZoneScenePropSpawner : MonoBehaviour
         if (string.IsNullOrEmpty(key))
             return null;
 
-        // If JSON already includes "Props/..."
         if (key.StartsWith("Props/"))
             return Resources.Load<Sprite>(key);
 
-        // Otherwise assume it's just the filename
         return Resources.Load<Sprite>($"Props/{key}");
     }
 
     private string ResolveSpriteKey(ScenePropData p)
     {
-        // states are optional
         if (p.states != null)
         {
             foreach (var s in p.states)
@@ -337,7 +460,7 @@ public class ZoneScenePropSpawner : MonoBehaviour
                 if (flag.Length == 0) continue;
 
                 if (WorldStateManager.Instance != null && WorldStateManager.Instance.HasFlag(flag))
-                    return s.sprite; // may be null/empty to indicate hide if you want
+                    return s.sprite;
             }
         }
 

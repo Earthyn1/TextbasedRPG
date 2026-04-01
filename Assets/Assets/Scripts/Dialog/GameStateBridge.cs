@@ -135,6 +135,62 @@ public static class GameStateBridge
 
             EventBus.Fire("StartMinigame", minigameId);
         });
+
+        // ----- COMBAT -----
+        // Call from Ink: ~ startCombat("goblin1")
+        // Closes the active dialog panel immediately, then starts the encounter.
+        // Victory / defeat are handled by CombatResultUI — no ink resumption needed.
+        story.BindExternalFunction("startCombat", (string enemyId) =>
+        {
+            var wim = UnityEngine.Object.FindFirstObjectByType<WorldInteractableManager>();
+            if (wim != null && wim.gameObject.activeInHierarchy)
+            {
+                wim.Close();
+            }
+            else
+            {
+                var dm = UnityEngine.Object.FindFirstObjectByType<DialogManager>();
+                if (dm != null && dm.gameObject.activeInHierarchy)
+                    dm.CloseDialog();
+            }
+
+            // npcId here is the prop's interactable ID (e.g. "StableCourtyard_Goblin_1").
+            Debug.Log($"[CombatInit] Start → npcId={npcId}, enemyId={enemyId}");
+
+            var propRect = ZoneScenePropSpawner.Instance?.GetPropRect(npcId);
+
+            if (propRect != null)
+            {
+                Debug.Log($"[CombatInit] Found propRect for '{npcId}' → {propRect.name}");
+
+                if (CombatAnimator.Instance != null)
+                {
+                    Debug.Log("[CombatInit] Setting CombatAnimator target");
+                    CombatAnimator.Instance.SetEnemyTarget(propRect);
+                }
+                else
+                {
+                    Debug.LogWarning("[CombatInit] CombatAnimator.Instance is NULL!");
+                }
+
+                if (CombatManager.Instance != null)
+                {
+                    Debug.Log("[CombatInit] Setting CombatManager anchor");
+                    CombatManager.Instance.SetEnemyAnchor(propRect);
+                }
+                else
+                {
+                    Debug.LogWarning("[CombatInit] CombatManager.Instance is NULL!");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[CombatInit] propRect is NULL for npcId='{npcId}'");
+            }
+
+            Debug.Log("[CombatInit] Firing StartCombat event");
+            EventBus.Fire("StartCombat", enemyId);
+        });
     }
 
     private static string NamespaceKey(string npcId, string key)

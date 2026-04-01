@@ -1,9 +1,7 @@
 [
   {
     "id": "adventurersStable",
-    "displayName": "Stables",
-    "description": "The straw is damp, the air reeks of horses, but there’s a strange comfort to it.",
-    "portrait": "narrator",
+    "displayName": "Stable Boy",
     "bgImage": "TownStables",
     "actions": [
       {
@@ -55,11 +53,6 @@
     ],
     "worldObjects": [
       {
-        "id": "yourBag",
-        "displayName": "Your Bag",
-        "portrait": "satchel"
-      },
-      {
         "id": "brush",
         "displayName": "Horse Brush",
         "portrait": "satchel",
@@ -93,24 +86,76 @@
     ]
   },
   {
-    "id": "stableFront",
-    "displayName": "Stable Entrance",
-    "description": "Sunlight cuts through the open doors, tracing muddy prints in and out — comings and goings never cease here.",
-    "portrait": "narrator",
-    "bgImage": "TownStables"
+    "id": "tackRoom",
+    "displayName": "Tack Room",
+    "bgImage": "TackRoom",
+    "actions": [
+      {
+        "name": "To Stable Block",
+        "type": "Zone",
+        "target": "adventurersStable",
+        "hitColor": "220",
+        "enableWhen": [
+          "Flag(stablemaster.hasSpoken)"
+        ],
+        "lockedMessage": "You should check in with the stablemaster first."
+      }
+    ],
+    "npcs": [
+      {
+        "id": "stableMaster",
+        "displayName": "Stable Master",
+        "portrait": "stableMaster",
+        "autoDialog": "stableMaster",
+        "disposition": "Neutral",
+        "hitColor": "250"
+      }
+    ],
+    "worldObjects": [
+      {
+        "id": "ladder",
+        "displayName": "Ladder",
+        "portrait": "ladder",
+        "autoDialog": "tackRoomLadder",
+        "hitColor": "240"
+      },
+      {
+        "id": "haystack",
+        "displayName": "Haystack",
+        "portrait": "hayStack",
+        "autoDialog": "tackRoomHaystack",
+        "hitColor": "230"
+      }
+    ]
   },
   {
     "id": "stableCourtyard",
-    "displayName": "Stable Courtyard",
-    "hitColor": "220",
-    "portrait": "narrator",
-    "bgImage": "StableCourtyard",
+    "displayName": "Stables Courtyard",
+    "bgImage": "TownStablesCourtYard",
     "actions": [
       {
         "name": "To Stable Block",
         "type": "Zone",
         "target": "adventurersStable",
         "hitColor": "220"
+      }
+    ],
+    "npcs": [
+      {
+        "id": "StableCourtyard_Adventurers",
+        "displayName": "Adventurers",
+        "portrait": "stableMaster",
+        "autoDialog": "adventurersIntro",
+        "disposition": "Neutral",
+        "hitColor": "150"
+      },
+      {
+        "id": "StableCourtyard_Goblin_1",
+        "displayName": "Goblin",
+        "portrait": "stableMaster",
+        "autoDialog": "goblin_1_Fight",
+        "disposition": "Neutral",
+        "hitColor": "160"
       }
     ],
     "sceneProps": [
@@ -139,13 +184,14 @@
           1600,
           900
         ],
-        "showWhenFlag": ""
+        "showWhenFlag": "",
+        "hitId": 150
       },
       {
         "id": "StableCourtyard_Goblin_1",
         "sprite": "StableCourtyard_Goblin_1",
         "pos": [
-          0,
+          -36.12,
           0
         ],
         "size": [
@@ -153,8 +199,8 @@
           900
         ],
         "hideWhenFlag": "stableCourtyard.goblin1.killed",
-        "showWhenFlag": "stableCourtyard.goblins.spawned",
-        "spawnHidden": true
+        "showWhenFlag": "",
+        "hitId": 160
       },
       {
         "id": "StableCourtyard_Goblin_1_Dead",
@@ -202,72 +248,6 @@
         "spawnHidden": true
       }
     ]
-  },
-  {
-    "id": "tackRoom",
-    "displayName": "Tack Room",
-    "description": "Horses shift in their stalls, leather tack swaying gently with each heavy breath.",
-    "portrait": "narrator",
-    "bgImage": "TackRoom",
-    "actions": [
-      {
-        "name": "To Stable Block",
-        "type": "Zone",
-        "target": "adventurersStable",
-        "hitColor": "220",
-        "enableWhen": [
-          "Flag(stablemaster.hasSpoken)"
-        ],
-        "lockedMessage": "You should check in with the stablemaster first."
-      }
-    ],
-    "npcs": [
-      {
-        "id": "stableMaster",
-        "displayName": "Stable Master",
-        "portrait": "stableMaster",
-        "autoDialog": "stableMaster",
-        "disposition": "Neutral",
-        "hitColor": "250"
-      }
-    ],
-    "worldObjects": [
-      {
-        "id": "ladder",
-        "displayName": "Ladder",
-        "portrait": "ladder",
-        "autoDialog": "tackRoomLadder",
-        "hitColor": "240"
-      },
-      {
-        "id": "haystack",
-        "displayName": "Haystack",
-        "portrait": "hayStack",
-        "autoDialog": "tackRoomHaystack",
-        "hitColor": "230"
-      }
-    ]
-  },
-  {
-    "id": "stableHayLoft",
-    "displayName": "Hay Loft",
-    "description": "A precarious ladder leads up to the hayloft above.",
-    "portrait": "narrator",
-    "bgImage": "TownStables",
-    "actions": [
-      {
-        "name": "To Stable Block",
-        "type": "Zone",
-        "target": "adventurersStable"
-      }
-    ]
-  },
-  {
-    "id": "stableFront",
-    "displayName": "Stable Entrance",
-    "hitColor": "220",
-    "portrait": "narrator",
-    "bgImage": "TackRoom"
   },
   {
     "id": "stableDirtRoad",
