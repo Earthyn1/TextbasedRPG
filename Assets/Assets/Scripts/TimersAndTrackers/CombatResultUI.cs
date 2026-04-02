@@ -1,24 +1,37 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
-/// Displays a "Victory" or "Defeat" overlay when combat ends.
+/// Displays a "Victory" or "Defeat" overlay when combat ends, plus a combat XP
+/// toast under the Victory label.
 ///
 /// Wire up in Inspector:
-///   - labelText       : TMP_Text at the top showing "Victory" or "Defeat"
-///   - screenOverlay   : CanvasGroup covering the full screen (used for black fade on defeat)
-///   - labelCanvasGroup: CanvasGroup on the label itself for fade in/out
+///   - labelText          : TMP_Text showing "Victory" or "Defeat"
+///   - labelCanvasGroup   : CanvasGroup on the label for fade in/out
+///   - xpToastRoot        : root GameObject containing xpIcon + xpText
+///   - xpCanvasGroup      : CanvasGroup on xpToastRoot for fade in/out
+///   - xpIcon             : UI Image for the skill icon (Strength / Speed etc.)
+///   - xpText             : TMP_Text showing e.g. "334xp"
+///   - screenOverlay      : CanvasGroup full-screen black (defeat only)
 ///
-/// Listens for EventBus "CombatResult" (bool) — true = win, false = lose.
+/// Listens for:
+///   EventBus "CombatResult"   (bool)            — true = win, false = lose
+///   EventBus "CombatXPEarned" (CombatXPPayload) — icon + amount to show
 /// </summary>
 public class CombatResultUI : MonoBehaviour
 {
     public static CombatResultUI Instance { get; private set; }
 
-    [Header("Label")]
+    [Header("Victory / Defeat Label")]
     [SerializeField] private TMP_Text     labelText;
     [SerializeField] private CanvasGroup  labelCanvasGroup;
+
+    [Header("Combat XP Toast (shown under Victory label)")]
+    [SerializeField] private CanvasGroup xpCanvasGroup; // on the toast root
+    [SerializeField] private Image       xpIcon;        // skill icon image
+    [SerializeField] private TMP_Text    xpText;        // "334xp"
 
     [Header("Screen Overlay (defeat black fade)")]
     [SerializeField] private CanvasGroup  screenOverlay;
@@ -28,6 +41,9 @@ public class CombatResultUI : MonoBehaviour
     [SerializeField] private float labelHoldDuration    = 1.4f;
     [SerializeField] private float labelFadeOutDuration = 0.4f;
     [SerializeField] private float screenFadeDuration   = 0.8f;
+    [SerializeField] private float xpFadeInDuration     = 0.4f;
+
+    private CombatXPPayload _pendingXP;
 
     private void Awake()
     {
@@ -35,8 +51,9 @@ public class CombatResultUI : MonoBehaviour
         Instance = this;
 
         // Start hidden
-        if (labelCanvasGroup != null)  labelCanvasGroup.alpha  = 0f;
-        if (screenOverlay    != null)  screenOverlay.alpha     = 0f;
+        if (labelCanvasGroup != null) labelCanvasGroup.alpha = 0f;
+        if (xpCanvasGroup    != null) xpCanvasGroup.alpha    = 0f;
+        if (screenOverlay    != null) screenOverlay.alpha    = 0f;
     }
 
     private void OnEnable()  => EventBus.OnTrigger += OnBusEvent;
@@ -44,6 +61,13 @@ public class CombatResultUI : MonoBehaviour
 
     private void OnBusEvent(string trigger, object payload)
     {
+        if (trigger == "CombatXPEarned")
+        {
+            // Cache payload; CombatResult fires just after this
+            _pendingXP = payload as CombatXPPayload;
+            return;
+        }
+
         if (trigger != "CombatResult") return;
         bool win = payload is bool b && b;
         StopAllCoroutines();
@@ -60,9 +84,32 @@ public class CombatResultUI : MonoBehaviour
             labelText.color = new Color(1f, 0.85f, 0.2f); // gold
         }
 
+        // Populate and reset the XP toast
+        if (xpCanvasGroup != null) xpCanvasGroup.alpha = 0f;
+        if (_pendingXP != null)
+        {
+            if (xpText != null) xpText.text = $"{_pendingXP.xp}xp";
+            if (xpIcon != null)
+            {
+                xpIcon.sprite  = _pendingXP.icon;
+                xpIcon.enabled = _pendingXP.icon != null;
+            }
+        }
+
+        // Victory label fades in
         yield return FadeCG(labelCanvasGroup, 0f, 1f, labelFadeInDuration);
+
+        // XP toast fades in underneath
+        yield return FadeCG(xpCanvasGroup, 0f, 1f, xpFadeInDuration);
+
+        // Hold both visible
         yield return new WaitForSeconds(labelHoldDuration);
+
+        // Fade both out together
+        StartCoroutine(FadeCG(xpCanvasGroup, 1f, 0f, labelFadeOutDuration));
         yield return FadeCG(labelCanvasGroup, 1f, 0f, labelFadeOutDuration);
+
+        _pendingXP = null;
     }
 
     private IEnumerator ShowDefeat()

@@ -90,8 +90,10 @@
     <Compile Include="Assets\Assets\Scripts\Managers\ZoneManager\ZoneUIManager.cs" />
     <Compile Include="Assets\Assets\Scripts\TimersAndTrackers\ReadingSession.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\QuestData\QuestData.cs" />
+    <Compile Include="Assets\Assets\Scripts\VFX\HealthBarSlashSpawner.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\CombatData\RespawnUI.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\QuestData\QuestReward.cs" />
+    <Compile Include="Assets\Assets\Scripts\VFX\SlashAutoCleanup.cs" />
     <Compile Include="Assets\Assets\Scripts\TimersAndTrackers\XPNumbers.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\ZoneData\ZoneData.cs" />
     <Compile Include="Assets\Assets\Scripts\DataModels\Items\ConsumableCooldowns.cs" />

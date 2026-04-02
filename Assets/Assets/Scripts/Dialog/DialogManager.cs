@@ -69,7 +69,13 @@ public class DialogManager : MonoBehaviour
 
         if (npcNameText) npcNameText.text = string.IsNullOrEmpty(displayName) ? npcId : displayName;
 
-        portait.sprite = Resources.Load<Sprite>($"Portraits/Dialog_Portraits/{npcId}");
+        // Resolve the portrait filename from zone NPC data (e.g. "goblin") rather than
+        // the raw interactable id ("StableCourtyard_Goblin_1") so the file path matches.
+        string portraitKey = GameManager.Instance != null
+            ? GameManager.Instance.GetInteractablePortraitKey(npcId)
+            : npcId;
+        portait.sprite = Resources.Load<Sprite>($"Portraits/Dialog_Portraits/{portraitKey}");
+        Debug.Log($"[DialogManager] npcId={npcId} portraitKey={portraitKey}");
         _story = new Story(inkJson.text);
         GameStateBridge.Bind(_story, npcId);
 
@@ -86,6 +92,16 @@ public class DialogManager : MonoBehaviour
     public void CloseDialog()
     {
         RunAnim(CloseSequence());
+    }
+
+    /// <summary>
+    /// Fades the panel out exactly like CloseDialog(), then invokes <paramref name="onComplete"/>
+    /// just before the GameObject is deactivated. Used by combat so StartCombat fires
+    /// after the dialog has visually gone but before SetActive(false) kills coroutines.
+    /// </summary>
+    public void CloseAndThen(System.Action onComplete)
+    {
+        RunAnim(CloseSequence(onComplete));
     }
 
     // ── Animation Sequences ────────────────────────────────────────────────────
@@ -137,7 +153,7 @@ public class DialogManager : MonoBehaviour
             yield return SpawnAndFadeButtons();
     }
 
-    private IEnumerator CloseSequence()
+    private IEnumerator CloseSequence(System.Action onComplete = null)
     {
         yield return FadeOutButtons();
 
@@ -149,6 +165,10 @@ public class DialogManager : MonoBehaviour
         if (npcNameText)     npcNameText.text      = "";
         _story              = null;
         _waitingForMinigame = false;
+
+        // Fire callback BEFORE SetActive(false) — deactivating kills all coroutines
+        // on this GameObject, so anything after SetActive would never run.
+        onComplete?.Invoke();
         gameObject.SetActive(false);
         mainTextBox.SetActive(true);
     }

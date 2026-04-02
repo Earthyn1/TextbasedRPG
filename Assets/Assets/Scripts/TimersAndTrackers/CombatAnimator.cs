@@ -36,7 +36,11 @@ public class CombatAnimator : MonoBehaviour
     [SerializeField] private float lungeTime        = 0.08f;
     [SerializeField] private float returnTime       = 0.18f;
 
-   
+    [Header("HealthBarSlashScriptRef")]
+
+    [SerializeField] private HealthBarSlashSpawner slashSpawner; 
+
+
 
     // ── Runtime ───────────────────────────────────────────────────────────────
 
@@ -145,12 +149,16 @@ public class CombatAnimator : MonoBehaviour
     {
         if (enemyRect == null) return;
         RestartAnim(EnemyFlinch());
+       
     }
 
     private void HandlePlayerHit(int damage)
     {
-        // Player damage has landed.
-        // Later this can flash player UI / slash effect / HP pop.
+        // 💥 Spawn slash AFTER animation completes
+        if (slashSpawner != null)
+        {
+            slashSpawner.SpawnSlash();
+        }
     }
 
     // ── Sequences ─────────────────────────────────────────────────────────────
@@ -166,6 +174,8 @@ public class CombatAnimator : MonoBehaviour
 
         // Snap back
         yield return MoveEnemy(enemyRect.anchoredPosition, _enemyOrigin, flinchReturnTime, Easing.EaseIn);
+
+        
     }
 
     private IEnumerator EnemyAttackLunge()

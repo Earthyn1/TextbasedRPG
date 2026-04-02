@@ -34,11 +34,17 @@ public class ZoneHitmaskInteractor : MonoBehaviour
     private float revealAmount = 0f;
     private float lastNonZeroTime = -999f;
 
+    /// <summary>True when the player should not be able to interact with scene props.</summary>
+    private bool IsLocked =>
+        (interactionUI != null && interactionUI.IsBusy) ||
+        CinematicManager.IsPlaying ||
+        (CombatManager.Instance != null && CombatManager.Instance.IsActive);
+
     void Update()
     {
-        if (interactionUI != null && interactionUI.IsBusy || CinematicManager.IsPlaying)
+        if (IsLocked)
         {
-            // Suppress all interaction while UI is busy or a cinematic is playing
+            // Suppress all interaction while UI is busy, cinematic is playing, or combat is active
             ClearHover();
             return;
         }
@@ -112,7 +118,7 @@ public class ZoneHitmaskInteractor : MonoBehaviour
     /// </summary>
     public void SetPropHovered(byte id)
     {
-       
+        if (IsLocked) return;
         pendingId = id;
         lastNonZeroTime = Time.unscaledTime;
     }
@@ -123,6 +129,7 @@ public class ZoneHitmaskInteractor : MonoBehaviour
     /// </summary>
     public void TriggerPropClick(byte hitId)
     {
+        if (IsLocked) return;
         Debug.Log($"[TriggerPropClick] ENTERED hitId={hitId} cooldownLeft={clickCooldown - (Time.unscaledTime - lastClickTime):F2}s mapCount={hitIdToInteractable?.Count ?? -1}");
 
         if (Time.unscaledTime - lastClickTime < clickCooldown) return;

@@ -9,8 +9,8 @@ EXTERNAL startMinigame(id)
 === Intro ===
 A pile of dry hay stacked against the wall. It smells faintly of dust and horses.
 
-   * [Rummage through it<mg:haystackSearch,2,TimedAction,Perception><req:Perception,1>]
-    ~ startMinigame("haystackSearch, 2, TimedAction, Perception, Searching the stall...")
+   * [Rummage through it<mg:goblinSearch,1.5,TimedAction,Perception><req:Perception,1>]
+    ~ startMinigame("goblinSearch, 1.5, TimedAction, Perception, Searching the stall...")
         -> DONE
 
     * [Leave]

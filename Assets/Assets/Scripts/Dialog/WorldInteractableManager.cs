@@ -86,6 +86,16 @@ public class WorldInteractableManager : MonoBehaviour
         RunAnim(CloseSequence());
     }
 
+    /// <summary>
+    /// Fades the panel out exactly like Close(), then invokes <paramref name="onComplete"/>
+    /// just before the GameObject is deactivated. Used by combat so StartCombat fires
+    /// after the dialog has visually gone but before SetActive(false) kills coroutines.
+    /// </summary>
+    public void CloseAndThen(System.Action onComplete)
+    {
+        RunAnim(CloseSequence(onComplete));
+    }
+
     // ── Animation Sequences ────────────────────────────────────────────────────
 
     private IEnumerator OpenSequence()
@@ -126,7 +136,7 @@ public class WorldInteractableManager : MonoBehaviour
             yield return SpawnAndFadeButtons();
     }
 
-    private IEnumerator CloseSequence()
+    private IEnumerator CloseSequence(System.Action onComplete = null)
     {
         yield return FadeOutButtons();
 
@@ -138,6 +148,10 @@ public class WorldInteractableManager : MonoBehaviour
         _story              = null;
         _contextId          = null;
         _waitingForMinigame = false;
+
+        // Fire callback BEFORE SetActive(false) — deactivating kills all coroutines
+        // on this GameObject, so anything after SetActive would never run.
+        onComplete?.Invoke();
         gameObject.SetActive(false);
     }
 

@@ -81,6 +81,13 @@ public static class GameStateBridge
                     InventoryManager.Instance.AddItem(itemId, count, silent: true);
             });
 
+        story.BindExternalFunction("removeItem",
+           (string itemId, int count) =>
+           {
+               if (InventoryManager.Instance != null)
+                   InventoryManager.Instance.RemoveItem(itemId, count, silent: true);
+           });
+
         story.BindExternalFunction("takeItem",
             (string itemId, int count) =>
             {
@@ -138,58 +145,46 @@ public static class GameStateBridge
 
         // ----- COMBAT -----
         // Call from Ink: ~ startCombat("goblin1")
-        // Closes the active dialog panel immediately, then starts the encounter.
-        // Victory / defeat are handled by CombatResultUI — no ink resumption needed.
+        // Distributes the prop rect immediately, then closes the dialog with a fade.
+        // StartCombat only fires in the close-callback so combat panels appear AFTER
+        // the dialog has fully faded out. Victory/defeat handled by CombatResultUI.
         story.BindExternalFunction("startCombat", (string enemyId) =>
         {
+            // ── Distribute prop rect right now (sync, before close starts) ──────
+            Debug.Log($"[CombatInit] Start → npcId={npcId}, enemyId={enemyId}");
+
+            var propRect = ZoneScenePropSpawner.Instance?.GetPropRect(npcId);
+            if (propRect != null)
+            {
+                Debug.Log($"[CombatInit] Found propRect for '{npcId}' → {propRect.name}");
+                CombatAnimator.Instance?.SetEnemyTarget(propRect);
+                CombatManager.Instance?.SetEnemyAnchor(propRect);
+            }
+            else
+            {
+                Debug.LogWarning($"[CombatInit] propRect NULL for npcId='{npcId}'");
+            }
+
+            // ── Close dialog with fade; fire StartCombat only when fully gone ───
+            System.Action fireCombat = () =>
+            {
+                Debug.Log("[CombatInit] Dialog closed — firing StartCombat");
+                EventBus.Fire("StartCombat", enemyId);
+            };
+
             var wim = UnityEngine.Object.FindFirstObjectByType<WorldInteractableManager>();
             if (wim != null && wim.gameObject.activeInHierarchy)
             {
-                wim.Close();
+                wim.CloseAndThen(fireCombat);
             }
             else
             {
                 var dm = UnityEngine.Object.FindFirstObjectByType<DialogManager>();
                 if (dm != null && dm.gameObject.activeInHierarchy)
-                    dm.CloseDialog();
-            }
-
-            // npcId here is the prop's interactable ID (e.g. "StableCourtyard_Goblin_1").
-            Debug.Log($"[CombatInit] Start → npcId={npcId}, enemyId={enemyId}");
-
-            var propRect = ZoneScenePropSpawner.Instance?.GetPropRect(npcId);
-
-            if (propRect != null)
-            {
-                Debug.Log($"[CombatInit] Found propRect for '{npcId}' → {propRect.name}");
-
-                if (CombatAnimator.Instance != null)
-                {
-                    Debug.Log("[CombatInit] Setting CombatAnimator target");
-                    CombatAnimator.Instance.SetEnemyTarget(propRect);
-                }
+                    dm.CloseAndThen(fireCombat);
                 else
-                {
-                    Debug.LogWarning("[CombatInit] CombatAnimator.Instance is NULL!");
-                }
-
-                if (CombatManager.Instance != null)
-                {
-                    Debug.Log("[CombatInit] Setting CombatManager anchor");
-                    CombatManager.Instance.SetEnemyAnchor(propRect);
-                }
-                else
-                {
-                    Debug.LogWarning("[CombatInit] CombatManager.Instance is NULL!");
-                }
+                    fireCombat(); // no dialog open — start immediately
             }
-            else
-            {
-                Debug.LogWarning($"[CombatInit] propRect is NULL for npcId='{npcId}'");
-            }
-
-            Debug.Log("[CombatInit] Firing StartCombat event");
-            EventBus.Fire("StartCombat", enemyId);
         });
     }
 

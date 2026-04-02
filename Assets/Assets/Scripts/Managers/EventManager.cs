@@ -163,6 +163,16 @@ public class EventManager : MonoBehaviour
             ZoneUIManager.Instance?.RefreshCurrentZone();
             return null;
         }
+        if (a.StartsWith("RemoveItem("))
+        {
+            var body = Between(a, "RemoveItem(", ")").Split(',');
+            string itemId = body[0].Trim();
+            int amount = int.Parse(body[1].Trim());
+            InventoryManager.Instance?.RemoveItem(itemId, amount);
+            GameLog_Manager.Instance?.AddEntry($"Lost {itemId} x{amount}.");
+            ZoneUIManager.Instance?.RefreshCurrentZone();
+            return null;
+        }
 
         Debug.LogWarning($"[Events] Unknown action: {a}");
         return null;

@@ -425,7 +425,17 @@ public class MinigameManager : MonoBehaviour
         if (parts.Length >= 1) entry.minigameId = parts[0];
 
         if (parts.Length >= 2)
-            int.TryParse(parts[1], out entry.level);
+        {
+            if (!int.TryParse(parts[1], out entry.level))
+            {
+                // Gracefully handle float strings like "1.5" — round to nearest int
+                if (float.TryParse(parts[1], System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out float fLevel))
+                    entry.level = Mathf.RoundToInt(fLevel);
+                else
+                    entry.level = 1; // default if completely unparseable
+            }
+        }
 
         if (parts.Length >= 3)
         {

@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Orchestrates combat encounters started from Ink dialog via ~ startCombat("enemyId").
@@ -31,6 +33,12 @@ public class CombatManager : MonoBehaviour
     [Header("XP Reward (on kill)")]
     [Tooltip("Base XP awarded when the enemy is defeated. Scaled by enemy level.")]
     [SerializeField] private int xpPerEnemyLevel = 20;
+
+    [Header("Transition Timing")]
+    [Tooltip("How long the combat UI panels take to fade in at the start of an encounter.")]
+    [SerializeField] private float uiFadeInDuration = 0.30f;
+    [Tooltip("Seconds after victory before the killed flag is set (lets Victory label show first).")]
+    [SerializeField] private float killFlagDelay = 1.5f;
 
 
     private Coroutine _enemyAttackRoutine;
@@ -158,9 +166,14 @@ public class CombatManager : MonoBehaviour
             return;
         }
 
-        // Show the combat UI panel — must happen before the initial event pushes
-        // so CombatUI.OnEnable subscribes before we fire the first HP/timer updates.
-        if (combatUIParent != null) combatUIParent.SetActive(true);
+        // Activate combat UI at alpha 0 so OnEnable fires and CombatUI subscribes
+        // before the first event pushes below — then fade in visually.
+        if (combatUIParent != null)
+        {
+            var cg = combatUIParent.GetComponent<CanvasGroup>();
+            if (cg != null) cg.alpha = 0f;
+            combatUIParent.SetActive(true);
+        }
         combatUI?.InitialSetup(enemyId);
 
         _enemyData    = enemy;
@@ -179,37 +192,36 @@ public class CombatManager : MonoBehaviour
         if (stanceSys != null && stanceSys.currentStance == StanceType.None)
             stanceSys.SetStance(StanceType.Defensive);
 
-        // Spawn enemy health bar
+        // Spawn enemy health bar (starts invisible, fades in alongside combat UI)
         if (enemyHealthBarPrefab != null)
         {
             if (_spawnedHealthBar != null) Destroy(_spawnedHealthBar);
             _spawnedHealthBar = Instantiate(enemyHealthBarPrefab, enemyHealthBarParent);
 
-            var prop = ZoneScenePropSpawner.Instance.GetPropData(CurrentNPC);
+            var prop = ZoneScenePropSpawner.Instance?.GetPropData(CurrentNPC);
 
-            if (prop == null)
-            {
-                Debug.LogError($"[HealthBar] Missing prop data for '{CurrentNPC}' — cannot position health bar");
-                return;
-            }
-
-            // Position the health bar above the enemy prop
+            // Position the health bar above the enemy prop anchor
             if (_enemyAnchor != null)
             {
                 var barRect = _spawnedHealthBar.GetComponent<RectTransform>();
-                if (barRect != null)
+                if (barRect != null && prop != null)
                 {
-                    barRect.anchoredPosition = new Vector2(
-                        prop.PosX,
-                        prop.PosY
-                    );
+                    barRect.anchoredPosition = new Vector2(prop.PosX, prop.PosY);
                 }
             }
+
+            // Start invisible for fade-in
+            var barCG = _spawnedHealthBar.GetComponent<CanvasGroup>()
+                     ?? _spawnedHealthBar.AddComponent<CanvasGroup>();
+            barCG.alpha = 0f;
         }
         else
         {
             Debug.LogWarning("[CombatManager] enemyHealthBarPrefab is NULL — assign it in the Inspector.");
         }
+
+        // Fade in both panels together
+        StartCoroutine(FadeInCombatPanels());
 
         // Initial UI push
         OnEnemyHPChanged?.Invoke(_enemyHP, _enemyData.maxHP);
@@ -231,32 +243,56 @@ public class CombatManager : MonoBehaviour
             _enemyAttackRoutine = null;
         }
 
-        // ── Set the killed flag so the prop disappears from the scene ─────────
-        // Convention: <zoneId>.<npcId>.killed  e.g. "stableCourtyard.goblin1.killed"
-        if (_enemyData != null)
-        {
-            string zone = WorldState.CurrentZoneId;
-            string flag = !string.IsNullOrEmpty(zone)
-                ? $"{zone}.{_enemyData.npcID}.killed"
-                : $"{_enemyData.npcID}.killed";
-            WorldStateManager.Instance?.SetFlag(flag);
-        }
-
-        // ── Award XP based on enemy level and current stance ──────────────────
+        // Award XP (also broadcasts "CombatXPEarned" for the victory toast)
         AwardKillXP();
 
-        // ── Clean up health bar ───────────────────────────────────────────────
-        if (_spawnedHealthBar != null)
+        // Fade bars out, then fire CombatResult + delayed kill flag
+        StartCoroutine(VictoryFadeOut());
+    }
+
+    /// <summary>
+    /// Fades the combat UI panel and enemy health bar out together,
+    /// then fires the CombatResult event and schedules the kill flag.
+    /// </summary>
+    private IEnumerator VictoryFadeOut()
+    {
+        var panelCG = combatUIParent    != null ? combatUIParent.GetComponent<CanvasGroup>()    : null;
+        var barCG   = _spawnedHealthBar != null ? _spawnedHealthBar.GetComponent<CanvasGroup>() : null;
+
+        float t = 0f;
+        while (t < uiFadeInDuration)
         {
-            Destroy(_spawnedHealthBar);
-            _spawnedHealthBar = null;
+            t += Time.deltaTime;
+            float alpha = Mathf.Clamp01(1f - t / uiFadeInDuration);
+            if (panelCG != null) panelCG.alpha = alpha;
+            if (barCG   != null) barCG.alpha   = alpha;
+            yield return null;
         }
 
-        // ── Hide combat UI ────────────────────────────────────────────────────
-        if (combatUIParent != null) combatUIParent.SetActive(false);
+        // Destroy + deactivate now that they're invisible
+        if (_spawnedHealthBar != null) { Destroy(_spawnedHealthBar); _spawnedHealthBar = null; }
+        if (combatUIParent    != null) combatUIParent.SetActive(false);
 
-        // ── Resume the Ink story at the CombatWon knot ───────────────────────
+        // Show the Victory overlay
         EventBus.Fire("CombatResult", true);
+
+        // Delay prop disappear so it happens after the Victory label has been visible
+        StartCoroutine(DelayedKillFlag());
+    }
+
+    private IEnumerator DelayedKillFlag()
+    {
+        yield return new WaitForSeconds(killFlagDelay);
+
+        if (_enemyData == null) yield break;
+
+        // Convention: <zoneId>.<npcId>.killed  e.g. "stableCourtyard.goblin1.killed"
+        string zone = WorldState.CurrentZoneId;
+        string flag = !string.IsNullOrEmpty(zone)
+            ? $"{zone}.{_enemyData.npcID}.killed"
+            : $"{_enemyData.npcID}.killed";
+
+        WorldStateManager.Instance?.SetFlag(flag);
     }
 
     public void HandlePlayerDeath()
@@ -516,11 +552,19 @@ public class CombatManager : MonoBehaviour
 
         PlayerSkills.Instance.AddXP(skill, xp);
 
-        if (XPToastSpawner.Instance != null)
+        // Broadcast icon + amount for the combat victory XP toast.
+        // We intentionally skip XPToastSpawner here — combat has its own
+        // overlay toast in CombatResultUI so we don't double-show.
+        Sprite xpIcon = PlayerSkills.Instance != null
+            ? PlayerSkills.Instance.GetIconForSkill(skill)
+            : null;
+
+        EventBus.Fire("CombatXPEarned", new CombatXPPayload
         {
-            Sprite icon = PlayerSkills.Instance.GetIconForSkill(skill);
-            XPToastSpawner.Instance.ShowXPToast($"{xp}xp", icon);
-        }
+            xp        = xp,
+            icon      = xpIcon,
+            skillName = skill.ToString()
+        });
 
         Debug.Log($"[CombatManager] Awarded {xp} {skill} XP for killing {_enemyData.npcID}.");
     }
@@ -533,4 +577,43 @@ public class CombatManager : MonoBehaviour
         float e = Mathf.Clamp01(_enemyTimer  / _enemyCd);
         OnTimersChanged?.Invoke(p, e);
     }
+
+    /// <summary>
+    /// Fades the combat UI parent and the spawned enemy health bar in together
+    /// after the dialog panel has closed.
+    /// </summary>
+    private IEnumerator FadeInCombatPanels()
+    {
+        var panelCG = combatUIParent != null
+            ? combatUIParent.GetComponent<CanvasGroup>()
+            : null;
+
+        var barCG = _spawnedHealthBar != null
+            ? _spawnedHealthBar.GetComponent<CanvasGroup>()
+            : null;
+
+        float t = 0f;
+        while (t < uiFadeInDuration)
+        {
+            t += Time.deltaTime;
+            float alpha = Mathf.Clamp01(t / uiFadeInDuration);
+            if (panelCG != null) panelCG.alpha = alpha;
+            if (barCG   != null) barCG.alpha   = alpha;
+            yield return null;
+        }
+
+        if (panelCG != null) panelCG.alpha = 1f;
+        if (barCG   != null) barCG.alpha   = 1f;
+    }
+}
+
+/// <summary>
+/// Payload sent on EventBus "CombatXPEarned" so CombatResultUI can show
+/// the skill icon alongside the XP number without needing a string parse.
+/// </summary>
+public class CombatXPPayload
+{
+    public int    xp;
+    public Sprite icon;
+    public string skillName; // e.g. "Strength"
 }

@@ -152,10 +152,18 @@
       {
         "id": "StableCourtyard_Goblin_1",
         "displayName": "Goblin",
-        "portrait": "stableMaster",
+        "portrait": "goblin",
         "autoDialog": "goblin_1_Fight",
         "disposition": "Neutral",
         "hitColor": "160"
+      }
+    ],
+    "worldObjects": [
+      {
+        "id": "StableCourtyard_Goblin_1_Dead",
+        "displayName": "Dead Goblin",
+        "autoDialog": "goblin_1_loot",
+        "hitColor": "140"
       }
     ],
     "sceneProps": [
@@ -191,7 +199,7 @@
         "id": "StableCourtyard_Goblin_1",
         "sprite": "StableCourtyard_Goblin_1",
         "pos": [
-          -36.12,
+          -36,
           0
         ],
         "size": [
@@ -215,7 +223,8 @@
         ],
         "hideWhenFlag": "stableCourtyard.goblin1.defeated",
         "showWhenFlag": "stableCourtyard.goblin1.killed",
-        "spawnHidden": true
+        "spawnHidden": true,
+        "hitId": 140
       },
       {
         "id": "StableCourtyard_Goblin_2",

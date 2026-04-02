@@ -6,106 +6,107 @@ EXTERNAL giveItem(itemId, count)
 
 
 === Intro ===
-{  hasFlag("Firstime"):
-The lad glances up from a broom. “Still here are you?”
+{ hasFlag("stableboy.met"): -> IntroRepeat }
 
-* [Any news from town?]
+~ setFlag("stableboy.met")
+
+The lad leans on his broom. "You're late."
+
+* ["Had things to do."]
+    "Oh yeah? Tell him that yourself?"
+    -> TalkLoop
+
+* ["Any news from town?"]
     -> Rumors
 
-* [\(Glance at the dog\)]
-    -> DogLester
-    
-    * [I’ll get out of your way.]
+* ["Back to work."]
     -> Goodbye
-    
-    - else:
-        ~ setFlag("Firstime")
-        
-        The lad glances up from a broom, hay stuck to his sleeves. “You ain’t from around here, are you?”
 
-        * [That obvious huh? Came in two days past.]
-            -> Warm
-        
-        * [Nope, any news from town?]
-            -> Rumors
-        
-        * [\(Glance at the dog\)]
-            -> DogLester
-    
-}
 
-=== Warm ===
-He brightens a little. “Name’s Tom. I keep the stalls clean an the horses calmer”
+=== IntroRepeat ===
+Tom gives you a nod. Lester's tail thumps once.
+"You forget something?"
 
-* [Any news from town?]
+* ["Any news from town?"]
     -> Rumors
 
-* [I’ll get out of your way.]
+* ["(Look at Lester)"]
+    -> DogLester
+
+* ["Back to work."]
+    -> Goodbye
+
+
+=== TalkLoop ===
++ ["Any news from town?"]
+    -> Rumors
+
++ ["(Look at Lester)"]
+    -> DogLester
+
+* ["Back to work."]
     -> Goodbye
 
 
 === Rumors ===
-{  hasFlag("askedRumors"):
-     
-      He squints at you. “Already told you what I know. Dungeon’s been rough. Priests greedy. Nothin’ new since last breath.”
-      
-      * [Right sorry.]
-    -> Goodbye
-    
-- else:
-~ setFlag("askedRumors")
-   “Guild’s been busier. Folks comin out the dungeon more beaten up than usual. Priests chargin double if you’re not copper-tier too.”
-   
-    * [What changed in the dungeon you think?]
+{ hasFlag("stableboy.askedRumors"): -> RumorsRepeat }
+
+~ setFlag("stableboy.askedRumors")
+
+"Guild's been packed. Folks coming out the dungeon half-dead again."
+"Priests charging double if you're not copper-tier."
+
++ ["Think the dungeon's getting worse?"]
     -> Changed
 
-    * [Damned priests. Same in every town, eh?]
++ ["Priests are the same everywhere."]
     -> PopsSays
 
-    * [I’ll get out of your way.]
-    -> Goodbye
-}
++ ["Right."]
+    "Tom starts to idly pet Lester."
+    -> TalkLoop
 
 
+=== RumorsRepeat ===
+He side-eyes you. "Same as I told you. Dungeon's bad. Priests worse."
 
++ ["Yeah, yeah."]
+    "Tom starts to idly pet Lester."
+    -> TalkLoop
 
-=== DogLester ===
-A grin. “Lester’s friendly enough. Toss him a bone and he’ll guard your boots like treasure.”
-
-* [Thats a good boy.]
-    -> BiteYou
-
-* [I’ll get out of your way.]
-    -> Goodbye
-
-
-=== Goodbye ===
-“I’ve chores. Don’t step in the bucket by the door... ain’t water.”
--> END
-
-
-=== PopsSays ===
-“Aye, Pops says the same — swears priests never heal what they can’t tax.”
-
-* [\(Glance at the dog\)]
-    -> DogLester
-
-* [I’ll get out of your way.]
++ ["Alright."]
     -> Goodbye
 
 
 === Changed ===
-“Thinkin I would be sweeping floors here if I knew that answer?”
+He snorts. "If I knew that, I wouldn't be shoveling this."
 
-* [Right. I'll get out of your way.]
-    -> Goodbye
+-> TalkLoop
+
+
+=== PopsSays ===
+"Aye. Pops says they'd tax breathing if they could."
+
+-> TalkLoop
+
+
+=== DogLester ===
+"Lester's been eyeing you all morning. Thinks you owe him something."
+
++ ["Good dog."]
+    -> BiteYou
+
++ ["Not today."]
+    "A low growl rumbles from Lester."
+    -> TalkLoop
 
 
 === BiteYou ===
-"If he bites you… that’s on you!”
+"If he bites you, I'm not helping."
 
-* [Any news from town?]
-    -> Rumors
+-> TalkLoop
 
-* [I’ll get out of your way.]
-    -> Goodbye
+
+=== Goodbye ===
+"Try not to make more work for me."
+-> END

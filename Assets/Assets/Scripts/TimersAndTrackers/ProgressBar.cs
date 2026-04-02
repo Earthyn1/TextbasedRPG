@@ -4,69 +4,78 @@ using UnityEngine.UI;
 
 public class ProgressBar : MonoBehaviour
 {
-    // Public progress bar
     public Image progressBar;
-    public Image damageOverlayBar;   // secondary (behind main)
-
+    public Image damageOverlayBar;
     public TMP_Text Text;
 
     [Header("Settings")]
-    private readonly float overlayLerpSpeed = 1.0f; // how fast the red overlay catches up
+    [SerializeField] private float overlayLerpSpeed = 1.0f;
 
-    private float targetFill;   // where we *want* the main bar
-    private float overlayFill;  // current value of overlay bar
-
-    // Current progress value (0-1)
-    [Range(0f, 1f)]
-    public float progress = 0f;
-
-    // Max time for timer display
-    public float maxTime = 10f; // e.g., 10 seconds
-
-    // Show timer instead of percentage
-    public bool showTimer = false;
+    private float targetFill;
+    private float overlayFill;
 
     private void Awake()
     {
         if (progressBar != null)
             targetFill = progressBar.fillAmount;
+
         if (damageOverlayBar != null)
+        {
             overlayFill = damageOverlayBar.fillAmount;
+        }
+        else
+        {
+            overlayFill = targetFill;
+        }
+    }
+
+    private void Update()
+    {
+        if (damageOverlayBar == null)
+            return;
+
+        overlayFill = Mathf.MoveTowards(overlayFill, targetFill, overlayLerpSpeed * Time.deltaTime);
+        damageOverlayBar.fillAmount = overlayFill;
     }
 
     public void SetupOverlayFill()
     {
-        overlayFill = 1;
-    }
-    private void Update()
-    {
+        if (progressBar != null)
+            targetFill = progressBar.fillAmount;
+
+        overlayFill = targetFill;
+
         if (damageOverlayBar != null)
-        {
-            // Interpolate the overlay down to match targetFill
-            overlayFill = Mathf.MoveTowards(overlayFill, targetFill, overlayLerpSpeed * Time.deltaTime);
             damageOverlayBar.fillAmount = overlayFill;
-        }
     }
 
     public void SetProgress(float value, string text = "")
     {
         targetFill = Mathf.Clamp01(value);
 
-        // Snap the main bar instantly
         if (progressBar != null)
             progressBar.fillAmount = targetFill;
 
-        // Initialize overlay if it was above new value
+        // Heal: overlay should jump up instantly
         if (damageOverlayBar != null && overlayFill < targetFill)
-            overlayFill = targetFill; // heal → overlay jumps instantly up
+        {
+            overlayFill = targetFill;
+            damageOverlayBar.fillAmount = overlayFill;
+        }
 
         if (Text != null)
             Text.text = text;
     }
 
-    // Optional: reset progress
     public void ResetProgress()
     {
-        progress = 0f;
+        targetFill = 0f;
+        overlayFill = 0f;
+
+        if (progressBar != null)
+            progressBar.fillAmount = 0f;
+
+        if (damageOverlayBar != null)
+            damageOverlayBar.fillAmount = 0f;
     }
 }

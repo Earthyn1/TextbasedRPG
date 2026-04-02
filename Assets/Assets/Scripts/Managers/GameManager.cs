@@ -475,6 +475,33 @@ public class GameManager : MonoBehaviour
         return zone;
     }
 
+    /// <summary>
+    /// Returns the portrait key for a zone interactable (NPC or world object) by its id.
+    /// Looks up the current zone's npc/worldObject list and returns the 'portrait' field
+    /// (e.g. "goblin") so callers can load  Resources.Load("Portraits/Dialog_Portraits/goblin").
+    /// Falls back to <paramref name="interactableId"/> if no matching entry is found.
+    /// </summary>
+    public string GetInteractablePortraitKey(string interactableId)
+    {
+        if (_currentZone == null) return interactableId;
+
+        if (_currentZone.npcs != null)
+        {
+            var npc = _currentZone.npcs.Find(n => n.id == interactableId);
+            if (npc != null && !string.IsNullOrEmpty(npc.portrait))
+                return npc.portrait;
+        }
+
+        if (_currentZone.worldObjects != null)
+        {
+            var world = _currentZone.worldObjects.Find(w => w.id == interactableId);
+            if (world != null && !string.IsNullOrEmpty(world.portrait))
+                return world.portrait;
+        }
+
+        return interactableId; // fallback: try the id itself as a filename
+    }
+
 
     public void GoToZone(string zoneId)
     {

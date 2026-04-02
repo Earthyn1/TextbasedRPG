@@ -30,11 +30,12 @@ public class Debug_Manager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             // Grab the quest from your GameManager by ID
-            QuestData goblinQuest = GameManager.Instance.GetQuestById("BanditEscort");
+            QuestData goblinQuest = GameManager.Instance.GetQuestById("GroomMaple");
 
             if (goblinQuest != null)
             {
                 QuestManager.Instance.AddQuest(goblinQuest);
+                InventoryManager.Instance.AddItem("brush", 1);
             }
             else
             {
@@ -45,9 +46,9 @@ public class Debug_Manager : MonoBehaviour
         // ✅ Update Goblin Slayer progress by 1
         if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            QuestManager.Instance.UpdateQuestProgress("GroomMaple", "Action_Stable_GroomMaple", 1);
-           
+            InventoryManager.Instance.AddItem("potion_mana", 1);
+
         }
-    
-}
+
+    }
 }
