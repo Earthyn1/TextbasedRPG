@@ -6,33 +6,39 @@ EXTERNAL hasItem(itemId, count)
 -> Intro
 
 === Intro ===
-A wooden ladder leads up to the loft above. The rungs look worn but sturdy enough.
+A wooden ladder leads up to the loft above. The rungs are worn smooth from use.
 
-    * [Climb up]
-        -> StableBoyWarning
+* [Climb up]
+    -> StableMasterStop
 
-    * [Return]
-        -> END
+* [Return]
+    -> END
 
-=== StableBoyWarning ===
+
+=== StableMasterStop ===
 { hasFlag("tackRoom.ladder.warned"):
-    The stableboy eyes you sharply. "Don't do this again."
-
+    He doesn't even look at you this time. "Don't."
+    
     * [Back off]
         -> END
-- else:
-    The stableboy yells "Oi! You're not allowed up there!"
 
     * [Climb anyway]
         -> ClimbAnyway
+- else:
+    A firm hand clamps your shoulder before you get far. "Not up there."
 
-    * [Leave]
+    ~ setFlag("tackRoom.ladder.warned")
+
+    * [Alright.]
         -> END
+
+    * [Climb anyway]
+        -> ClimbAnyway
 }
 
+
 === ClimbAnyway ===
-~ setFlag("tackRoom.ladder.warned")
-He rushes over and pulls you off the ladder angrily. "Are you deaf??"
+He yanks you back down the ladder without effort. "Are you looking to lose work?"
 
     * [Back off]
         -> END

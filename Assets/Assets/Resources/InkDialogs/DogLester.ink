@@ -8,7 +8,7 @@ EXTERNAL hasItem(itemId, count)
 
 === Intro ===
 { hasFlag("lester.boneGiven"):
-    Lester’s tail wags the moment he sees you. He remembers.
+    Lester’s tail starts wagging the moment she sees you. She remembers.
 
     * [Pet Lester]
         -> PetLester
@@ -17,68 +17,62 @@ EXTERNAL hasItem(itemId, count)
         -> Goodbye
 
 - else:
-    Lester eyes you warily, tail twitching, a low growl rumbling in his throat.
+    Lester watches you closely, tail stiff, a low growl rumbling in her throat.
 
-    * [Pet Dog]
+    * [Reach for him]
         -> Bite
 
-    * { hasItem("dog_bone", 1) } [<i><color=\#228B22>Easy now, boy... look what I’ve got.</color> (Bone)</i>]
+    * { hasItem("dog_bone", 1) } ["Easy now... look what I’ve got."]
         -> GiveBone
 
-    * { not hasItem("dog_bone", 1) } [<alpha=\#99>Easy now, boy... look what I’ve got. (<i>Bone</i>)]
-        -> NeedBone
-
-    * [Back away from the dog]
+    * [Back away]
         -> Goodbye
 }
-    
 
 
 === Bite ===
-You approach Lester... stupidly. Lester snaps at you as you quickly pull back your hand.
+You reach out slowly.
 
-* [Woah, might need to earn his trust]
+Lester snaps — quick and sharp. You pull your hand back just in time.
+
+* [Alright... not yet.]
     -> Goodbye
 
 * [Try again]
     -> Bite2
-    
-    === Bite2 ===
-You approach Lester again... but someone pulls you back "Are you mad?? Lester don't like you!"
 
-* [Worth a try]
+
+=== Bite2 ===
+You try again —
+
+A hand grabs your shoulder and yanks you back.
+
+"Are you mad? Lester’ll take your fingers off."
+
+* [Worth a try.]
     -> Goodbye
-
-=== NeedBone ===
-You pat your pockets. Nothing. Lester growls louder.
-    * [Return]
-    -> Intro
-
 
 
 === GiveBone ===
 ~ giveItem("dog_bone", -1)
 ~ setFlag("lester.boneGiven")
 
-      You toss Lester the bone. His tail thumps the dirt, growl fading into eager crunching.
+You toss the bone. Lester catches it, growl melting into eager crunching. Her tail thumps against the dirt.
 
-       * [Try to pet Lester]
-        -> PetLester
-        
-      * [Good boy.]
-        -> Goodbye
-    
+* [Pet him]
+    -> PetLester
+
+* [Good boy.]
+    -> Goodbye
 
 
-=== PetLester === 
-You aggressivly pet Lester's head and belly as he gnaws on the bone too distracted to notice.
+=== PetLester ===
+You crouch beside Her. Lester leans into your hand, too busy with the bone to mind.
 
- * [Thats a good dog.]
-        -> Goodbye
+* [That’s a good dog.]
+    -> Goodbye
 
 
 === Goodbye ===
-
+She lowers her head, eyes drifting closed.
 -> END
-
-

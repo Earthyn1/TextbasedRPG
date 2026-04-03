@@ -13,25 +13,17 @@ EXTERNAL startMinigame(id)
     * [Leave]
         -> END
 
-- else:
-    { hasFlag("adventurersStable.haystack.failed"):
-        Before you can dig in again, Tom's voice cuts across the stall. "Oi, leave that alone!"
-
-        * [Back off]
-            -> END
-
     - else:
-        A tall pile of hay stuffed into the corner of the stall. Someone's bedded down here recently — there's a worn blanket half-buried in it.
+        A worn blanket half-buried peeks out the side. Someone’s been sleeping here.
 
-        * [Rummage through it<mg:haystackMemory,1,Memory,dog_bone><req:Perception,1>]
-
-            ~ startMinigame("haystackMemory,1,Memory,dog_bone")
+       * [Rummage through it<mg:Search,1.5,TimedAction,Perception><req:Perception,1>]
+    ~ startMinigame("Search, 1.5, TimedAction, Perception, Shifting through straw..., noXP")
             -> DONE
 
         * [Leave]
             -> END
-    }
 }
+
 
 === MinigameFound ===
 ~ setFlag("adventurersStable.haystack.found")
@@ -41,9 +33,3 @@ Stuffed deep in the hay — a chewed bone. Lester's been hiding his treasures in
     * [Pocket it and leave]
         -> END
 
-=== MinigameMissed ===
-~ setFlag("adventurersStable.haystack.failed")
-Hay, dust, and the smell of horse. If there's something here, you couldn't find it.
-
-    * [Leave]
-        -> END

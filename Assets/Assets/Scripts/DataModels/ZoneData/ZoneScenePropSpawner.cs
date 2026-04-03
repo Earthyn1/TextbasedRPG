@@ -70,7 +70,9 @@ public class ZoneScenePropSpawner : MonoBehaviour
 
     private ZoneData _zone;
 
-    public float fadeDuration = 0.20f;
+    [Header("Fading")]
+    [Tooltip("Seconds for props to fade in, fade out, and crossfade between sprites (e.g. live → dead).")]
+    public float fadeDuration = 0.45f;
 
     private readonly Dictionary<string, Coroutine> _running = new();
 
@@ -193,7 +195,7 @@ public class ZoneScenePropSpawner : MonoBehaviour
                 var enterEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
                 enterEntry.callback.AddListener(_ =>
                 {
-                   
+                    if (hitmaskInteractor.IsLocked) return;
                     hitmaskInteractor.SetPropHovered(hitIdByte);
                     highlight.SetHovered(true);
                 });

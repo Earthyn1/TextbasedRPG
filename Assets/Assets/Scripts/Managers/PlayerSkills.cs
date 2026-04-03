@@ -80,7 +80,7 @@ public class PlayerSkills : MonoBehaviour
         // 2. Pop the floating "+12 xp" toast
         if (XPToastSpawner.Instance != null)
         {
-            string xpText = xpAmount + " xp";
+            string xpText = $"+{xpAmount} XP";
             Sprite icon = GetIconForSkill(skillToTrain);
             XPToastSpawner.Instance.ShowXPToast(xpText, icon);
         }

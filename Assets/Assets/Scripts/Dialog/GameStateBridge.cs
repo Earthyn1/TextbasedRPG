@@ -81,6 +81,24 @@ public static class GameStateBridge
                     InventoryManager.Instance.AddItem(itemId, count, silent: true);
             });
 
+        // ~ giveXP("Strength", 30)  — awards XP directly from Ink (e.g. on loot).
+        // XP is applied immediately; the toast is delayed 0.5s so it floats up
+        // just after the flavour-text line has had a moment to register.
+        story.BindExternalFunction("giveXP",
+            (string skillName, int amount) =>
+            {
+                if (PlayerSkills.Instance == null) return;
+                if (!System.Enum.TryParse(skillName, true, out Enum_Skills skill))
+                {
+                    Debug.LogWarning($"[Bridge] giveXP: unknown skill '{skillName}'");
+                    return;
+                }
+                PlayerSkills.Instance.AddXP(skill, amount);
+                Sprite icon = PlayerSkills.Instance.GetIconForSkill(skill);
+                XPToastSpawner.Instance?.ShowXPToastDelayed($"+{amount} XP", icon, 0.5f);
+                Debug.Log($"[Bridge] giveXP: {amount} {skill} XP awarded.");
+            });
+
         story.BindExternalFunction("removeItem",
            (string itemId, int count) =>
            {

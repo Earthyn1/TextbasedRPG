@@ -243,9 +243,6 @@ public class CombatManager : MonoBehaviour
             _enemyAttackRoutine = null;
         }
 
-        // Award XP (also broadcasts "CombatXPEarned" for the victory toast)
-        AwardKillXP();
-
         // Fade bars out, then fire CombatResult + delayed kill flag
         StartCoroutine(VictoryFadeOut());
     }
@@ -531,42 +528,6 @@ public class CombatManager : MonoBehaviour
         else
             GameLog_Manager.Instance.AddEntry(
                 $"{_enemyData.displayName} {verb} you for {result.finalDamage}.", "#FF5555");
-    }
-
-    // ── XP award on kill ──────────────────────────────────────────────────────
-
-    private void AwardKillXP()
-    {
-        if (PlayerSkills.Instance == null || _enemyData == null) return;
-
-        int xp = Mathf.Max(10, _enemyData.level * xpPerEnemyLevel);
-
-        var stance = PlayerStance.Instance != null ? PlayerStance.Instance.currentStance : StanceType.None;
-        Enum_Skills skill = stance switch
-        {
-            StanceType.Berserker  => Enum_Skills.Strength,
-            StanceType.Defensive  => Enum_Skills.Speed,
-            StanceType.Precision  => Enum_Skills.Perception,
-            _                     => Enum_Skills.Strength
-        };
-
-        PlayerSkills.Instance.AddXP(skill, xp);
-
-        // Broadcast icon + amount for the combat victory XP toast.
-        // We intentionally skip XPToastSpawner here — combat has its own
-        // overlay toast in CombatResultUI so we don't double-show.
-        Sprite xpIcon = PlayerSkills.Instance != null
-            ? PlayerSkills.Instance.GetIconForSkill(skill)
-            : null;
-
-        EventBus.Fire("CombatXPEarned", new CombatXPPayload
-        {
-            xp        = xp,
-            icon      = xpIcon,
-            skillName = skill.ToString()
-        });
-
-        Debug.Log($"[CombatManager] Awarded {xp} {skill} XP for killing {_enemyData.npcID}.");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

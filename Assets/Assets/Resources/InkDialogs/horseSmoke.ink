@@ -7,92 +7,61 @@ EXTERNAL hasItem(itemId, count)
 
 
 === Intro ===
-{ hasFlag("metSmoke"):
-    Smoke shifts restlessly in his stall, ears pinned back. He eyes you sideways.
+{ hasFlag("smokeCalmed"):
+    Smoke shifts but doesn’t flare this time. One ear flicks toward you.
 
-    * [Try to calm him]
+    * [Stay calm]
         -> Calm
 
-    * [Keep your distance]
-        -> Distance
-
-    * [Leave him alone]
+    * [Leave him]
         -> Goodbye
 
 - else:
-    ~ setFlag("metSmoke")
-    A dark grey stallion, big and restless. He snorts the moment you get close.
+    A dark grey stallion, restless and tense. Smoke snorts as you approach, ears pinned.
 
-    * [Stand your ground]
-        -> StandGround
+    * [Hold steady]
+        -> Calm
 
-    * [Step back slowly]
-        -> StepBack
-
-    * [Leave him alone]
+    * [Back off]
         -> Goodbye
 }
 
 
-=== StandGround ===
-Smoke huffs and stomps, but doesn't charge. After a moment he seems to decide you're not worth the effort.
-
-* [Try to calm him]
-    -> Calm
-
-* [Leave him alone]
-    -> Goodbye
-
-
-=== StepBack ===
-Smart move. Smoke watches you retreat with an air of smug satisfaction.
-
-* [Leave him alone]
-    -> Goodbye
-
-
 === Calm ===
 { hasFlag("smokeCalmed"):
-    You speak low and steady. Smoke's ears flick toward you — he remembers you well enough.
+    You keep your voice low. Smoke watches you, wary — but not pushing.
 
     * [Good.]
         -> Goodbye
 
 - else:
     ~ setFlag("smokeCalmed")
-    You speak low, hand raised slow. Smoke's nostrils flare... then he exhales, ears lifting just a fraction. Progress.
+    You move slow, voice low. Smoke snorts — then exhales, tension easing just a little.
 
-    * [There we go.]
-        -> Goodbye
+    * [Easy...]
+        -> AfterCalm
 
-    * [Offer something to eat]
+    * { hasItem("apple", 1) } [Offer an apple]
         -> OfferFood
 }
 
 
+=== AfterCalm ===
+Smoke shifts his weight, still watching you closely.
+
+* [Leave him]
+    -> Goodbye
+
+
 === OfferFood ===
-{ hasItem("apple", 1):
-    ~ giveItem("apple", -1)
-    You hold out an apple at arm's length. Smoke stares at it. Then you. Then takes it roughly — but he takes it.
+~ giveItem("apple", -1)
 
-    * [We're getting somewhere.]
-        -> Goodbye
+You hold the apple out carefully. Smoke hesitates — then snatches it, chewing hard.
 
-- else:
-    Nothing to offer. Smoke loses interest immediately.
-
-    * [Maybe next time.]
-        -> Goodbye
-}
-
-
-=== Distance ===
-Probably wise. Smoke stamps a hoof and goes back to ignoring you.
-
-* [Leave him alone]
+* [That’s it.]
     -> Goodbye
 
 
 === Goodbye ===
-
+Smoke snorts softly, watching you as you step away.
 -> END

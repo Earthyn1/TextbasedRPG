@@ -7,18 +7,18 @@ EXTERNAL startMinigame(id)
 -> Intro
 
 === Intro ===
-A pile of dry hay stacked against the wall. It smells faintly of dust and horses.
+A pile of dry hay...
 
    * [Rummage through it<mg:goblinSearch,1.5,TimedAction,Perception><req:Perception,1>]
-    ~ startMinigame("goblinSearch, 1.5, TimedAction, Perception, Searching the stall...")
+    ~ startMinigame("goblinSearch, 1.5, TimedAction, Perception, Searching the pile of hay..., noXP")
         -> DONE
 
     * [Leave]
         -> END
 
 === MinigameFound ===
-Your fingers close around something solid. Hidden beneath the hay — a small coin purse!
-~ giveItem("potion_mana", 1)
+Your fingers close around something solid. A single Coin...
+~ giveItem("gold_coin", 1)
 ~ setFlag("tackRoom.haystack.searched")
 
     * [Leave]

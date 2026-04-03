@@ -300,7 +300,8 @@ public class MinigameManager : MonoBehaviour
     private void OnMinigameInstantResult(bool success)
     {
         // Fires the frame the player clicks — before any result animations
-        if (success && _activeEntry != null)
+        // Skip automatic XP if the minigame was tagged noXP (e.g. haystack searches)
+        if (success && _activeEntry != null && !_activeEntry.noXP)
             AwardMinigameXP(_activeEntry, _activeDelta);
     }
 
@@ -333,7 +334,7 @@ public class MinigameManager : MonoBehaviour
 
         if (XPToastSpawner.Instance != null)
         {
-            string xpText = $"{totalXP}xp";
+            string xpText = $"+{totalXP} XP";
             Sprite icon   = PlayerSkills.Instance.GetIconForSkill(skill);
             XPToastSpawner.Instance.ShowXPToast(xpText, icon);
         }
@@ -464,6 +465,11 @@ public class MinigameManager : MonoBehaviour
         if (parts.Length >= 5 && entry.type == MinigameType.TimedAction)
             entry.displayLabel = parts[4];
 
+        // Scan all parts for "noXP" — suppresses automatic XP on success
+        foreach (var p in parts)
+            if (p.Equals("noXP", System.StringComparison.OrdinalIgnoreCase))
+                { entry.noXP = true; break; }
+
         return entry;
     }
 
@@ -494,6 +500,9 @@ public class MinigameDifficultyEntry
 
     [Tooltip("Only used when type = TimedAction — text shown on the bar label (optional, falls back to minigameId)")]
     public string displayLabel;
+
+    [Tooltip("If true, no XP is awarded on success — use giveXP() in Ink instead.")]
+    public bool noXP;
 }
 
 [Serializable]

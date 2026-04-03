@@ -99,14 +99,16 @@ public class CombatResultUI : MonoBehaviour
         // Victory label fades in
         yield return FadeCG(labelCanvasGroup, 0f, 1f, labelFadeInDuration);
 
-        // XP toast fades in underneath
-        yield return FadeCG(xpCanvasGroup, 0f, 1f, xpFadeInDuration);
+        // XP toast fades in underneath — only if there's actually a payload
+        if (_pendingXP != null)
+            yield return FadeCG(xpCanvasGroup, 0f, 1f, xpFadeInDuration);
 
-        // Hold both visible
+        // Hold visible
         yield return new WaitForSeconds(labelHoldDuration);
 
-        // Fade both out together
-        StartCoroutine(FadeCG(xpCanvasGroup, 1f, 0f, labelFadeOutDuration));
+        // Fade out
+        if (_pendingXP != null)
+            StartCoroutine(FadeCG(xpCanvasGroup, 1f, 0f, labelFadeOutDuration));
         yield return FadeCG(labelCanvasGroup, 1f, 0f, labelFadeOutDuration);
 
         _pendingXP = null;

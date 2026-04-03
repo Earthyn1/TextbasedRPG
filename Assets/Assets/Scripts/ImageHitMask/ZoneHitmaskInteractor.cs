@@ -35,7 +35,7 @@ public class ZoneHitmaskInteractor : MonoBehaviour
     private float lastNonZeroTime = -999f;
 
     /// <summary>True when the player should not be able to interact with scene props.</summary>
-    private bool IsLocked =>
+    public bool IsLocked =>
         (interactionUI != null && interactionUI.IsBusy) ||
         CinematicManager.IsPlaying ||
         (CombatManager.Instance != null && CombatManager.Instance.IsActive);

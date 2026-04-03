@@ -100,7 +100,7 @@ public class WorldInteractableManager : MonoBehaviour
 
     private IEnumerator OpenSequence()
     {
-        BuildDescriptionText();
+        yield return BuildDescriptionTextRoutine();
 
         if (dialogCanvasGroup)
             yield return FadeCG(dialogCanvasGroup, 0f, 1f, panelFadeDuration);
@@ -122,7 +122,7 @@ public class WorldInteractableManager : MonoBehaviour
 
         ClearButtons();
         _story.ChooseChoiceIndex(choiceIndex);
-        BuildDescriptionText();
+        yield return BuildDescriptionTextRoutine();
 
         if (autoCloseWhenDone && !_waitingForMinigame && !_story.canContinue && _story.currentChoices.Count == 0)
         {
@@ -159,31 +159,70 @@ public class WorldInteractableManager : MonoBehaviour
     {
         ClearButtons();
         if (textCanvasGroup) yield return FadeCG(textCanvasGroup, 1f, 0f, textFadeDuration);
-        BuildDescriptionText();
-        if (textCanvasGroup) yield return FadeCG(textCanvasGroup, 0f, 1f, textFadeDuration);
+        // fadeInOnFirstLine=true: text fades IN after the first line so the player
+        // can read it during the delay, then subsequent lines append while text stays visible.
+        yield return BuildDescriptionTextRoutine(fadeInOnFirstLine: true);
         if (!_waitingForMinigame)
             yield return SpawnAndFadeButtons();
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
-    private void BuildDescriptionText()
+    /// <summary>
+    /// Reads story lines one at a time. Supports a <c># delay:0.5</c> Ink tag on any
+    /// line to pause before the next line is shown.
+    ///
+    /// When <paramref name="fadeInOnFirstLine"/> is true (used by RefreshAfterMinigame),
+    /// the text CanvasGroup fades in after the first line is set, so the player sees it
+    /// during the delay rather than waiting for everything to finish first.
+    /// </summary>
+    private IEnumerator BuildDescriptionTextRoutine(bool fadeInOnFirstLine = false)
     {
-        if (_story == null) return;
+        if (_story == null) yield break;
 
-        var sb = new StringBuilder();
+        var  sb          = new StringBuilder();
+        bool fadedIn     = false;
+
         while (_story.canContinue)
         {
             var line = _story.Continue().Trim();
             if (_waitingForMinigame) break;
+
+            // Parse optional  # delay:0.5  tag on this line
+            float delay = 0f;
+            if (_story.currentTags != null)
+                foreach (var tag in _story.currentTags)
+                    if (tag.StartsWith("delay:", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        float.TryParse(tag.Substring(6).Trim(),
+                            System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out delay);
+                        break;
+                    }
+
             if (!string.IsNullOrEmpty(line))
             {
                 if (sb.Length > 0) sb.AppendLine();
                 sb.Append(FormatDialogLine(line));
+                if (descriptionText) descriptionText.text = sb.ToString();
             }
+
+            // Fade text in before the delay so line 1 is readable during the pause
+            if (fadeInOnFirstLine && !fadedIn && delay > 0f)
+            {
+                if (textCanvasGroup) yield return FadeCG(textCanvasGroup, 0f, 1f, textFadeDuration);
+                fadedIn = true;
+            }
+
+            if (delay > 0f)
+                yield return new WaitForSeconds(delay);
         }
 
         if (descriptionText) descriptionText.text = sb.ToString();
+
+        // If fadeInOnFirstLine but no delay was ever encountered, do the fade now
+        if (fadeInOnFirstLine && !fadedIn && textCanvasGroup != null)
+            yield return FadeCG(textCanvasGroup, 0f, 1f, textFadeDuration);
     }
 
     private IEnumerator SpawnAndFadeButtons()

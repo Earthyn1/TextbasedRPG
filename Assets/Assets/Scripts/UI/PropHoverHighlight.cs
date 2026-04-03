@@ -1,48 +1,99 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Brightens the prop's own Image on hover by tweening its color.
-/// No child GameObjects required.
+/// Renders a soft glow around the prop on hover using a custom UI shader.
+/// Targets PropVisual.imageA and imageB directly so the glow always follows
+/// whichever image is currently visible (live sprite, dead sprite, etc.).
+/// Never modifies Image.color — sprites always render at full fidelity.
 /// </summary>
 public class PropHoverHighlight : MonoBehaviour
 {
-    [SerializeField] private float fadeSpeed    = 10f;
-    [SerializeField] private float dimmedBrightness = 0.8f; // normal state
+    [Header("Glow")]
+    [SerializeField] private Color glowColor   = new Color(0.655f, 0.686f, 1f, 1f);
+    [SerializeField] private float glowRadius  = 0.0026f;
+    [SerializeField] private float glowFalloff = 2.5f;
 
-    private static readonly Color HoverColor = Color.white;
+    [Header("Animation")]
+    [SerializeField] private float fadeSpeed = 10f;
 
-    private Image     _image;
-    private Color     _normalColor;
+    private static readonly int StrengthProp = Shader.PropertyToID("_GlowStrength");
+    private static readonly int ColorProp    = Shader.PropertyToID("_GlowColor");
+    private static readonly int RadiusProp   = Shader.PropertyToID("_GlowRadius");
+    private static readonly int FalloffProp  = Shader.PropertyToID("_GlowFalloff");
+
+    private readonly List<Material> _mats = new();
     private Coroutine _coroutine;
 
     private void Awake()
     {
-        _image = GetComponentInChildren<Image>();
-        if (_image == null) return;
+        var shader = Shader.Find("UI/PropGlow");
+        if (shader == null)
+        {
+            Debug.LogError("[PropHoverHighlight] Shader 'UI/PropGlow' not found.");
+            return;
+        }
 
-        _normalColor    = new Color(dimmedBrightness, dimmedBrightness, dimmedBrightness, 1f);
-        _image.color    = _normalColor;
+        // Prefer PropVisual so we target the actual sprite images (imageA + imageB),
+        // not the transparent root Image that acts as the button hit-area.
+        var pv = GetComponent<PropVisual>();
+        if (pv != null)
+        {
+            SetupImage(pv.imageA, shader);
+            SetupImage(pv.imageB, shader);
+        }
+        else
+        {
+            // Fallback for simple props that only have one Image child.
+            // Skip the root Image (hit area) by searching only true children.
+            foreach (Transform child in transform)
+            {
+                var img = child.GetComponent<Image>();
+                if (img != null) { SetupImage(img, shader); break; }
+            }
+        }
+    }
+
+    private void SetupImage(Image img, Shader shader)
+    {
+        if (img == null) return;
+        var mat = new Material(shader);
+        mat.SetColor(ColorProp,    glowColor);
+        mat.SetFloat(RadiusProp,   glowRadius);
+        mat.SetFloat(FalloffProp,  glowFalloff);
+        mat.SetFloat(StrengthProp, 0f);
+        img.material = mat;
+        img.color    = Color.white;
+        _mats.Add(mat);
+    }
+
+    private void OnDestroy()
+    {
+        foreach (var m in _mats)
+            if (m != null) Destroy(m);
+        _mats.Clear();
     }
 
     public void SetHovered(bool hovered)
     {
-        if (_image == null) return;
+        if (_mats.Count == 0) return;
         if (_coroutine != null) StopCoroutine(_coroutine);
-        _coroutine = StartCoroutine(TweenColor(hovered ? HoverColor : _normalColor));
+        _coroutine = StartCoroutine(TweenGlow(hovered ? 1f : 0f));
     }
 
-    private IEnumerator TweenColor(Color target)
+    private IEnumerator TweenGlow(float target)
     {
-        Color start = _image.color;
+        float current = _mats[0].GetFloat(StrengthProp);
         float t = 0f;
         while (t < 1f)
         {
             t = Mathf.MoveTowards(t, 1f, fadeSpeed * Time.deltaTime);
-            _image.color = Color.Lerp(start, target, t);
+            float v = Mathf.Lerp(current, target, t);
+            foreach (var m in _mats) m.SetFloat(StrengthProp, v);
             yield return null;
         }
-        _image.color = target;
+        foreach (var m in _mats) m.SetFloat(StrengthProp, target);
     }
 }

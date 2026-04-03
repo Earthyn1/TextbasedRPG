@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class XPToastSpawner : MonoBehaviour
@@ -41,5 +42,18 @@ public class XPToastSpawner : MonoBehaviour
 
         // 4. animation will auto-fire in XPNumbers.Start() via Animator.SetTrigger("Play")
         // 5. when animation finishes, Animation Event calls XPNumbers.DestroySelf()
+    }
+
+    /// <summary>Shows the XP toast after a delay in seconds.</summary>
+    public void ShowXPToastDelayed(string xpText, Sprite xpIcon, float delay)
+    {
+        if (delay <= 0f) { ShowXPToast(xpText, xpIcon); return; }
+        StartCoroutine(DelayedToast(xpText, xpIcon, delay));
+    }
+
+    private IEnumerator DelayedToast(string xpText, Sprite xpIcon, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        ShowXPToast(xpText, xpIcon);
     }
 }
